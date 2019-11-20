@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 * @author Tan Jun Ming
 * @date 2019-11-20
 */
-@Api(tags = "ConfigClassify管理")
+@Api(tags = "优码MES:配置分类管理")
 @RestController
 @RequestMapping("/api/configClassify")
 public class ConfigClassifyController {

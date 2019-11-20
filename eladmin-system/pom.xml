@@ -48,6 +48,11 @@
             <artifactId>quartz</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.lgmn</groupId>
+            <artifactId>uma-mes</artifactId>
+            <version>2.3</version>
+        </dependency>
     </dependencies>
 
     <build>

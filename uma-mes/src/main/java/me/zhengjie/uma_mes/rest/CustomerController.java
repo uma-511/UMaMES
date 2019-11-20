@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 * @author Tan Jun Ming
 * @date 2019-11-20
 */
-@Api(tags = "Customer管理")
+@Api(tags = "优码MES:客户管理")
 @RestController
 @RequestMapping("/api/customer")
 public class CustomerController {

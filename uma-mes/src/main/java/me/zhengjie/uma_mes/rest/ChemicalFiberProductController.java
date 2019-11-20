@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 * @author Tan Jun Ming
 * @date 2019-11-20
 */
-@Api(tags = "ChemicalFiberProduct管理")
+@Api(tags = "优码MES:化纤-产品管理")
 @RestController
 @RequestMapping("/api/chemicalFiberProduct")
 public class ChemicalFiberProductController {

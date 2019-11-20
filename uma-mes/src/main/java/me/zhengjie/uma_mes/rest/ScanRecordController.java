@@ -18,11 +18,11 @@ import javax.servlet.http.HttpServletResponse;
 * @author Tan Jun Ming
 * @date 2019-11-20
 */
-@Api(tags = "ScanRecord管理")
+@Api(tags = "优码MES:扫描记录管理")
 @RestController
 @RequestMapping("/api/scanRecord")
 public class ScanRecordController {
-
+ 
     private final ScanRecordService scanRecordService;
 
     public ScanRecordController(ScanRecordService scanRecordService) {

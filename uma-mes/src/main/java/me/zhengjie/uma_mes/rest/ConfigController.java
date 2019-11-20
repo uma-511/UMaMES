@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 * @author Tan Jun Ming
 * @date 2019-11-20
 */
-@Api(tags = "Config管理")
+@Api(tags = "优码MES:配置值管理")
 @RestController
 @RequestMapping("/api/config")
 public class ConfigController {
