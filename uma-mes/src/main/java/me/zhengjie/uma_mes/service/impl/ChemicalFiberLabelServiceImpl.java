@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.utils.ValidationUtil;
 import me.zhengjie.utils.FileUtil;
@@ -8,6 +9,7 @@ import me.zhengjie.uma_mes.service.ChemicalFiberLabelService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberLabelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +53,7 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public List<ChemicalFiberLabelDTO> queryAll(ChemicalFiberLabelQueryCriteria criteria){
         return chemicalFiberLabelMapper.toDto(chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
@@ -115,5 +117,12 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
             list.add(map);
         }
         FileUtil.downloadExcel(list, response);
+    }
+
+    @Override
+    @CacheEvict(allEntries = true)
+    @Transactional(rollbackFor = Exception.class)
+    public void update(List<ChemicalFiberLabel> chemicalFiberLabels) {
+        chemicalFiberLabelRepository.saveAll(chemicalFiberLabels);
     }
 }

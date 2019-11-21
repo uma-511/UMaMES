@@ -23,6 +23,14 @@ public class ScanRecordQueryCriteria{
     @Query(type = Query.Type.INNER_LIKE)
     private Timestamp scanTime;
 
+    // 大于等于
+    @Query(type = Query.Type.GREATER_THAN, propName = "scanTime")
+    private Timestamp startTime;
+
+    // 小于等于
+    @Query(type = Query.Type.LESS_THAN, propName = "scanTime")
+    private Timestamp endTime;
+
     // 精确
     @Query
     private String type;

@@ -44,4 +44,6 @@ public interface ChemicalFiberLabelService {
     void delete(Integer id);
 
     void download(List<ChemicalFiberLabelDTO> all, HttpServletResponse response) throws IOException;
+
+    void update(List<ChemicalFiberLabel> chemicalFiberLabels);
 }
