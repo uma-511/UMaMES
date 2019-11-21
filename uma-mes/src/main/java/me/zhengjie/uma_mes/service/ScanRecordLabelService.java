@@ -44,4 +44,6 @@ public interface ScanRecordLabelService {
     void delete(Integer id);
 
     void download(List<ScanRecordLabelDTO> all, HttpServletResponse response) throws IOException;
+
+    List<ScanRecordLabel> create(List<ScanRecordLabel> scanRecordLabels);
 }

@@ -5,8 +5,10 @@ import com.lgmn.common.result.ResultEnum;
 import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ScanRecord;
+import me.zhengjie.uma_mes.domain.ScanRecordLabel;
 import me.zhengjie.uma_mes.service.ChemicalFiberLabelService;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductionService;
+import me.zhengjie.uma_mes.service.ScanRecordLabelService;
 import me.zhengjie.uma_mes.service.ScanRecordService;
 import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.dto.handheld.LabelMsgDto;
@@ -29,14 +31,18 @@ public class HandheldService {
 
     private final ScanRecordService scanRecordService;
 
+    private final ScanRecordLabelService scanRecordLabelService;
+
     public HandheldService(
             ChemicalFiberLabelService chemicalFiberLabelService,
             ChemicalFiberProductionService chemicalFiberProductionService,
-            ScanRecordService scanRecordService) {
+            ScanRecordService scanRecordService,
+            ScanRecordLabelService scanRecordLabelService) {
 
         this.chemicalFiberLabelService = chemicalFiberLabelService;
         this.chemicalFiberProductionService = chemicalFiberProductionService;
         this.scanRecordService = scanRecordService;
+        this.scanRecordLabelService = scanRecordLabelService;
     }
 
     public Result getLabelMsg(LabelMsgDto labelMsgDto) {
@@ -67,6 +73,16 @@ public class HandheldService {
         List<ChemicalFiberLabel> chemicalFiberLabels = new ArrayList<>();
         // 扫描单号
         String scanNumber = getScanNumber(uploadDataDto.getStatus());
+
+        // 新增扫描记录
+        ScanRecord scanRecord = new ScanRecord();
+        scanRecord.setScanNumber(scanNumber);
+        scanRecord.setScanUser(uploadDataDto.getScanUser());
+        scanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
+        scanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
+        scanRecordService.create(scanRecord);
+
+        List<ScanRecordLabel> scanRecordLabels = new ArrayList<>();
         for (Map map : uploadDataDto.getLabelList()) {
             String labelNumber = map.get("labelNumber").toString();
             String scanTime = map.get("scanTime").toString();
@@ -79,22 +95,26 @@ public class HandheldService {
             if (!"".equals(checkLabelStatusStr)) {
                 return Result.error(ResultEnum.NOT_SCHEDULED_ERROR.getCode(), checkLabelStatusStr);
             }
-            ChemicalFiberLabelDTO newChemicalFiberLabelDTO = getNewChemicalFiberLabelDTO(chemicalFiberLabelDTO, uploadDataDto.getStatus(), scanNumber, scanTime);
+
+            ChemicalFiberLabelDTO newChemicalFiberLabelDTO = getNewChemicalFiberLabelDTO(chemicalFiberLabelDTO, uploadDataDto.getStatus());
             ChemicalFiberLabel chemicalFiberLabel = new ChemicalFiberLabel();
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberLabel);
             chemicalFiberLabels.add(chemicalFiberLabel);
-        }
 
-        // 新增扫描记录
-        ScanRecord scanRecord = new ScanRecord();
-        scanRecord.setScanNumber(scanNumber);
-        scanRecord.setScanUser(uploadDataDto.getScanUser());
-        scanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
-        scanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
-        scanRecordService.create(scanRecord);
+            Timestamp tempTimestamp = new Timestamp(Long.parseLong(scanTime));
+            ScanRecordLabel scanRecordLabel = new ScanRecordLabel();
+            scanRecordLabel.setLabelId(chemicalFiberLabel.getId());
+            scanRecordLabel.setScanRecordId(scanRecord.getId());
+            scanRecordLabel.setScanTime(tempTimestamp);
+            scanRecordLabels.add(scanRecordLabel);
+        }
 
         // 修改标签
         chemicalFiberLabelService.update(chemicalFiberLabels);
+
+        // 新增标签扫描记录
+        scanRecordLabelService.create(scanRecordLabels);
+
         return Result.success("上传成功");
     }
 
@@ -103,30 +123,20 @@ public class HandheldService {
      * @param chemicalFiberLabelDTO
      * @param status 入库：RK 出库：SH 退库：TK 退货：TH
      *               便签状态 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货
-     * @param scanNumber
      * @return
      */
-    private ChemicalFiberLabelDTO getNewChemicalFiberLabelDTO(ChemicalFiberLabelDTO chemicalFiberLabelDTO, Integer status, String scanNumber, String scanTime) {
-        Timestamp tempTimestamp = new Timestamp(Long.parseLong(scanTime));
+    private ChemicalFiberLabelDTO getNewChemicalFiberLabelDTO(ChemicalFiberLabelDTO chemicalFiberLabelDTO, Integer status) {
         switch (status) {
             case 1:
-                chemicalFiberLabelDTO.setRkNumber(scanNumber);
-                chemicalFiberLabelDTO.setRkScanTime(tempTimestamp);
                 chemicalFiberLabelDTO.setStatus(1);
                 break;
             case 2:
-                chemicalFiberLabelDTO.setShNumber(scanNumber);
-                chemicalFiberLabelDTO.setShScanTime(tempTimestamp);
                 chemicalFiberLabelDTO.setStatus(2);
                 break;
             case 4:
-                chemicalFiberLabelDTO.setTkNumber(scanNumber);
-                chemicalFiberLabelDTO.setTkScanTime(tempTimestamp);
                 chemicalFiberLabelDTO.setStatus(4);
                 break;
             default:
-                chemicalFiberLabelDTO.setThNumber(scanNumber);
-                chemicalFiberLabelDTO.setThScanTime(tempTimestamp);
                 chemicalFiberLabelDTO.setStatus(5);
         }
         return chemicalFiberLabelDTO;

@@ -101,4 +101,9 @@ public class ScanRecordLabelServiceImpl implements ScanRecordLabelService {
         }
         FileUtil.downloadExcel(list, response);
     }
+
+    @Override
+    public List<ScanRecordLabel> create(List<ScanRecordLabel> scanRecordLabels) {
+        return scanRecordLabelRepository.saveAll(scanRecordLabels);
+    }
 }

@@ -106,14 +106,6 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
             map.put("毛重", chemicalFiberLabel.getGrossWeight());
             map.put("班次", chemicalFiberLabel.getShifts());
             map.put("包装员", chemicalFiberLabel.getPacker());
-            map.put("入库单号", chemicalFiberLabel.getRkNumber());
-            map.put("送货单号", chemicalFiberLabel.getShNumber());
-            map.put("退库单号", chemicalFiberLabel.getTkNumber());
-            map.put("退货单号", chemicalFiberLabel.getThNumber());
-            map.put("入库扫描时间", chemicalFiberLabel.getRkScanTime());
-            map.put("出库扫描时间", chemicalFiberLabel.getShScanTime());
-            map.put("退库扫描时间", chemicalFiberLabel.getTkScanTime());
-            map.put("退货扫描时间", chemicalFiberLabel.getThScanTime());
             list.add(map);
         }
         FileUtil.downloadExcel(list, response);
