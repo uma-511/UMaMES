@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 /**
 * @author Tan Jun Ming
-* @date 2019-11-20
+* @date 2019-11-21
 */
 @Entity
 @Data
@@ -22,7 +22,7 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    // 条码号
+    // 标签编号（条码号）
     @Column(name = "label_number",nullable = false)
     private String labelNumber;
 
@@ -30,7 +30,7 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name = "production_id",nullable = false)
     private Integer productionId;
 
-    // 状态
+    // 便签状态 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货
     @Column(name = "status")
     private Integer status;
 
@@ -38,7 +38,7 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name = "print_time")
     private Timestamp printTime;
 
-    // 每袋个数
+    // 实际每袋个数
     @Column(name = "fact_per_bag_number")
     private Integer factPerBagNumber;
 
@@ -61,38 +61,6 @@ public class ChemicalFiberLabel implements Serializable {
     // 包装员
     @Column(name = "packer")
     private String packer;
-
-    // 入库单号
-    @Column(name = "rk_number")
-    private String rkNumber;
-
-    // 送货单号
-    @Column(name = "sh_number")
-    private String shNumber;
-
-    // 退库单号
-    @Column(name = "tk_number")
-    private String tkNumber;
-
-    // 退货单号
-    @Column(name = "th_number")
-    private String thNumber;
-
-    // 入库扫描时间
-    @Column(name = "rk_scan_time")
-    private Timestamp rkScanTime;
-
-    // 出库扫描时间
-    @Column(name = "sh_scan_time")
-    private Timestamp shScanTime;
-
-    // 退库扫描时间
-    @Column(name = "tk_scan_time")
-    private Timestamp tkScanTime;
-
-    // 退货扫描时间
-    @Column(name = "th_scan_time")
-    private Timestamp thScanTime;
 
     public void copy(ChemicalFiberLabel source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

@@ -8,26 +8,26 @@ import java.io.Serializable;
 
 /**
 * @author Tan Jun Ming
-* @date 2019-11-20
+* @date 2019-11-21
 */
 @Data
 public class ChemicalFiberLabelDTO implements Serializable {
 
     private Integer id;
 
-    // 条码号
+    // 标签编号（条码号）
     private String labelNumber;
 
     // 生产单id
     private Integer productionId;
 
-    // 状态
+    // 便签状态 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货
     private Integer status;
 
     // 打印时间
     private Timestamp printTime;
 
-    // 每袋个数
+    // 实际每袋个数
     private Integer factPerBagNumber;
 
     // 净重
@@ -44,28 +44,4 @@ public class ChemicalFiberLabelDTO implements Serializable {
 
     // 包装员
     private String packer;
-
-    // 入库单号
-    private String rkNumber;
-
-    // 送货单号
-    private String shNumber;
-
-    // 退库单号
-    private String tkNumber;
-
-    // 退货单号
-    private String thNumber;
-
-    // 入库扫描时间
-    private Timestamp rkScanTime;
-
-    // 出库扫描时间
-    private Timestamp shScanTime;
-
-    // 退库扫描时间
-    private Timestamp tkScanTime;
-
-    // 退货扫描时间
-    private Timestamp thScanTime;
 }
