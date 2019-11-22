@@ -36,6 +36,14 @@ public class HandheldController {
         return handheldService.uploadData(uploadDataDto);
     }
 
+    @Log("获取配置")
+    @ApiOperation("获取配置")
+    @PostMapping(value = "/getConfigs")
+    @AnonymousAccess()
+    public Result getConfigs() {
+        return handheldService.getConfigs();
+    }
+
 
 
 }

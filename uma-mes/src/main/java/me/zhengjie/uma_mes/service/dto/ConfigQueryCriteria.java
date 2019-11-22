@@ -9,4 +9,6 @@ import me.zhengjie.annotation.Query;
 */
 @Data
 public class ConfigQueryCriteria{
+    @Query
+    private Integer classifyId;
 }

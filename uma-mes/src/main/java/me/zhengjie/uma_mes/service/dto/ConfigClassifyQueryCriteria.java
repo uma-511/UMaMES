@@ -9,4 +9,7 @@ import me.zhengjie.annotation.Query;
 */
 @Data
 public class ConfigClassifyQueryCriteria{
+    // 别名
+    @Query
+    private String alias;
 }
