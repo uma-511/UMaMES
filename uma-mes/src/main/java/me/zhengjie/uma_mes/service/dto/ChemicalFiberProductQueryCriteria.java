@@ -10,6 +10,10 @@ import me.zhengjie.annotation.Query;
 @Data
 public class ChemicalFiberProductQueryCriteria{
 
+    // 产品名称，精准查询
+    @Query(propName = "model")
+    private String modelAccurate;
+
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String model;
@@ -25,4 +29,7 @@ public class ChemicalFiberProductQueryCriteria{
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String fineness;
+
+    @Query
+    private Integer delFlag;
 }
