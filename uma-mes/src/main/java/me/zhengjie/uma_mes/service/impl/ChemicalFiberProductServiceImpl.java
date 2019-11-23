@@ -71,6 +71,7 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     public ChemicalFiberProductDTO create(ChemicalFiberProduct resources) {
         ChemicalFiberProductQueryCriteria chemicalFiberProductQueryCriteria = new ChemicalFiberProductQueryCriteria();
         chemicalFiberProductQueryCriteria.setModelAccurate(resources.getModel());
+        chemicalFiberProductQueryCriteria.setDelFlag(0);
         List<ChemicalFiberProductDTO> chemicalFiberProductDTOS = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, chemicalFiberProductQueryCriteria, criteriaBuilder)));
         if (chemicalFiberProductDTOS.size() > 0) {
             throw new BadRequestException("请确保产品型号唯一");
@@ -88,6 +89,7 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     public void update(ChemicalFiberProduct resources) {
         ChemicalFiberProductQueryCriteria chemicalFiberProductQueryCriteria = new ChemicalFiberProductQueryCriteria();
         chemicalFiberProductQueryCriteria.setModelAccurate(resources.getModel());
+        chemicalFiberProductQueryCriteria.setDelFlag(0);
         List<ChemicalFiberProductDTO> chemicalFiberProductDTOS = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, chemicalFiberProductQueryCriteria, criteriaBuilder)));
         if (chemicalFiberProductDTOS.size() > 0 && chemicalFiberProductDTOS.get(0).getModel().equals(resources.getModel()) && resources.getId() != chemicalFiberProductDTOS.get(0).getId()) {
             throw new BadRequestException("请确保产品型号唯一");

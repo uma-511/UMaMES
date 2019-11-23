@@ -1,8 +1,9 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import me.zhengjie.exception.BadRequestException;
+import me.zhengjie.uma_mes.domain.ChemicalFiberProduct;
 import me.zhengjie.uma_mes.domain.Customer;
-import me.zhengjie.utils.ValidationUtil;
-import me.zhengjie.utils.FileUtil;
+import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.CustomerRepository;
 import me.zhengjie.uma_mes.service.CustomerService;
 import me.zhengjie.uma_mes.service.dto.CustomerDTO;
@@ -16,8 +17,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import me.zhengjie.utils.PageUtil;
-import me.zhengjie.utils.QueryHelp;
+
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
@@ -46,6 +47,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Cacheable
     public Map<String,Object> queryAll(CustomerQueryCriteria criteria, Pageable pageable){
+        criteria.setDelFlag(0);
         Page<Customer> page = customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(customerMapper::toDto));
     }
@@ -53,6 +55,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     @Cacheable
     public List<CustomerDTO> queryAll(CustomerQueryCriteria criteria){
+        criteria.setDelFlag(0);
         return customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
@@ -68,24 +71,47 @@ public class CustomerServiceImpl implements CustomerService {
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public CustomerDTO create(Customer resources) {
-        return customerMapper.toDto(customerRepository.save(resources));
+        CustomerQueryCriteria criteria = new CustomerQueryCriteria();
+        criteria.setCodeAccurate(resources.getCode());
+        criteria.setDelFlag(0);
+        List<CustomerDTO> customerDTOs = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria,criteriaBuilder)));
+        if (customerDTOs.size() > 0 && customerDTOs.get(0).getCode().equals(resources.getCode()) && resources.getId() != customerDTOs.get(0).getId()) {
+            throw new BadRequestException("请确保客户编号唯一");
+        } else {
+            resources.setCreateUser(SecurityUtils.getUsername());
+            resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
+            resources.setDelFlag(0);
+            return customerMapper.toDto(customerRepository.save(resources));
+        }
     }
 
     @Override
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(Customer resources) {
-        Customer customer = customerRepository.findById(resources.getId()).orElseGet(Customer::new);
-        ValidationUtil.isNull( customer.getId(),"Customer","id",resources.getId());
-        customer.copy(resources);
-        customerRepository.save(customer);
+        CustomerQueryCriteria criteria = new CustomerQueryCriteria();
+        criteria.setCodeAccurate(resources.getCode());
+        criteria.setDelFlag(0);
+        List<CustomerDTO> customerDTOs = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria,criteriaBuilder)));
+        if (customerDTOs.size() > 0 && customerDTOs.get(0).getCode().equals(resources.getCode()) && resources.getId() != customerDTOs.get(0).getId()) {
+            throw new BadRequestException("请确保客户编号唯一");
+        } else {
+            Customer customer = customerRepository.findById(resources.getId()).orElseGet(Customer::new);
+            resources.setCreateUser(SecurityUtils.getUsername());
+            resources.setDelFlag(0);
+            ValidationUtil.isNull( customer.getId(),"Customer","id",resources.getId());
+            customer.copy(resources);
+            customerRepository.save(customer);
+        }
     }
 
     @Override
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
-        customerRepository.deleteById(id);
+        Customer customer = customerRepository.findById(id).orElseGet(Customer::new);
+        customer.setDelFlag(1);
+        customerRepository.save(customer);
     }
 
 
