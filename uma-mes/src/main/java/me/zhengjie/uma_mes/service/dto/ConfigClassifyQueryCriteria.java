@@ -12,4 +12,7 @@ public class ConfigClassifyQueryCriteria{
     // 别名
     @Query
     private String alias;
+
+    @Query
+    private Integer delFlag;
 }
