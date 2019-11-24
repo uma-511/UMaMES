@@ -23,6 +23,14 @@ public class ChemicalFiberLabelQueryCriteria{
     @Query(type = Query.Type.INNER_LIKE)
     private Timestamp printTime;
 
+    // 大于等于
+    @Query(type = Query.Type.GREATER_THAN, propName = "printTime")
+    private Timestamp startTime;
+
+    // 小于等于
+    @Query(type = Query.Type.LESS_THAN, propName = "printTime")
+    private Timestamp endTime;
+
     // 精确
     @Query
     private String shifts;
@@ -30,4 +38,10 @@ public class ChemicalFiberLabelQueryCriteria{
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String packer;
+
+    // 临时开始时间
+    private Long tempStartTime;
+
+    // 临时结束时间
+    private Long tempEndTime;
 }
