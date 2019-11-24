@@ -181,7 +181,6 @@ public class HandheldService {
             scanNumber = type + year + month + "001";
         } else {
             ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(scanRecordDTOS.size() - 1);
-            scanRecordDTO.getScanNumber().length();
             String tempScanNumber = scanRecordDTO.getScanNumber().substring(8);
             Integer number = Integer.parseInt(tempScanNumber) + 1;
             String tempNumberStr = String.format("%3d", number++).replace(" ", "0");
@@ -257,7 +256,7 @@ public class HandheldService {
      * 获取当月0时时间戳
      * @return
      */
-    private Map monthTimeInMillis() {
+    public Map monthTimeInMillis() {
         Calendar calendar = Calendar.getInstance();// 获取当前日期
         calendar.add(Calendar.YEAR, 0);
         calendar.add(Calendar.MONTH, 0);

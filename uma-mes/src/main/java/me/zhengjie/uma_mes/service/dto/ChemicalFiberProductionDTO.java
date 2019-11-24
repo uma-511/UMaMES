@@ -83,4 +83,7 @@ public class ChemicalFiberProductionDTO implements Serializable {
 
     // 制单人
     private String createUser;
+
+    // 删除标识
+    private Integer delFlag;
 }

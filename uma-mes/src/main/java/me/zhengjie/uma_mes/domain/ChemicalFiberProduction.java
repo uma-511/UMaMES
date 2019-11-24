@@ -114,6 +114,10 @@ public class ChemicalFiberProduction implements Serializable {
     @Column(name = "create_user")
     private String createUser;
 
+    // 删除标识
+    @Column(name = "del_flag")
+    private Integer delFlag;
+
     public void copy(ChemicalFiberProduction source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.rest;
 
+import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.Machine;
 import me.zhengjie.uma_mes.service.MachineService;
@@ -43,6 +44,16 @@ public class MachineController {
     @PreAuthorize("@el.check('machine:list')")
     public ResponseEntity getMachines(MachineQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(machineService.queryAll(criteria,pageable),HttpStatus.OK);
+    }
+
+    @Log("获取全部几台")
+    @ApiOperation("获取全部几台")
+    @PostMapping(value = "/getMachinesAllList")
+//    @PreAuthorize("@el.check('chemicalFiberProduct:getList')")
+    @AnonymousAccess()
+    public ResponseEntity getMachinesAllList(){
+        MachineQueryCriteria criteria = new MachineQueryCriteria();
+        return new ResponseEntity<>(machineService.queryAll(criteria),HttpStatus.OK);
     }
 
     @PostMapping
