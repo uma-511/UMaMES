@@ -90,6 +90,39 @@ public class AuthenticationController {
         return ResponseEntity.ok(new AuthInfo(token,jwtUser));
     }
 
+    @Log("手持机用户登录")
+    @ApiOperation("登录授权")
+    @AnonymousAccess
+    @PostMapping(value = "/handsetlogin")
+    public ResponseEntity handSetLogin(@Validated @RequestBody AuthUser authUser, HttpServletRequest request){
+
+        // 查询验证码
+//        String code = redisService.getCodeVal(authUser.getUuid());
+        // 清除验证码
+//        redisService.delete(authUser.getUuid());
+//        if (StringUtils.isBlank(code)) {
+//            throw new BadRequestException("验证码已过期");
+//        }
+//        if (StringUtils.isBlank(authUser.getCode()) || !authUser.getCode().equalsIgnoreCase(code)) {
+//            throw new BadRequestException("验证码错误");
+//        }
+        final JwtUser jwtUser = (JwtUser) userDetailsService.loadUserByUsername(authUser.getUsername());
+
+        if(!jwtUser.getPassword().equals(EncryptUtils.encryptPassword(authUser.getPassword()))){
+            throw new AccountExpiredException("密码错误");
+        }
+
+        if(!jwtUser.isEnabled()){
+            throw new AccountExpiredException("账号已停用，请联系管理员");
+        }
+        // 生成令牌
+        final String token = jwtTokenUtil.generateToken(jwtUser);
+        // 保存在线信息
+        onlineUserService.save(jwtUser, token, request);
+        // 返回 token
+        return ResponseEntity.ok(new AuthInfo(token,jwtUser));
+    }
+
     @ApiOperation("获取用户信息")
     @GetMapping(value = "/info")
     public ResponseEntity getUserInfo(){
