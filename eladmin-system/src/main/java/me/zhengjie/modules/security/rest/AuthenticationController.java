@@ -1,6 +1,7 @@
 package me.zhengjie.modules.security.rest;
 
 import cn.hutool.core.util.IdUtil;
+import com.lgmn.common.result.Result;
 import com.wf.captcha.ArithmeticCaptcha;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -94,7 +95,7 @@ public class AuthenticationController {
     @ApiOperation("登录授权")
     @AnonymousAccess
     @PostMapping(value = "/handsetlogin")
-    public ResponseEntity handSetLogin(@Validated @RequestBody AuthUser authUser, HttpServletRequest request){
+    public Result handSetLogin(@Validated @RequestBody AuthUser authUser, HttpServletRequest request){
 
         // 查询验证码
 //        String code = redisService.getCodeVal(authUser.getUuid());
@@ -106,21 +107,25 @@ public class AuthenticationController {
 //        if (StringUtils.isBlank(authUser.getCode()) || !authUser.getCode().equalsIgnoreCase(code)) {
 //            throw new BadRequestException("验证码错误");
 //        }
-        final JwtUser jwtUser = (JwtUser) userDetailsService.loadUserByUsername(authUser.getUsername());
+        try {
+            final JwtUser jwtUser = (JwtUser) userDetailsService.loadUserByUsername(authUser.getUsername());
 
-        if(!jwtUser.getPassword().equals(EncryptUtils.encryptPassword(authUser.getPassword()))){
-            throw new AccountExpiredException("密码错误");
-        }
+            if(!jwtUser.getPassword().equals(EncryptUtils.encryptPassword(authUser.getPassword()))){
+                throw new AccountExpiredException("密码错误");
+            }
 
-        if(!jwtUser.isEnabled()){
-            throw new AccountExpiredException("账号已停用，请联系管理员");
+            if(!jwtUser.isEnabled()){
+                throw new AccountExpiredException("账号已停用，请联系管理员");
+            }
+            // 生成令牌
+            final String token = jwtTokenUtil.generateToken(jwtUser);
+            // 保存在线信息
+            onlineUserService.save(jwtUser, token, request);
+            // 返回 token
+            return Result.success(new AuthInfo(token,jwtUser));
+        } catch (Exception e) {
+            return Result.serverError(e.getMessage());
         }
-        // 生成令牌
-        final String token = jwtTokenUtil.generateToken(jwtUser);
-        // 保存在线信息
-        onlineUserService.save(jwtUser, token, request);
-        // 返回 token
-        return ResponseEntity.ok(new AuthInfo(token,jwtUser));
     }
 
     @ApiOperation("获取用户信息")
