@@ -3,6 +3,8 @@ package me.zhengjie.uma_mes.service.dto;
 import lombok.Data;
 import me.zhengjie.annotation.Query;
 
+import java.sql.Timestamp;
+
 /**
 * @author Tan Jun Ming
 * @date 2019-11-20
@@ -49,4 +51,16 @@ public class ChemicalFiberProductionQueryCriteria{
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String customerCode;
+
+    // 大于等于
+    @Query(type = Query.Type.GREATER_THAN, propName = "createTime")
+    private Timestamp startTime;
+
+    // 小于等于
+    @Query(type = Query.Type.LESS_THAN, propName = "createTime")
+    private Timestamp endTime;
+
+    // 删除标识
+    @Query
+    private Integer delFlag;
 }

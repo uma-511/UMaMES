@@ -54,6 +54,7 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     @Override
     @Cacheable
     public List<ChemicalFiberProductDTO> queryAll(ChemicalFiberProductQueryCriteria criteria){
+        criteria.setDelFlag(0);
         return chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 

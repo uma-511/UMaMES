@@ -1,13 +1,18 @@
 package me.zhengjie.uma_mes.service.impl;
 
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
-import me.zhengjie.utils.ValidationUtil;
-import me.zhengjie.utils.FileUtil;
+import me.zhengjie.uma_mes.domain.Machine;
+import me.zhengjie.uma_mes.repository.MachineRepository;
+import me.zhengjie.uma_mes.service.ChemicalFiberProductService;
+import me.zhengjie.uma_mes.service.CustomerService;
+import me.zhengjie.uma_mes.service.MachineService;
+import me.zhengjie.uma_mes.service.dto.*;
+import me.zhengjie.uma_mes.service.handheld.HandheldService;
+import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductionRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductionService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberProductionMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,14 +21,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import me.zhengjie.utils.PageUtil;
-import me.zhengjie.utils.QueryHelp;
-import java.util.List;
-import java.util.Map;
+
+import java.sql.Timestamp;
+import java.util.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 /**
 * @author Tan Jun Ming
@@ -38,14 +40,31 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
 
     private final ChemicalFiberProductionMapper chemicalFiberProductionMapper;
 
-    public ChemicalFiberProductionServiceImpl(ChemicalFiberProductionRepository chemicalFiberProductionRepository, ChemicalFiberProductionMapper chemicalFiberProductionMapper) {
+    private final ChemicalFiberProductService chemicalFiberProductService;
+
+    private final CustomerService customerService;
+
+    private final MachineRepository machineRepository;
+
+    @Autowired
+    HandheldService handheldService;
+
+    public ChemicalFiberProductionServiceImpl(ChemicalFiberProductionRepository chemicalFiberProductionRepository,
+                                              ChemicalFiberProductionMapper chemicalFiberProductionMapper,
+                                              ChemicalFiberProductService chemicalFiberProductService,
+                                              CustomerService customerService,
+                                              MachineRepository machineRepository) {
         this.chemicalFiberProductionRepository = chemicalFiberProductionRepository;
         this.chemicalFiberProductionMapper = chemicalFiberProductionMapper;
+        this.chemicalFiberProductService = chemicalFiberProductService;
+        this.customerService = customerService;
+        this.machineRepository = machineRepository;
     }
 
     @Override
     @Cacheable
     public Map<String,Object> queryAll(ChemicalFiberProductionQueryCriteria criteria, Pageable pageable){
+        criteria.setDelFlag(0);
         Page<ChemicalFiberProduction> page = chemicalFiberProductionRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberProductionMapper::toDto));
     }
@@ -53,6 +72,7 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
     @Override
     @Cacheable
     public List<ChemicalFiberProductionDTO> queryAll(ChemicalFiberProductionQueryCriteria criteria){
+        criteria.setDelFlag(0);
         return chemicalFiberProductionMapper.toDto(chemicalFiberProductionRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
@@ -68,6 +88,27 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberProductionDTO create(ChemicalFiberProduction resources) {
+        ChemicalFiberProductDTO chemicalFiberProductDTO = chemicalFiberProductService.findById(resources.getProdId());
+        if (resources.getCustomerId() != null) {
+            CustomerDTO customerDTO = customerService.findById(resources.getCustomerId());
+            resources.setCustomerId(customerDTO.getId());
+            resources.setCustomerName(customerDTO.getName());
+            resources.setCustomerCode(customerDTO.getCode());
+            resources.setCustomerAddress(customerDTO.getAddress());
+            resources.setCustomerContacts(customerDTO.getContacts());
+            resources.setCustomerContactPhone(customerDTO.getContactPhone());
+        }
+
+        resources.setNumber(getChemicalFiberProductionNumber());
+        resources.setProdId(chemicalFiberProductDTO.getId());
+        resources.setProdModel(chemicalFiberProductDTO.getModel());
+        resources.setProdName(chemicalFiberProductDTO.getName());
+        resources.setProdColor(chemicalFiberProductDTO.getColor());
+        resources.setProdFineness(chemicalFiberProductDTO.getFineness());
+        resources.setStatus(0);
+        resources.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        resources.setCreateUser(SecurityUtils.getUsername());
+        resources.setDelFlag(0);
         return chemicalFiberProductionMapper.toDto(chemicalFiberProductionRepository.save(resources));
     }
 
@@ -75,6 +116,22 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(ChemicalFiberProduction resources) {
+        if (resources.getCustomerId() != null) {
+            CustomerDTO customerDTO = customerService.findById(resources.getCustomerId());
+            resources.setCustomerId(customerDTO.getId());
+            resources.setCustomerName(customerDTO.getName());
+            resources.setCustomerCode(customerDTO.getCode());
+            resources.setCustomerAddress(customerDTO.getAddress());
+            resources.setCustomerContactPhone(customerDTO.getContactPhone());
+            resources.setCustomerContacts(customerDTO.getContacts());
+        }
+        ChemicalFiberProductDTO chemicalFiberProductDTO = chemicalFiberProductService.findById(resources.getProdId());
+        resources.setProdId(chemicalFiberProductDTO.getId());
+        resources.setProdModel(chemicalFiberProductDTO.getModel());
+        resources.setProdName(chemicalFiberProductDTO.getName());
+        resources.setProdColor(chemicalFiberProductDTO.getColor());
+        resources.setProdFineness(chemicalFiberProductDTO.getFineness());
+
         ChemicalFiberProduction chemicalFiberProduction = chemicalFiberProductionRepository.findById(resources.getId()).orElseGet(ChemicalFiberProduction::new);
         ValidationUtil.isNull( chemicalFiberProduction.getId(),"ChemicalFiberProduction","id",resources.getId());
         chemicalFiberProduction.copy(resources);
@@ -85,7 +142,9 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
-        chemicalFiberProductionRepository.deleteById(id);
+        ChemicalFiberProduction chemicalFiberProduction = chemicalFiberProductionRepository.findById(id).orElseGet(ChemicalFiberProduction::new);
+        chemicalFiberProduction.setDelFlag(1);
+        chemicalFiberProductionRepository.save(chemicalFiberProduction);
     }
 
 
@@ -120,5 +179,68 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
             list.add(map);
         }
         FileUtil.downloadExcel(list, response);
+    }
+
+    @CacheEvict(allEntries = true)
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ChemicalFiberProduction setMachines(ChemicalFiberProductionSetMachinesDTO resources) {
+        Machine machine = machineRepository.findById(resources.getMachinesId()).orElseGet(Machine::new);
+        ChemicalFiberProduction chemicalFiberProduction = chemicalFiberProductionRepository.findById(resources.getProductionId()).orElseGet(ChemicalFiberProduction::new);
+        chemicalFiberProduction.setMachineNumber(machine.getNumber());
+        chemicalFiberProduction.setStatus(1);
+        machine.setStatus(1);
+        machine.setProductionId(chemicalFiberProduction.getId());
+        machineRepository.save(machine);
+        chemicalFiberProductionRepository.save(chemicalFiberProduction);
+        return chemicalFiberProduction;
+    }
+
+    @CacheEvict(allEntries = true)
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ChemicalFiberProduction setProductionStatus(ChemicalFiberProductionSetProductionStatusDTO resources) {
+        ChemicalFiberProduction chemicalFiberProduction = chemicalFiberProductionRepository.findById(resources.getProductionId()).orElseGet(ChemicalFiberProduction::new);
+        Machine machine = machineRepository.findById(Integer.parseInt(chemicalFiberProduction.getMachineNumber())).orElseGet(Machine::new);
+        switch (resources.getStatus()) {
+            case 0:
+                chemicalFiberProduction.setStatus(2);
+                machine.setStatus(2);
+                break;
+            case 1:
+                chemicalFiberProduction.setStatus(1);
+                machine.setStatus(1);
+                break;
+            case 2:
+                chemicalFiberProduction.setStatus(4);
+                machine.setStatus(0);
+                break;
+            default:
+                chemicalFiberProduction.setStatus(3);
+                machine.setStatus(0);
+        }
+        machineRepository.save(machine);
+        chemicalFiberProductionRepository.save(chemicalFiberProduction);
+        return chemicalFiberProduction;
+    }
+
+    private String getChemicalFiberProductionNumber() {
+        String productionNumber;
+        ChemicalFiberProductionQueryCriteria criteria = new ChemicalFiberProductionQueryCriteria();
+        Map<String, Object> timeMap = handheldService.monthTimeInMillis();
+        String year = timeMap.get("year").toString();
+        String month = timeMap.get("month").toString();
+        criteria.setStartTime(new Timestamp(Long.parseLong(timeMap.get("time").toString())));
+        criteria.setEndTime(new Timestamp(System.currentTimeMillis()));
+        List<ChemicalFiberProductionDTO> chemicalFiberProductionDTOS = chemicalFiberProductionMapper.toDto(chemicalFiberProductionRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+
+        if (chemicalFiberProductionDTOS.size() == 0) {
+            productionNumber = year + month + "0001";
+        } else {
+            Integer chemicalFiberProductionDTOSSize =  chemicalFiberProductionDTOS.size();
+            String tempNumberStr = String.format("%4d", (chemicalFiberProductionDTOSSize + 1)).replace(" ", "0");
+            productionNumber = year + month + tempNumberStr;
+        }
+        return productionNumber;
     }
 }

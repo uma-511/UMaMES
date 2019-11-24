@@ -1,9 +1,13 @@
 package me.zhengjie.uma_mes.rest;
 
+import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductionService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionSetMachinesDTO;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionSetProductionStatusDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,5 +73,21 @@ public class ChemicalFiberProductionController {
     public ResponseEntity delete(@PathVariable Integer id){
         chemicalFiberProductionService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Log("设置机台号")
+    @ApiOperation("设置机台号")
+    @PostMapping(value = "/setMachines")
+    @AnonymousAccess()
+    public ResponseEntity setMachines(@RequestBody ChemicalFiberProductionSetMachinesDTO resources){
+        return new ResponseEntity<>(chemicalFiberProductionService.setMachines(resources),HttpStatus.CREATED);
+    }
+
+    @Log("生产单状态 0：待产 1：生产中 2：暂停 3：取消 4：完成；生产单：暂停、完成、取消、继续")
+    @ApiOperation("生产单状态 0：待产 1：生产中 2：暂停 3：取消 4：完成；生产单：暂停、完成、取消、继续")
+    @PostMapping(value = "/setProductionStatus")
+    @AnonymousAccess()
+    public ResponseEntity setProductionStatus(@RequestBody ChemicalFiberProductionSetProductionStatusDTO resources){
+        return new ResponseEntity<>(chemicalFiberProductionService.setProductionStatus(resources),HttpStatus.CREATED);
     }
 }

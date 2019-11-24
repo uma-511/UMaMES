@@ -1,8 +1,10 @@
 package me.zhengjie.uma_mes.rest;
 
+import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.Customer;
 import me.zhengjie.uma_mes.service.CustomerService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.CustomerQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -69,5 +71,14 @@ public class CustomerController {
     public ResponseEntity delete(@PathVariable Integer id){
         customerService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Log("获取客户列表")
+    @ApiOperation("获取客户列表")
+    @PostMapping(value = "/getCustomerList")
+//    @PreAuthorize("@el.check('chemicalFiberProduct:getList')")
+    @AnonymousAccess()
+    public ResponseEntity getCustomerList(@RequestBody CustomerQueryCriteria criteria) {
+        return new ResponseEntity<>(customerService.queryAll(criteria),HttpStatus.OK);
     }
 }

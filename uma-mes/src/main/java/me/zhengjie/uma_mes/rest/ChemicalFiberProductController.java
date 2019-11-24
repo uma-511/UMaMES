@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.rest;
 
+import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduct;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductService;
@@ -70,5 +71,14 @@ public class ChemicalFiberProductController {
     public ResponseEntity delete(@PathVariable Integer id){
         chemicalFiberProductService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Log("获取产品列表")
+    @ApiOperation("获取产品列表")
+    @PostMapping(value = "/getProdList")
+//    @PreAuthorize("@el.check('chemicalFiberProduct:getList')")
+    @AnonymousAccess()
+    public ResponseEntity getList(@RequestBody ChemicalFiberProductQueryCriteria criteria) {
+        return new ResponseEntity<>(chemicalFiberProductService.queryAll(criteria),HttpStatus.OK);
     }
 }

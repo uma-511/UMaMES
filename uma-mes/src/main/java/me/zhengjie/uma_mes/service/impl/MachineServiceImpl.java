@@ -51,7 +51,7 @@ public class MachineServiceImpl implements MachineService {
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public List<MachineDTO> queryAll(MachineQueryCriteria criteria){
         return machineMapper.toDto(machineRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }

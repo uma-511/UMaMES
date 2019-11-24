@@ -14,7 +14,7 @@ public class MachineDTO implements Serializable {
     private Integer id;
 
     // 机台号
-    private Integer number;
+    private String number;
 
     // 生产单id
     private Integer productionId;

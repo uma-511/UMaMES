@@ -3,6 +3,8 @@ package me.zhengjie.uma_mes.service;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionSetMachinesDTO;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionSetProductionStatusDTO;
 import org.springframework.data.domain.Pageable;
 import java.util.Map;
 import java.util.List;
@@ -44,4 +46,8 @@ public interface ChemicalFiberProductionService {
     void delete(Integer id);
 
     void download(List<ChemicalFiberProductionDTO> all, HttpServletResponse response) throws IOException;
+
+    ChemicalFiberProduction setMachines(ChemicalFiberProductionSetMachinesDTO resources);
+
+    ChemicalFiberProduction setProductionStatus(ChemicalFiberProductionSetProductionStatusDTO resources);
 }

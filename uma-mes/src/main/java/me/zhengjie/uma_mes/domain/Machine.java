@@ -22,7 +22,7 @@ public class Machine implements Serializable {
 
     // 机台号
     @Column(name = "number",nullable = false)
-    private Integer number;
+    private String number;
 
     // 生产单id
     @Column(name = "production_id")
