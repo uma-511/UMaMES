@@ -20,6 +20,14 @@ public class HandheldController {
     @Autowired
     HandheldService handheldService;
 
+    @Log("handheldInit")
+    @ApiOperation("handheldInit")
+    @GetMapping(value = "/handheldInit")
+    @AnonymousAccess()
+    public Result init() {
+        return Result.success("成功");
+    }
+
     @Log("获取标签信息")
     @ApiOperation("获取标签信息")
     @PostMapping(value = "/getLabelMsg")
@@ -36,6 +44,11 @@ public class HandheldController {
         return handheldService.uploadData(uploadDataDto);
     }
 
-
-
+    @Log("获取配置")
+    @ApiOperation("获取配置")
+    @PostMapping(value = "/getConfigs")
+    @AnonymousAccess()
+    public Result getConfigs() {
+        return handheldService.getConfigs();
+    }
 }

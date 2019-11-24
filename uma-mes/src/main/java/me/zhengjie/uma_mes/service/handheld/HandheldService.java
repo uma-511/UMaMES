@@ -6,10 +6,7 @@ import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ScanRecord;
 import me.zhengjie.uma_mes.domain.ScanRecordLabel;
-import me.zhengjie.uma_mes.service.ChemicalFiberLabelService;
-import me.zhengjie.uma_mes.service.ChemicalFiberProductionService;
-import me.zhengjie.uma_mes.service.ScanRecordLabelService;
-import me.zhengjie.uma_mes.service.ScanRecordService;
+import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.dto.handheld.LabelMsgDto;
 import me.zhengjie.uma_mes.service.dto.handheld.UploadDataDto;
@@ -33,16 +30,24 @@ public class HandheldService {
 
     private final ScanRecordLabelService scanRecordLabelService;
 
+    private final ConfigClassifyService configClassifyService;
+
+    private final ConfigService configService;
+
     public HandheldService(
             ChemicalFiberLabelService chemicalFiberLabelService,
             ChemicalFiberProductionService chemicalFiberProductionService,
             ScanRecordService scanRecordService,
-            ScanRecordLabelService scanRecordLabelService) {
+            ScanRecordLabelService scanRecordLabelService,
+            ConfigClassifyService configClassifyService,
+            ConfigService configService) {
 
         this.chemicalFiberLabelService = chemicalFiberLabelService;
         this.chemicalFiberProductionService = chemicalFiberProductionService;
         this.scanRecordService = scanRecordService;
         this.scanRecordLabelService = scanRecordLabelService;
+        this.configClassifyService = configClassifyService;
+        this.configService = configService;
     }
 
     public Result getLabelMsg(LabelMsgDto labelMsgDto) {
@@ -88,11 +93,13 @@ public class HandheldService {
             String scanTime = map.get("scanTime").toString();
             ChemicalFiberLabelDTO chemicalFiberLabelDTO = getChemicalFiberLabelDTOByLabelNumber(labelNumber);
             if (chemicalFiberLabelDTO == null) {
+                scanRecordService.delete(scanRecord.getId());
                 return Result.error(ResultEnum.DATA_NOT_EXISTS);
             }
 
             String checkLabelStatusStr = checkLabelStatus(chemicalFiberLabelDTO, uploadDataDto.getStatus());
             if (!"".equals(checkLabelStatusStr)) {
+                scanRecordService.delete(scanRecord.getId());
                 return Result.error(ResultEnum.NOT_SCHEDULED_ERROR.getCode(), checkLabelStatusStr);
             }
 
@@ -116,6 +123,16 @@ public class HandheldService {
         scanRecordLabelService.create(scanRecordLabels);
 
         return Result.success("上传成功");
+    }
+
+    public Result getConfigs() {
+        ConfigClassifyQueryCriteria configClassifyQueryCriteria = new ConfigClassifyQueryCriteria();
+        configClassifyQueryCriteria.setAlias("PDA_Summary");
+        List<ConfigClassifyDTO> configClassifyDTOS = configClassifyService.queryAll(configClassifyQueryCriteria);
+        ConfigQueryCriteria configQueryCriteria = new ConfigQueryCriteria();
+        configQueryCriteria.setClassifyId(configClassifyDTOS.get(0).getId());
+        List<ConfigDTO> configDTOS = configService.queryAll(configQueryCriteria);
+        return Result.success(configDTOS);
     }
 
     /**

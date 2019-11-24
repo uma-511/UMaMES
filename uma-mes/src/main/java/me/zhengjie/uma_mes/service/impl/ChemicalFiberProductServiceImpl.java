@@ -1,8 +1,8 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduct;
-import me.zhengjie.utils.ValidationUtil;
-import me.zhengjie.utils.FileUtil;
+import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductDTO;
@@ -16,8 +16,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import me.zhengjie.utils.PageUtil;
-import me.zhengjie.utils.QueryHelp;
+
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
@@ -46,6 +46,7 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     @Override
     @Cacheable
     public Map<String,Object> queryAll(ChemicalFiberProductQueryCriteria criteria, Pageable pageable){
+        criteria.setDelFlag(0);
         Page<ChemicalFiberProduct> page = chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberProductMapper::toDto));
     }
@@ -68,24 +69,46 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberProductDTO create(ChemicalFiberProduct resources) {
-        return chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.save(resources));
+        ChemicalFiberProductQueryCriteria chemicalFiberProductQueryCriteria = new ChemicalFiberProductQueryCriteria();
+        chemicalFiberProductQueryCriteria.setModelAccurate(resources.getModel());
+        chemicalFiberProductQueryCriteria.setDelFlag(0);
+        List<ChemicalFiberProductDTO> chemicalFiberProductDTOS = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, chemicalFiberProductQueryCriteria, criteriaBuilder)));
+        if (chemicalFiberProductDTOS.size() > 0) {
+            throw new BadRequestException("请确保产品型号唯一");
+        } else {
+            resources.setCreateUser(SecurityUtils.getUsername());
+            resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
+            resources.setDelFlag(0);
+            return chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.save(resources));
+        }
     }
 
     @Override
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(ChemicalFiberProduct resources) {
-        ChemicalFiberProduct chemicalFiberProduct = chemicalFiberProductRepository.findById(resources.getId()).orElseGet(ChemicalFiberProduct::new);
-        ValidationUtil.isNull( chemicalFiberProduct.getId(),"ChemicalFiberProduct","id",resources.getId());
-        chemicalFiberProduct.copy(resources);
-        chemicalFiberProductRepository.save(chemicalFiberProduct);
+        ChemicalFiberProductQueryCriteria chemicalFiberProductQueryCriteria = new ChemicalFiberProductQueryCriteria();
+        chemicalFiberProductQueryCriteria.setModelAccurate(resources.getModel());
+        chemicalFiberProductQueryCriteria.setDelFlag(0);
+        List<ChemicalFiberProductDTO> chemicalFiberProductDTOS = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, chemicalFiberProductQueryCriteria, criteriaBuilder)));
+        if (chemicalFiberProductDTOS.size() > 0 && chemicalFiberProductDTOS.get(0).getModel().equals(resources.getModel()) && resources.getId() != chemicalFiberProductDTOS.get(0).getId()) {
+            throw new BadRequestException("请确保产品型号唯一");
+        } else {
+            ChemicalFiberProduct chemicalFiberProduct = chemicalFiberProductRepository.findById(resources.getId()).orElseGet(ChemicalFiberProduct::new);
+            ValidationUtil.isNull( chemicalFiberProduct.getId(),"ChemicalFiberProduct","id",resources.getId());
+            chemicalFiberProduct.copy(resources);
+            resources.setCreateUser(SecurityUtils.getUsername());
+            chemicalFiberProductRepository.save(chemicalFiberProduct);
+        }
     }
 
     @Override
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
-        chemicalFiberProductRepository.deleteById(id);
+        ChemicalFiberProduct chemicalFiberProduct = chemicalFiberProductRepository.findById(id).orElseGet(ChemicalFiberProduct::new);
+        chemicalFiberProduct.setDelFlag(1);
+        chemicalFiberProductRepository.save(chemicalFiberProduct);
     }
 
 

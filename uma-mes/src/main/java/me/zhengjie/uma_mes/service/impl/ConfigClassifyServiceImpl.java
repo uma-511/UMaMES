@@ -46,6 +46,7 @@ public class ConfigClassifyServiceImpl implements ConfigClassifyService {
     @Override
     @Cacheable
     public Map<String,Object> queryAll(ConfigClassifyQueryCriteria criteria, Pageable pageable){
+        criteria.setDelFlag(0);
         Page<ConfigClassify> page = configClassifyRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(configClassifyMapper::toDto));
     }
@@ -68,6 +69,7 @@ public class ConfigClassifyServiceImpl implements ConfigClassifyService {
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ConfigClassifyDTO create(ConfigClassify resources) {
+        resources.setDelFlag(0);
         return configClassifyMapper.toDto(configClassifyRepository.save(resources));
     }
 
@@ -85,7 +87,11 @@ public class ConfigClassifyServiceImpl implements ConfigClassifyService {
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
-        configClassifyRepository.deleteById(id);
+        ConfigClassify resources = new ConfigClassify();
+        resources.setId(id);
+        ConfigClassify configClassify = configClassifyRepository.findById(resources.getId()).orElseGet(ConfigClassify::new);
+        configClassify.setDelFlag(1);
+        configClassifyRepository.save(configClassify);
     }
 
 

@@ -57,7 +57,7 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public ChemicalFiberProductionDTO findById(Integer id) {
         ChemicalFiberProduction chemicalFiberProduction = chemicalFiberProductionRepository.findById(id).orElseGet(ChemicalFiberProduction::new);
         ValidationUtil.isNull(chemicalFiberProduction.getId(),"ChemicalFiberProduction","id",id);
