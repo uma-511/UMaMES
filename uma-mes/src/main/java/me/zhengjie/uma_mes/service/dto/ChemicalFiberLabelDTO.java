@@ -21,6 +21,9 @@ public class ChemicalFiberLabelDTO implements Serializable {
     // 生产单id
     private Integer productionId;
 
+    // 产品id
+    private Integer productId;
+
     // 便签状态 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货
     private Integer status;
 
