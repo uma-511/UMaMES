@@ -10,6 +10,10 @@ import me.zhengjie.annotation.Query;
 @Data
 public class ChemicalFiberStockQueryCriteria{
 
+    // 产品id
+    @Query
+    private Integer prodId;
+
     // 精确
     @Query
     private String prodModel;

@@ -1,7 +1,12 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduct;
+import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
+import me.zhengjie.uma_mes.service.ChemicalFiberStockService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockDTO;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockQueryCriteria;
 import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductService;
@@ -38,9 +43,15 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
 
     private final ChemicalFiberProductMapper chemicalFiberProductMapper;
 
-    public ChemicalFiberProductServiceImpl(ChemicalFiberProductRepository chemicalFiberProductRepository, ChemicalFiberProductMapper chemicalFiberProductMapper) {
+    private final ChemicalFiberStockService chemicalFiberStockService;
+
+    public ChemicalFiberProductServiceImpl(
+            ChemicalFiberProductRepository chemicalFiberProductRepository,
+            ChemicalFiberProductMapper chemicalFiberProductMapper,
+            ChemicalFiberStockService chemicalFiberStockService) {
         this.chemicalFiberProductRepository = chemicalFiberProductRepository;
         this.chemicalFiberProductMapper = chemicalFiberProductMapper;
+        this.chemicalFiberStockService = chemicalFiberStockService;
     }
 
     @Override
@@ -77,10 +88,21 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
         if (chemicalFiberProductDTOS.size() > 0) {
             throw new BadRequestException("请确保产品型号唯一");
         } else {
+
             resources.setCreateUser(SecurityUtils.getUsername());
             resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
             resources.setDelFlag(0);
-            return chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.save(resources));
+            ChemicalFiberProductDTO chemicalFiberProductDTO = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.save(resources));
+
+            // 添加库存
+            ChemicalFiberStock chemicalFiberStock = new ChemicalFiberStock();
+            chemicalFiberStock.setProdId(chemicalFiberProductDTO.getId());
+            chemicalFiberStock.setProdModel(chemicalFiberProductDTO.getModel());
+            chemicalFiberStock.setProdName(chemicalFiberProductDTO.getName());
+            chemicalFiberStock.setProdColor(chemicalFiberProductDTO.getColor());
+            chemicalFiberStock.setProdFineness(chemicalFiberProductDTO.getFineness());
+            chemicalFiberStockService.create(chemicalFiberStock);
+            return chemicalFiberProductDTO;
         }
     }
 
@@ -99,7 +121,23 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
             ValidationUtil.isNull( chemicalFiberProduct.getId(),"ChemicalFiberProduct","id",resources.getId());
             chemicalFiberProduct.copy(resources);
             resources.setCreateUser(SecurityUtils.getUsername());
-            chemicalFiberProductRepository.save(chemicalFiberProduct);
+            ChemicalFiberProduct upDateChemicalFiberProduct = chemicalFiberProductRepository.save(chemicalFiberProduct);
+
+            ChemicalFiberStockQueryCriteria chemicalFiberStockQueryCriteria = new ChemicalFiberStockQueryCriteria();
+            chemicalFiberStockQueryCriteria.setProdId(upDateChemicalFiberProduct.getId());
+            List<ChemicalFiberStockDTO> chemicalFiberStockDTOS = chemicalFiberStockService.queryAll(chemicalFiberStockQueryCriteria);
+            if (chemicalFiberStockDTOS.size() > 0) {
+                ChemicalFiberStockDTO chemicalFiberStockDTO = chemicalFiberStockDTOS.get(0);
+                chemicalFiberStockDTO.setProdId(upDateChemicalFiberProduct.getId());
+                chemicalFiberStockDTO.setProdModel(upDateChemicalFiberProduct.getModel());
+                chemicalFiberStockDTO.setProdName(upDateChemicalFiberProduct.getName());
+                chemicalFiberStockDTO.setProdColor(upDateChemicalFiberProduct.getColor());
+                chemicalFiberStockDTO.setProdFineness(upDateChemicalFiberProduct.getFineness());
+
+                ChemicalFiberStock chemicalFiberStock = new ChemicalFiberStock();
+                ObjectTransfer.transValue(chemicalFiberStockDTO, chemicalFiberStock);
+                chemicalFiberStockService.update(chemicalFiberStock);
+            }
         }
     }
 

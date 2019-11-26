@@ -4,6 +4,8 @@ import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockQueryCriteria;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+
 import java.util.Map;
 import java.util.List;
 import java.io.IOException;
@@ -44,4 +46,6 @@ public interface ChemicalFiberStockService {
     void delete(Integer id);
 
     void download(List<ChemicalFiberStockDTO> all, HttpServletResponse response) throws IOException;
+
+    void stockTask();
 }

@@ -44,7 +44,7 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public Map<String,Object> queryAll(ChemicalFiberStockQueryCriteria criteria, Pageable pageable){
         Page<ChemicalFiberStock> page = chemicalFiberStockRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberStockMapper::toDto));
@@ -111,5 +111,12 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
             list.add(map);
         }
         FileUtil.downloadExcel(list, response);
+    }
+
+    @Override
+    public void stockTask() {
+        System.out.println("\n\n--------------测试开始----------------\n\n");
+        chemicalFiberStockRepository.stockTask();
+        System.out.println("\n\n--------------测试完成----------------\n\n");
     }
 }
