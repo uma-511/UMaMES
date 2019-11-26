@@ -115,8 +115,6 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
 
     @Override
     public void stockTask() {
-        System.out.println("\n\n--------------测试开始----------------\n\n");
         chemicalFiberStockRepository.stockTask();
-        System.out.println("\n\n--------------测试完成----------------\n\n");
     }
 }
