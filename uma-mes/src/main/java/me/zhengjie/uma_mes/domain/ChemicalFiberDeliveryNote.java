@@ -15,10 +15,12 @@ import java.io.Serializable;
 @Entity
 @Data
 @Table(name="uma_chemical_fiber_delivery_note")
+@NamedStoredProcedureQuery(name = "DeliveryNote.task", procedureName = "proc_generate_delivery_detail")
 public class ChemicalFiberDeliveryNote implements Serializable {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     // 出库单号
@@ -26,7 +28,7 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     private String scanNumber;
 
     // 客户id
-    @Column(name = "customer_id",nullable = false)
+    @Column(name = "customer_id")
     private Integer customerId;
 
     // 客户名称

@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Entity
 @Data
 @Table(name="uma_chemical_fiber_stock")
-@NamedStoredProcedureQuery(name = "Stock.task", procedureName = "proc_update_stock")
+@NamedStoredProcedureQuery(name = "Stock.storedProcedure", procedureName = "proc_update_stock")
 public class ChemicalFiberStock implements Serializable {
 
     @Id

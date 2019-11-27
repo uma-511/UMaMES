@@ -112,4 +112,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         }
         FileUtil.downloadExcel(list, response);
     }
+
+    @Override
+    public void deliveryNoteStoredProcedure(String scanNumber) {
+        chemicalFiberDeliveryNoteRepository.deliveryNoteStoredProcedure(scanNumber);
+    }
 }
