@@ -2,6 +2,7 @@ package me.zhengjie.uma_mes.service.impl;
 
 import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelTotalDTO;
 import me.zhengjie.utils.ValidationUtil;
 import me.zhengjie.utils.FileUtil;
 import me.zhengjie.uma_mes.repository.ChemicalFiberLabelRepository;
@@ -122,5 +123,10 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
     @Transactional(rollbackFor = Exception.class)
     public void update(List<ChemicalFiberLabel> chemicalFiberLabels) {
         chemicalFiberLabelRepository.saveAll(chemicalFiberLabels);
+    }
+
+    @Override
+    public ChemicalFiberLabelTotalDTO getTotalByProductionId(Integer productionId) {
+        return chemicalFiberLabelRepository.getTotalByProductionId(productionId);
     }
 }

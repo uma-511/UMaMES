@@ -1,6 +1,8 @@
 package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
+
+import javax.persistence.Column;
 import java.math.BigDecimal;
 import java.io.Serializable;
 
@@ -13,6 +15,9 @@ import java.io.Serializable;
 public class ChemicalFiberDeliveryDetailDTO implements Serializable {
 
     private Integer id;
+
+    // 出库单号
+    private String scanNumber;
 
     // 产品id
     private Integer prodId;

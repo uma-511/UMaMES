@@ -3,6 +3,7 @@ package me.zhengjie.uma_mes.service;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelTotalDTO;
 import org.springframework.data.domain.Pageable;
 import java.util.Map;
 import java.util.List;
@@ -46,4 +47,6 @@ public interface ChemicalFiberLabelService {
     void download(List<ChemicalFiberLabelDTO> all, HttpServletResponse response) throws IOException;
 
     void update(List<ChemicalFiberLabel> chemicalFiberLabels);
+
+    ChemicalFiberLabelTotalDTO getTotalByProductionId(Integer productionId);
 }
