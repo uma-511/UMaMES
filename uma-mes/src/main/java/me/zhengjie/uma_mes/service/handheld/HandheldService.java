@@ -3,6 +3,7 @@ package me.zhengjie.uma_mes.service.handheld;
 import com.lgmn.common.result.Result;
 import com.lgmn.common.result.ResultEnum;
 import com.lgmn.common.utils.ObjectTransfer;
+import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ScanRecord;
 import me.zhengjie.uma_mes.domain.ScanRecordLabel;
@@ -34,13 +35,16 @@ public class HandheldService {
 
     private final ConfigService configService;
 
+    private final ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService;
+
     public HandheldService(
             ChemicalFiberLabelService chemicalFiberLabelService,
             ChemicalFiberProductionService chemicalFiberProductionService,
             ScanRecordService scanRecordService,
             ScanRecordLabelService scanRecordLabelService,
             ConfigClassifyService configClassifyService,
-            ConfigService configService) {
+            ConfigService configService,
+            ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService) {
 
         this.chemicalFiberLabelService = chemicalFiberLabelService;
         this.chemicalFiberProductionService = chemicalFiberProductionService;
@@ -48,6 +52,7 @@ public class HandheldService {
         this.scanRecordLabelService = scanRecordLabelService;
         this.configClassifyService = configClassifyService;
         this.configService = configService;
+        this.chemicalFiberDeliveryNoteService = chemicalFiberDeliveryNoteService;
     }
 
     public Result getLabelMsg(LabelMsgDto labelMsgDto) {
@@ -121,6 +126,13 @@ public class HandheldService {
 
         // 新增标签扫描记录
         scanRecordLabelService.create(scanRecordLabels);
+
+        if (uploadDataDto.getStatus() == 2) {
+            ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = new ChemicalFiberDeliveryNote();
+            chemicalFiberDeliveryNote.setScanNumber(scanNumber);
+            chemicalFiberDeliveryNoteService.create(chemicalFiberDeliveryNote);
+            chemicalFiberDeliveryNoteService.deliveryNoteStoredProcedure(scanNumber);
+        }
 
         return Result.success("上传成功");
     }

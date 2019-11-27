@@ -44,4 +44,6 @@ public interface ChemicalFiberDeliveryNoteService {
     void delete(Integer id);
 
     void download(List<ChemicalFiberDeliveryNoteDTO> all, HttpServletResponse response) throws IOException;
+
+    void deliveryNoteStoredProcedure(String scanNumber);
 }
