@@ -1,8 +1,10 @@
 package me.zhengjie.uma_mes.rest;
 
+import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -43,6 +46,15 @@ public class ChemicalFiberDeliveryDetailController {
     @PreAuthorize("@el.check('chemicalFiberDeliveryDetail:list')")
     public ResponseEntity getChemicalFiberDeliveryDetails(ChemicalFiberDeliveryDetailQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(chemicalFiberDeliveryDetailService.queryAll(criteria,pageable),HttpStatus.OK);
+    }
+
+    @PostMapping("/getChemicalFiberDeliveryDetailsList")
+    @Log("查询ChemicalFiberDeliveryDetail")
+    @ApiOperation("查询ChemicalFiberDeliveryDetail")
+    @AnonymousAccess()
+//    @PreAuthorize("@el.check('chemicalFiberDeliveryDetail:list')")
+    public ResponseEntity getChemicalFiberDeliveryDetailsList(@RequestBody ChemicalFiberDeliveryDetailQueryCriteria criteria){
+        return new ResponseEntity<>(chemicalFiberDeliveryDetailService.queryAll(criteria),HttpStatus.OK);
     }
 
     @PostMapping

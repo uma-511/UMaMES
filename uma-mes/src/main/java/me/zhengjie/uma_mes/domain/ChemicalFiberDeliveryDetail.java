@@ -69,6 +69,10 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
     @Column(name = "total_bag")
     private Integer totalBag;
 
+    // 总数量
+    @Column(name = "total_number")
+    private Integer totalNumber;
+
     public void copy(ChemicalFiberDeliveryDetail source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

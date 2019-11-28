@@ -25,4 +25,7 @@ public class ChemicalFiberDeliveryDetailQueryCriteria{
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String prodFineness;
+
+    @Query
+    private String scanNumber;
 }

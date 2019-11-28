@@ -51,4 +51,7 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
 
     // 总件数
     private Integer totalBag;
+
+    // 总数量
+    private Integer totalNumber;
 }
