@@ -51,7 +51,7 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public List<ChemicalFiberDeliveryDetailDTO> queryAll(ChemicalFiberDeliveryDetailQueryCriteria criteria){
         return chemicalFiberDeliveryDetailMapper.toDto(chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }

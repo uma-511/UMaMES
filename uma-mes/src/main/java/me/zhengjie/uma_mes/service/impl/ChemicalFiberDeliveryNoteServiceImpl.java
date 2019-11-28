@@ -1,13 +1,15 @@
 package me.zhengjie.uma_mes.service.impl;
 
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
-import me.zhengjie.utils.ValidationUtil;
-import me.zhengjie.utils.FileUtil;
+import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
+import me.zhengjie.uma_mes.service.CustomerService;
+import me.zhengjie.uma_mes.service.dto.*;
+import me.zhengjie.uma_mes.utils.DownloadUtil;
+import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryNoteMapper;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,14 +18,13 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import me.zhengjie.utils.PageUtil;
-import me.zhengjie.utils.QueryHelp;
-import java.util.List;
-import java.util.Map;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.sql.Timestamp;
+import java.util.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 /**
 * @author Tan Jun Ming
@@ -38,9 +39,18 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     private final ChemicalFiberDeliveryNoteMapper chemicalFiberDeliveryNoteMapper;
 
-    public ChemicalFiberDeliveryNoteServiceImpl(ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository, ChemicalFiberDeliveryNoteMapper chemicalFiberDeliveryNoteMapper) {
+    private final CustomerService customerService;
+
+    private final ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService;
+
+    public ChemicalFiberDeliveryNoteServiceImpl(ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository,
+                                                ChemicalFiberDeliveryNoteMapper chemicalFiberDeliveryNoteMapper,
+                                                CustomerService customerService,
+                                                ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService) {
         this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
         this.chemicalFiberDeliveryNoteMapper = chemicalFiberDeliveryNoteMapper;
+        this.customerService = customerService;
+        this.chemicalFiberDeliveryDetailService = chemicalFiberDeliveryDetailService;
     }
 
     @Override
@@ -75,9 +85,18 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(ChemicalFiberDeliveryNote resources) {
+        CustomerDTO customerDTO = customerService.findById(resources.getCustomerId());
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(resources.getId()).orElseGet(ChemicalFiberDeliveryNote::new);
         ValidationUtil.isNull( chemicalFiberDeliveryNote.getId(),"ChemicalFiberDeliveryNote","id",resources.getId());
         chemicalFiberDeliveryNote.copy(resources);
+        chemicalFiberDeliveryNote.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        chemicalFiberDeliveryNote.setCreateUser(SecurityUtils.getUsername());
+        chemicalFiberDeliveryNote.setCustomerId(customerDTO.getId());
+        chemicalFiberDeliveryNote.setCustomerCode(customerDTO.getCode());
+        chemicalFiberDeliveryNote.setCustomerName(customerDTO.getName());
+        chemicalFiberDeliveryNote.setCustomerAddress(customerDTO.getAddress());
+        chemicalFiberDeliveryNote.setContactPhone(customerDTO.getContactPhone());
+        chemicalFiberDeliveryNote.setContacts(customerDTO.getContacts());
         chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
     }
 
@@ -116,5 +135,14 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     @Override
     public void deliveryNoteStoredProcedure(String scanNumber) {
         chemicalFiberDeliveryNoteRepository.deliveryNoteStoredProcedure(scanNumber);
+    }
+
+    @Override
+    public void downloadDeliveryNote(Integer id, HttpServletResponse response) throws IOException, IllegalAccessException {
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+        ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
+        chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
+        DownloadUtil.downloadDeliveryNoteExcel(chemicalFiberDeliveryNote, chemicalFiberDeliveryDetailDTOS, response);
     }
 }

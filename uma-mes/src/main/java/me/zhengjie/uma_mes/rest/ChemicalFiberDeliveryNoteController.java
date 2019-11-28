@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.rest;
 
+import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
@@ -69,5 +70,13 @@ public class ChemicalFiberDeliveryNoteController {
     public ResponseEntity delete(@PathVariable Integer id){
         chemicalFiberDeliveryNoteService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Log("导出出库单")
+    @ApiOperation("导出出库单")
+    @GetMapping(value = "/downloadDeliveryNote/{id}")
+    @AnonymousAccess()
+    public void downloadDeliveryNote(HttpServletResponse response, @PathVariable Integer id) throws IOException, IllegalAccessException {
+        chemicalFiberDeliveryNoteService.downloadDeliveryNote(id, response);
     }
 }

@@ -46,4 +46,6 @@ public interface ChemicalFiberDeliveryNoteService {
     void download(List<ChemicalFiberDeliveryNoteDTO> all, HttpServletResponse response) throws IOException;
 
     void deliveryNoteStoredProcedure(String scanNumber);
+
+    void downloadDeliveryNote(Integer id, HttpServletResponse response) throws IOException, IllegalAccessException;
 }
