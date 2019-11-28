@@ -16,6 +16,7 @@
         <module>eladmin-tools</module>
         <module>eladmin-generator</module>
         <module>uma-mes</module>
+        <module>uma-iot</module>
     </modules>
 
     <name>EL-ADMIN后台管理系统</name>
