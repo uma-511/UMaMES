@@ -105,8 +105,8 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
         criteria.setScanNumber(chemicalFiberDeliveryDetail.getScanNumber());
         List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailMapper.toDto(chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
-            tempTotalCost = tempTotalCost.add(chemicalFiberDeliveryDetailDTO.getTotalCost());
-            tempTotalPrice = tempTotalPrice.add(chemicalFiberDeliveryDetailDTO.getTotalPrice());
+            tempTotalCost = tempTotalCost.add(chemicalFiberDeliveryDetailDTO.getTotalCost() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetailDTO.getTotalCost());
+            tempTotalPrice = tempTotalPrice.add(chemicalFiberDeliveryDetailDTO.getTotalPrice() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetailDTO.getTotalPrice());
         }
         chemicalFiberDeliveryNote.setTotalCost(tempTotalCost);
         chemicalFiberDeliveryNote.setTotalPrice(tempTotalPrice);
