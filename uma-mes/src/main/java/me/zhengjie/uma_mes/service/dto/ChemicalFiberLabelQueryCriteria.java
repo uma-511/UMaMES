@@ -2,6 +2,8 @@ package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
 import java.sql.Timestamp;
+import java.util.List;
+
 import me.zhengjie.annotation.Query;
 
 /**
@@ -10,6 +12,9 @@ import me.zhengjie.annotation.Query;
 */
 @Data
 public class ChemicalFiberLabelQueryCriteria{
+
+    @Query(type = Query.Type.IN)
+    private List<Integer> id;
 
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)

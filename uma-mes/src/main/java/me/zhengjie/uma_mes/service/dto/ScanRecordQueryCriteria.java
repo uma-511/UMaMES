@@ -34,4 +34,8 @@ public class ScanRecordQueryCriteria{
     // 精确
     @Query
     private String type;
+
+    // 模糊
+    @Query(propName = "scanNumber")
+    private String accurateScanNumber;
 }

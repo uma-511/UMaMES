@@ -9,4 +9,8 @@ import me.zhengjie.annotation.Query;
 */
 @Data
 public class ScanRecordLabelQueryCriteria{
+
+    // 扫描记录id
+    @Query
+    private Integer scanRecordId;
 }
