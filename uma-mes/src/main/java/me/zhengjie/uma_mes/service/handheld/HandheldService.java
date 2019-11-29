@@ -17,6 +17,7 @@ import me.zhengjie.uma_mes.vo.handheld.LabelMsgVo;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -130,6 +131,9 @@ public class HandheldService {
         if (uploadDataDto.getStatus() == 2) {
             ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = new ChemicalFiberDeliveryNote();
             chemicalFiberDeliveryNote.setScanNumber(scanNumber);
+            chemicalFiberDeliveryNote.setTotalCost(new BigDecimal(0));
+            chemicalFiberDeliveryNote.setTotalPrice(new BigDecimal(0));
+            chemicalFiberDeliveryNote.setCreateDate(new Timestamp(System.currentTimeMillis()));
             chemicalFiberDeliveryNoteService.create(chemicalFiberDeliveryNote);
             chemicalFiberDeliveryNoteService.deliveryNoteStoredProcedure(scanNumber);
         }

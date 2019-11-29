@@ -73,6 +73,10 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
     @Column(name = "total_number")
     private Integer totalNumber;
 
+    // 总重量
+    @Column(name = "total_weight")
+    private BigDecimal totalWeight;
+
     public void copy(ChemicalFiberDeliveryDetail source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

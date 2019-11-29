@@ -6,6 +6,7 @@ import cn.hutool.extra.template.Template;
 import cn.hutool.extra.template.TemplateConfig;
 import cn.hutool.extra.template.TemplateEngine;
 import cn.hutool.extra.template.TemplateUtil;
+import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.service.*;
@@ -72,6 +73,10 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     @Override
 //    @Cacheable
     public Map<String,Object> queryAll(ChemicalFiberDeliveryNoteQueryCriteria criteria, Pageable pageable){
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+        }
         Page<ChemicalFiberDeliveryNote> page = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberDeliveryNoteMapper::toDto));
     }
@@ -83,7 +88,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public ChemicalFiberDeliveryNoteDTO findById(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         ValidationUtil.isNull(chemicalFiberDeliveryNote.getId(),"ChemicalFiberDeliveryNote","id",id);
@@ -178,7 +183,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             Map<String, String> lm = new HashMap<String, String>();
             lm.put("prodName", chemicalFiberDeliveryDetailDTO.getProdName());
             lm.put("totalBag", chemicalFiberDeliveryDetailDTO.getTotalBag() + "");
-            lm.put("totalNumber", chemicalFiberDeliveryDetailDTO.getTotalNumber() + "");
+            lm.put("totalNumber", "个".equals(chemicalFiberDeliveryDetailDTO.getUnit()) ? chemicalFiberDeliveryDetailDTO.getTotalNumber() + "" : chemicalFiberDeliveryDetailDTO.getTotalWeight() + "");
             lm.put("unit", chemicalFiberDeliveryDetailDTO.getUnit());
             lm.put("sellingPrice", chemicalFiberDeliveryDetailDTO.getSellingPrice() + "");
             lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");

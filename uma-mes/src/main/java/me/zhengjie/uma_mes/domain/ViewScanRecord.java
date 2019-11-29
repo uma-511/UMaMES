@@ -15,14 +15,16 @@ import java.io.Serializable;
 @Entity
 @Data
 @Table(name="view_scan_record")
+@IdClass(ViewScanRecordPK.class)
 public class ViewScanRecord implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id",nullable = false)
     private Integer id;
 
     // 扫描时间
+    @Id
     @Column(name = "scan_time",nullable = false)
     private Timestamp scanTime;
 
