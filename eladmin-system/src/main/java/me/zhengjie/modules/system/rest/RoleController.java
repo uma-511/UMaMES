@@ -70,6 +70,9 @@ public class RoleController {
     @GetMapping
     @PreAuthorize("@el.check('roles:list')")
     public ResponseEntity getRoles(RoleQueryCriteria criteria, Pageable pageable){
+        if (!SecurityUtils.getUsername().equals("um_admin")) {
+            criteria.setNameNOT_EQUAL("超级管理员");
+        }
         return new ResponseEntity<>(roleService.queryAll(criteria,pageable),HttpStatus.OK);
     }
 

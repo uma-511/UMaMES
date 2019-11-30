@@ -33,4 +33,7 @@ public class UserQueryCriteria implements Serializable {
 
     @Query(type = Query.Type.LESS_THAN,propName = "createTime")
     private Timestamp endTime;
+
+    @Query(type = Query.Type.NOT_EQUAL, propName = "username")
+    private String username_NOT_EQUAL;
 }

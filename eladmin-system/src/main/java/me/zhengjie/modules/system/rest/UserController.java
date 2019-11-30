@@ -70,6 +70,9 @@ public class UserController {
     @GetMapping
     @PreAuthorize("@el.check('user:list')")
     public ResponseEntity getUsers(UserQueryCriteria criteria, Pageable pageable){
+        if (!SecurityUtils.getUsername().equals("um_admin")) {
+            criteria.setUsername_NOT_EQUAL("um_admin");
+        }
         Set<Long> deptSet = new HashSet<>();
         Set<Long> result = new HashSet<>();
         if (!ObjectUtils.isEmpty(criteria.getDeptId())) {

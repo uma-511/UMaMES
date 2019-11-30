@@ -5,13 +5,20 @@ import io.swagger.annotations.ApiOperation;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.modules.system.domain.Menu;
 import me.zhengjie.exception.BadRequestException;
+import me.zhengjie.modules.system.domain.Role;
+import me.zhengjie.modules.system.domain.User;
+import me.zhengjie.modules.system.repository.RoleRepository;
 import me.zhengjie.modules.system.service.MenuService;
 import me.zhengjie.modules.system.service.RoleService;
 import me.zhengjie.modules.system.service.UserService;
 import me.zhengjie.modules.system.service.dto.MenuDTO;
 import me.zhengjie.modules.system.service.dto.MenuQueryCriteria;
+import me.zhengjie.modules.system.service.dto.RoleQueryCriteria;
 import me.zhengjie.modules.system.service.dto.UserDTO;
+import me.zhengjie.utils.QueryHelp;
 import me.zhengjie.utils.SecurityUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,9 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Zheng Jie
@@ -40,12 +45,15 @@ public class MenuController {
 
     private final RoleService roleService;
 
+    private final RoleRepository roleRepository;
+
     private static final String ENTITY_NAME = "menu";
 
-    public MenuController(MenuService menuService, UserService userService, RoleService roleService) {
+    public MenuController(MenuService menuService, UserService userService, RoleService roleService, RoleRepository roleRepository) {
         this.menuService = menuService;
         this.userService = userService;
         this.roleService = roleService;
+        this.roleRepository = roleRepository;
     }
 
     @Log("导出菜单数据")
@@ -69,7 +77,33 @@ public class MenuController {
     @GetMapping(value = "/tree")
     @PreAuthorize("@el.check('menu:list','roles:list')")
     public ResponseEntity getMenuTree(){
-        return new ResponseEntity<>(menuService.getMenuTree(menuService.findByPid(0L)),HttpStatus.OK);
+        if (SecurityUtils.getUsername().equals("um_admin")) {
+            return new ResponseEntity<>(menuService.getMenuTree(menuService.findByPid(0L)),HttpStatus.OK);
+        }
+
+        UserDTO userDTO = userService.findByName(SecurityUtils.getUsername());
+        RoleQueryCriteria criteria = new RoleQueryCriteria();
+        List<Role> roles = roleRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+        List<Menu> menusList = null;
+        for (Role role : roles) {
+            Map<String, String> map = setToMap(role.getUsers());
+
+            if (map.containsKey(userDTO.getId().toString())) {
+                menusList = new ArrayList<>(role.getMenus());
+            }
+        }
+        Map<Long, Long> tempMap = new HashMap<>();
+        List<Menu> menusTemp = new ArrayList<>();
+        if (menusList != null) {
+            for (Menu menu : menusList) {
+                tempMap.put(menu.getId(), menu.getId());
+                if (menu.getPid() == 0) {
+                    menusTemp.add(menu);
+                }
+            }
+        }
+        Object menuTree = menuService.getMenuTree(menusTemp, tempMap);
+        return new ResponseEntity<>(menuTree,HttpStatus.OK);
     }
 
     @Log("查询菜单")
@@ -112,5 +146,18 @@ public class MenuController {
         menuSet = menuService.getDeleteMenus(menuList, menuSet);
         menuService.delete(menuSet);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    private Map<String,String> setToMap (Set<User> set) {
+        Map<String,String> map = new HashMap<String,String>();
+        if (set == null) {
+            return null;
+        }
+        Iterator<User> iterator = set.iterator();
+        while (iterator.hasNext()) {
+            User item = iterator.next();
+            map.put(item.getId().toString(), item.getId().toString());
+        }
+        return map;
     }
 }

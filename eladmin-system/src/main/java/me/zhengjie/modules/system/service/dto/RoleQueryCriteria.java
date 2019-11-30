@@ -20,4 +20,7 @@ public class RoleQueryCriteria {
 
     @Query(type = Query.Type.LESS_THAN,propName = "createTime")
     private Timestamp endTime;
+
+    @Query(type = Query.Type.NOT_EQUAL, propName = "name")
+    private String nameNOT_EQUAL;
 }

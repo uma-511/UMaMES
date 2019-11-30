@@ -29,6 +29,8 @@ public interface MenuService {
 
     Object getMenuTree(List<Menu> menus);
 
+    Object getMenuTree(List<Menu> menus, Map<Long, Long> tempMap);
+
     List<Menu> findByPid(long pid);
 
     Map<String,Object> buildTree(List<MenuDTO> menuDTOS);
