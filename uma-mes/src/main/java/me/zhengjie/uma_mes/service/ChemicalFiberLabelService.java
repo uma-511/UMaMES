@@ -49,4 +49,6 @@ public interface ChemicalFiberLabelService {
     void update(List<ChemicalFiberLabel> chemicalFiberLabels);
 
     ChemicalFiberLabelTotalDTO getTotalByProductionId(Integer productionId);
+
+    ChemicalFiberLabel getByLabelNumber(String labelNumber);
 }

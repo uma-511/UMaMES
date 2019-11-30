@@ -43,3 +43,8 @@ code:
 #登录图形验证码有效时间/分钟
 loginCode:
   expiration: 2
+
+uma:
+  heartbeat:
+    all-idle-time: 50
+    time-unit: seconds

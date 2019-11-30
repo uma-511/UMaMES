@@ -57,7 +57,7 @@ public class MachineServiceImpl implements MachineService {
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public MachineDTO findById(Integer id) {
         Machine machine = machineRepository.findById(id).orElseGet(Machine::new);
         ValidationUtil.isNull(machine.getId(),"Machine","id",id);

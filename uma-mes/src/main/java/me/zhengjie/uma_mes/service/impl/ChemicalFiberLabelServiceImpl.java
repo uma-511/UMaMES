@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +128,27 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
 
     @Override
     public ChemicalFiberLabelTotalDTO getTotalByProductionId(Integer productionId) {
-        return chemicalFiberLabelRepository.getTotalByProductionId(productionId);
+        Map map = chemicalFiberLabelRepository.getTotalByProductionId(productionId);
+
+        int factPerBagNumber=0;
+        BigDecimal netWeight = new BigDecimal(0);
+
+        if(map.containsKey("fact_per_bag_number")){
+            factPerBagNumber = Integer.parseInt(map.get("fact_per_bag_number").toString());
+        }
+
+        if(map.containsKey("net_weight")){
+            netWeight = new BigDecimal(map.get("net_weight").toString());
+        }
+
+        ChemicalFiberLabelTotalDTO totalDTO = new ChemicalFiberLabelTotalDTO();
+        totalDTO.setTotalNumber(factPerBagNumber);
+        totalDTO.setTotalWeight(netWeight);
+        return totalDTO;
+    }
+
+    @Override
+    public ChemicalFiberLabel getByLabelNumber(String labelNumber) {
+        return chemicalFiberLabelRepository.getByLabelNumber(labelNumber);
     }
 }

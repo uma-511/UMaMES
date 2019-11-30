@@ -7,12 +7,16 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Map;
+
 /**
 * @author Tan Jun Ming
 * @date 2019-11-20
 */
 public interface ChemicalFiberLabelRepository extends JpaRepository<ChemicalFiberLabel, Integer>, JpaSpecificationExecutor<ChemicalFiberLabel> {
-    @Query(value = "select sum(net_weight) as totalNetWeight,sum(fact_per_bag_number) as totalNumber from uma_chemical_fiber_label where `status`<> 3 and production_id=:productionId GROUP BY production_id",nativeQuery = true)
-    ChemicalFiberLabelTotalDTO getTotalByProductionId(@Param("productionId") Integer productionId);
+    @Query(value = "select max(id) as id,sum(net_weight) as net_weight,sum(fact_per_bag_number) as fact_per_bag_number from uma_chemical_fiber_label where `status`<> 3 and production_id=:productionId GROUP BY production_id",nativeQuery = true)
+    Map getTotalByProductionId(@Param("productionId") Integer productionId);
+
+    ChemicalFiberLabel getByLabelNumber(String labelNumber);
 
 }
