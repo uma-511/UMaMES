@@ -4,6 +4,7 @@ import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteExportPoundExcelDto;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -76,7 +77,15 @@ public class ChemicalFiberDeliveryNoteController {
     @ApiOperation("导出出库单")
     @GetMapping(value = "/downloadDeliveryNote/{id}")
     @AnonymousAccess()
-    public void downloadDeliveryNote(HttpServletResponse response, @PathVariable Integer id) throws IOException, IllegalAccessException {
+    public void downloadDeliveryNote(HttpServletResponse response, @PathVariable Integer id) {
         chemicalFiberDeliveryNoteService.downloadDeliveryNote(id, response);
+    }
+
+    @Log("导出出库单")
+    @ApiOperation("导出出库单")
+    @PostMapping(value = "/exportPoundExcel")
+    @AnonymousAccess()
+    public void exportPoundExcel(HttpServletResponse response, @RequestBody ChemicalFiberDeliveryNoteExportPoundExcelDto chemicalFiberDeliveryNoteExportPoundExcelDto) {
+        chemicalFiberDeliveryNoteService.exportPoundExcel(chemicalFiberDeliveryNoteExportPoundExcelDto, response);
     }
 }

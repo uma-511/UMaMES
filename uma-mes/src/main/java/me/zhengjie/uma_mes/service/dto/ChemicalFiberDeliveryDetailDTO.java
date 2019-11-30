@@ -54,4 +54,7 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
 
     // 总数量
     private Integer totalNumber;
+
+    // 总重量
+    private BigDecimal totalWeight;
 }

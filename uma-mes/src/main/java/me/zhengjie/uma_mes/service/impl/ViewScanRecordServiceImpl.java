@@ -46,7 +46,7 @@ public class ViewScanRecordServiceImpl implements ViewScanRecordService {
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public Map<String,Object> queryAll(ViewScanRecordQueryCriteria criteria, Pageable pageable){
         if (criteria.getTempStartTime() != null) {
             criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));

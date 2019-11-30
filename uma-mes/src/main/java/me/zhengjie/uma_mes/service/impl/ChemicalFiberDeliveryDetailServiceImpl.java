@@ -1,6 +1,12 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
+import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
+import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
+import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteDTO;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteQueryCriteria;
 import me.zhengjie.utils.ValidationUtil;
 import me.zhengjie.utils.FileUtil;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryDetailRepository;
@@ -18,6 +24,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
@@ -38,9 +46,14 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
 
     private final ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper;
 
-    public ChemicalFiberDeliveryDetailServiceImpl(ChemicalFiberDeliveryDetailRepository chemicalFiberDeliveryDetailRepository, ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper) {
+    private final ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository;
+
+    public ChemicalFiberDeliveryDetailServiceImpl(ChemicalFiberDeliveryDetailRepository chemicalFiberDeliveryDetailRepository,
+                                                  ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper,
+                                                  ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository) {
         this.chemicalFiberDeliveryDetailRepository = chemicalFiberDeliveryDetailRepository;
         this.chemicalFiberDeliveryDetailMapper = chemicalFiberDeliveryDetailMapper;
+        this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
     }
 
     @Override
@@ -79,6 +92,25 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
         ValidationUtil.isNull( chemicalFiberDeliveryDetail.getId(),"ChemicalFiberDeliveryDetail","id",resources.getId());
         chemicalFiberDeliveryDetail.copy(resources);
         chemicalFiberDeliveryDetailRepository.save(chemicalFiberDeliveryDetail);
+
+        // 修改出货单成本，总金额
+        ChemicalFiberDeliveryNoteQueryCriteria chemicalFiberDeliveryNoteQueryCriteria = new ChemicalFiberDeliveryNoteQueryCriteria();
+        chemicalFiberDeliveryNoteQueryCriteria.setScanNumber(chemicalFiberDeliveryDetail.getScanNumber());
+        List<ChemicalFiberDeliveryNote> chemicalFiberDeliveryNotes = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,chemicalFiberDeliveryNoteQueryCriteria,criteriaBuilder));
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNotes.get(0);
+
+        BigDecimal tempTotalCost = new BigDecimal(0.0);
+        BigDecimal tempTotalPrice = new BigDecimal(0.0);
+        ChemicalFiberDeliveryDetailQueryCriteria criteria = new ChemicalFiberDeliveryDetailQueryCriteria();
+        criteria.setScanNumber(chemicalFiberDeliveryDetail.getScanNumber());
+        List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailMapper.toDto(chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+        for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
+            tempTotalCost = tempTotalCost.add(chemicalFiberDeliveryDetailDTO.getTotalCost() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetailDTO.getTotalCost());
+            tempTotalPrice = tempTotalPrice.add(chemicalFiberDeliveryDetailDTO.getTotalPrice() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetailDTO.getTotalPrice());
+        }
+        chemicalFiberDeliveryNote.setTotalCost(tempTotalCost);
+        chemicalFiberDeliveryNote.setTotalPrice(tempTotalPrice);
+        chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
     }
 
     @Override

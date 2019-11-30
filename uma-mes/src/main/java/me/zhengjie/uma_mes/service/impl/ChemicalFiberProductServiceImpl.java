@@ -102,6 +102,7 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
             chemicalFiberStock.setProdColor(chemicalFiberProductDTO.getColor());
             chemicalFiberStock.setProdFineness(chemicalFiberProductDTO.getFineness());
             chemicalFiberStockService.create(chemicalFiberStock);
+            chemicalFiberStockService.stockTask();
             return chemicalFiberProductDTO;
         }
     }

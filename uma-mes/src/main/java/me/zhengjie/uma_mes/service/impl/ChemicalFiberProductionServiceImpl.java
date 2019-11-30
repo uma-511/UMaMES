@@ -201,25 +201,39 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
     @Override
     public ChemicalFiberProduction setProductionStatus(ChemicalFiberProductionSetProductionStatusDTO resources) {
         ChemicalFiberProduction chemicalFiberProduction = chemicalFiberProductionRepository.findById(resources.getProductionId()).orElseGet(ChemicalFiberProduction::new);
-        Machine machine = machineRepository.findById(Integer.parseInt(chemicalFiberProduction.getMachineNumber())).orElseGet(Machine::new);
+        if (!StringUtils.isEmpty(chemicalFiberProduction.getMachineNumber())) {
+            Machine machine = machineRepository.findById(Integer.parseInt(chemicalFiberProduction.getMachineNumber())).orElseGet(Machine::new);
+            switch (resources.getStatus()) {
+                case 0:
+                    machine.setStatus(0);
+                    chemicalFiberProduction.setMachineNumber("");
+                    break;
+                case 1:
+                    machine.setStatus(1);
+                    break;
+                case 2:
+                    chemicalFiberProduction.setMachineNumber("");
+                    machine.setStatus(0);
+                    break;
+                default:
+                    machine.setStatus(0);
+                    chemicalFiberProduction.setMachineNumber("");
+            }
+            machineRepository.save(machine);
+        }
         switch (resources.getStatus()) {
             case 0:
                 chemicalFiberProduction.setStatus(2);
-                machine.setStatus(2);
                 break;
             case 1:
                 chemicalFiberProduction.setStatus(1);
-                machine.setStatus(1);
                 break;
             case 2:
                 chemicalFiberProduction.setStatus(4);
-                machine.setStatus(0);
                 break;
             default:
                 chemicalFiberProduction.setStatus(3);
-                machine.setStatus(0);
         }
-        machineRepository.save(machine);
         chemicalFiberProductionRepository.save(chemicalFiberProduction);
         return chemicalFiberProduction;
     }

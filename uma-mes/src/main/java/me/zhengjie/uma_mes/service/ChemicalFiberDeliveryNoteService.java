@@ -2,6 +2,7 @@ package me.zhengjie.uma_mes.service;
 
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteDTO;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteExportPoundExcelDto;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import java.util.Map;
@@ -47,5 +48,7 @@ public interface ChemicalFiberDeliveryNoteService {
 
     void deliveryNoteStoredProcedure(String scanNumber);
 
-    void downloadDeliveryNote(Integer id, HttpServletResponse response) throws IOException, IllegalAccessException;
+    void downloadDeliveryNote(Integer id, HttpServletResponse response);
+
+    void exportPoundExcel(ChemicalFiberDeliveryNoteExportPoundExcelDto chemicalFiberDeliveryNoteExportPoundExcelDto, HttpServletResponse response);
 }
