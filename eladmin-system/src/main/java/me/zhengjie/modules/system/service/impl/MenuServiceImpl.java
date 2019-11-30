@@ -176,6 +176,28 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+//    @Cacheable(key = "'tree'")
+    public Object getMenuTree(List<Menu> menus, Map<Long, Long> tempMap) {
+        List<Map<String,Object>> list = new LinkedList<>();
+        menus.forEach(menu -> {
+                    if (menu!=null){
+                        List<Menu> menuList = menuRepository.findByPid(menu.getId());
+                        Map<String,Object> map = new HashMap<>();
+                        map.put("id",menu.getId());
+                        map.put("label",menu.getName());
+                        if(menuList!=null && menuList.size()!=0){
+                            map.put("children",getMenuTree(menuList, tempMap));
+                        }
+                        if (tempMap.containsKey(menu.getId())) {
+                            list.add(map);
+                        }
+                    }
+                }
+        );
+        return list;
+    }
+
+    @Override
     @Cacheable(key = "'pid:'+#p0")
     public List<Menu> findByPid(long pid) {
         return menuRepository.findByPid(pid);
