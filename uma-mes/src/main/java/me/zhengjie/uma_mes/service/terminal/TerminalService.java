@@ -73,19 +73,17 @@ public class TerminalService {
             chemicalFiberProductService.createForTerminal(chemicalFiberProduct);
 
             // 添加库存
-            ChemicalFiberStock chemicalFiberStock = new ChemicalFiberStock();
-            chemicalFiberStock.setProdId(chemicalFiberProduct.getId());
-            chemicalFiberStock.setProdName(chemicalFiberProduct.getName());
-            chemicalFiberStock.setProdModel(chemicalFiberProduct.getModel());
-            chemicalFiberStock.setProdColor(chemicalFiberProduct.getColor());
-            chemicalFiberStock.setProdFineness(chemicalFiberProduct.getFineness());
-            chemicalFiberStockService.create(chemicalFiberStock);
-            chemicalFiberStockService.stockTask();
+            saveChemicalFiberStock(chemicalFiberProduct);
         } else {
             ChemicalFiberProductDTO chemicalFiberProductDTO = chemicalFiberProductDTOS.get(0);
             ObjectTransfer.transValue(chemicalFiberProductDTO, chemicalFiberProduct);
         }
 
+        ChemicalFiberProduction chemicalFiberProduction = getChemicalFiberProduction(chemicalFiberProduct, terminalUploadDataDto);
+        return Result.success(chemicalFiberProduction);
+    }
+
+    private ChemicalFiberProduction getChemicalFiberProduction(ChemicalFiberProduct chemicalFiberProduct, TerminalUploadDataDto terminalUploadDataDto) {
         // 添加生产单
         ChemicalFiberProduction chemicalFiberProduction = new ChemicalFiberProduction();
         chemicalFiberProduction.setNumber(getChemicalFiberProductionNumber());
@@ -103,9 +101,18 @@ public class TerminalService {
         chemicalFiberProduction.setCreateTime(new Timestamp(System.currentTimeMillis()));
         chemicalFiberProduction.setCreateUser("admin");
         chemicalFiberProduction.setDelFlag(0);
-        chemicalFiberProductionRepository.save(chemicalFiberProduction);
+        return chemicalFiberProductionRepository.save(chemicalFiberProduction);
+    }
 
-        return Result.success(chemicalFiberProduction);
+    public void saveChemicalFiberStock(ChemicalFiberProduct chemicalFiberProduct) {
+        ChemicalFiberStock chemicalFiberStock = new ChemicalFiberStock();
+        chemicalFiberStock.setProdId(chemicalFiberProduct.getId());
+        chemicalFiberStock.setProdName(chemicalFiberProduct.getName());
+        chemicalFiberStock.setProdModel(chemicalFiberProduct.getModel());
+        chemicalFiberStock.setProdColor(chemicalFiberProduct.getColor());
+        chemicalFiberStock.setProdFineness(chemicalFiberProduct.getFineness());
+        chemicalFiberStockService.create(chemicalFiberStock);
+        chemicalFiberStockService.stockTask();
     }
 
     private String getChemicalFiberProductionNumber() {
