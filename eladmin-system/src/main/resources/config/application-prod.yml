@@ -6,7 +6,7 @@ spring:
       driverClassName: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
       url: jdbc:log4jdbc:mysql://localhost:3306/uma_mes?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false
       username: root
-      password: 123456
+      password: uma2019@mysql
 
       # 初始化配置
       initial-size: 3
@@ -80,8 +80,19 @@ swagger:
 
 # 文件存储路径
 file:
-  path: /home/eladmin/file/
-  avatar: /home/eladmin/avatar/
+  path: D:/UMa_Mes/file/
+  avatar: D:/UMa_Mes/avatar/
   # 文件大小 /M
   maxSize: 100
   avatarMaxSize: 5
+
+# 作为客户端请求的服务端地址
+netty:
+  tcp:
+    serve:
+      host: 127.0.0.1
+      # 作为客户端请求的服务端端口
+      port: 8080
+    client:
+      # 作为服务端开放给客户端的端口
+      port: 7000

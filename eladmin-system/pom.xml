@@ -53,6 +53,12 @@
             <artifactId>uma-mes</artifactId>
             <version>2.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.lgmn</groupId>
+            <artifactId>uma-iot</artifactId>
+            <version>2.3</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
