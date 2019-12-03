@@ -62,7 +62,7 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public Map<String,Object> queryAll(ChemicalFiberProductionQueryCriteria criteria, Pageable pageable){
         criteria.setDelFlag(0);
         Page<ChemicalFiberProduction> page = chemicalFiberProductionRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);

@@ -55,7 +55,7 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public Map<String,Object> queryAll(ChemicalFiberProductQueryCriteria criteria, Pageable pageable){
         criteria.setDelFlag(0);
         Page<ChemicalFiberProduct> page = chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
@@ -63,7 +63,7 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public List<ChemicalFiberProductDTO> queryAll(ChemicalFiberProductQueryCriteria criteria){
         criteria.setDelFlag(0);
         return chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
@@ -105,6 +105,11 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
             chemicalFiberStockService.stockTask();
             return chemicalFiberProductDTO;
         }
+    }
+
+    @Override
+    public ChemicalFiberProductDTO createForTerminal(ChemicalFiberProduct resources) {
+        return chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.save(resources));
     }
 
     @Override

@@ -39,6 +39,8 @@ public interface ChemicalFiberProductService {
 
     ChemicalFiberProductDTO create(ChemicalFiberProduct resources);
 
+    ChemicalFiberProductDTO createForTerminal(ChemicalFiberProduct resources);
+
     void update(ChemicalFiberProduct resources);
 
     void delete(Integer id);
