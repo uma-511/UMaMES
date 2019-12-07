@@ -42,6 +42,7 @@ public class ChemicalFiberStockController {
     @ApiOperation("查询ChemicalFiberStock")
     @PreAuthorize("@el.check('chemicalFiberStock:list')")
     public ResponseEntity getChemicalFiberStocks(ChemicalFiberStockQueryCriteria criteria, Pageable pageable){
+        criteria.setTotalBag(1);
         return new ResponseEntity<>(chemicalFiberStockService.queryAll(criteria,pageable),HttpStatus.OK);
     }
 
