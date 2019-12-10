@@ -262,7 +262,7 @@ public class ControllerPage extends SendCommand {
     }
 
     public String sendJitai2(String jitai2, String ip) {
-        return setTextValue("00 02", "00 0d", jitai2);
+        return setTextValue("00 02", "00 0e", jitai2);
     }
 
     public void getWeights(String ip) {
