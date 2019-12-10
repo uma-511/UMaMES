@@ -49,4 +49,19 @@ public class ChemicalFiberLabelQueryCriteria{
 
     // 临时结束时间
     private Long tempEndTime;
+
+    // 机台号
+    // 精确
+    @Query
+    private String machine;
+
+    // 纤度
+    // 精确
+    @Query
+    private String fineness;
+
+    // 色号
+    // 精确
+    @Query
+    private String color;
 }

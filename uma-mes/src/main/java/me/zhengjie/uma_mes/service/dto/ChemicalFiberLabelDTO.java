@@ -1,6 +1,8 @@
 package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
+
+import javax.persistence.Column;
 import java.sql.Timestamp;
 import java.math.BigDecimal;
 import java.io.Serializable;
@@ -47,4 +49,16 @@ public class ChemicalFiberLabelDTO implements Serializable {
 
     // 包装员
     private String packer;
+
+    // 机台号
+    private String machine;
+
+    // 流水号
+    private Integer flowNumber;
+
+    // 纤度
+    private String fineness;
+
+    // 色号
+    private String color;
 }

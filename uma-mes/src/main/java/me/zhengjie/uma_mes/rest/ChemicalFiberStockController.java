@@ -1,8 +1,12 @@
 package me.zhengjie.uma_mes.rest;
 
+import com.lgmn.common.result.Result;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
 import me.zhengjie.uma_mes.service.ChemicalFiberStockService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelDTO;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -12,6 +16,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -42,6 +50,7 @@ public class ChemicalFiberStockController {
     @ApiOperation("查询ChemicalFiberStock")
     @PreAuthorize("@el.check('chemicalFiberStock:list')")
     public ResponseEntity getChemicalFiberStocks(ChemicalFiberStockQueryCriteria criteria, Pageable pageable){
+        criteria.setTotalBag(1);
         return new ResponseEntity<>(chemicalFiberStockService.queryAll(criteria,pageable),HttpStatus.OK);
     }
 
@@ -69,5 +78,27 @@ public class ChemicalFiberStockController {
     public ResponseEntity delete(@PathVariable Integer id){
         chemicalFiberStockService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/getSummaryData")
+    @Log("查询ChemicalFiberLabel")
+    @ApiOperation("查询ChemicalFiberLabel")
+    @PreAuthorize("@el.check('chemicalFiberStock:list')")
+    public Result getSummaryData(@RequestBody ChemicalFiberStockQueryCriteria criteria) {
+        criteria.setTotalBag(1);
+        BigDecimal sumNetWeight = new BigDecimal(0);
+        Integer sumFactPerBagNumber = 0;
+        BigDecimal sumGrossWeight = new BigDecimal(0);
+        List<ChemicalFiberStockDTO> chemicalFiberStockDTOList = chemicalFiberStockService.queryAll(criteria);
+        for (ChemicalFiberStockDTO chemicalFiberStockDTO : chemicalFiberStockDTOList) {
+            sumFactPerBagNumber = sumFactPerBagNumber + chemicalFiberStockDTO.getTotalNumber();
+            sumNetWeight = sumNetWeight.add(chemicalFiberStockDTO.getTotalNetWeight());
+            sumGrossWeight = sumGrossWeight.add(chemicalFiberStockDTO.getTotalGrossWeight());
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("sumFactPerBagNumber", sumFactPerBagNumber);
+        map.put("sumNetWeight", sumNetWeight);
+        map.put("sumGrossWeight", sumGrossWeight);
+        return Result.success(map);
     }
 }

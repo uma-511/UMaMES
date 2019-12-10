@@ -1,8 +1,10 @@
 package me.zhengjie.uma_mes.rest;
 
+import com.lgmn.common.result.Result;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.service.ChemicalFiberLabelService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -69,5 +75,26 @@ public class ChemicalFiberLabelController {
     public ResponseEntity delete(@PathVariable Integer id){
         chemicalFiberLabelService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping("/getSummaryData")
+    @Log("查询ChemicalFiberLabel")
+    @ApiOperation("查询ChemicalFiberLabel")
+    @PreAuthorize("@el.check('chemicalFiberLabel:list')")
+    public Result getSummaryData(@RequestBody ChemicalFiberLabelQueryCriteria criteria) {
+        Integer sumFactPerBagNumber = 0;
+        BigDecimal sumNetWeight = new BigDecimal(0);
+        BigDecimal sumGrossWeight = new BigDecimal(0);
+        List<ChemicalFiberLabelDTO> chemicalFiberLabelDTOList = chemicalFiberLabelService.queryAll(criteria);
+        for (ChemicalFiberLabelDTO chemicalFiberLabelDTO : chemicalFiberLabelDTOList) {
+            sumFactPerBagNumber = sumFactPerBagNumber + chemicalFiberLabelDTO.getFactPerBagNumber();
+            sumNetWeight = sumNetWeight.add(chemicalFiberLabelDTO.getNetWeight());
+            sumGrossWeight = sumGrossWeight.add(chemicalFiberLabelDTO.getGrossWeight());
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("sumFactPerBagNumber", sumFactPerBagNumber);
+        map.put("sumNetWeight", sumNetWeight);
+        map.put("sumGrossWeight", sumGrossWeight);
+        return Result.success(map);
     }
 }
