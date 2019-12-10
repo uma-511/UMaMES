@@ -1,5 +1,7 @@
 package me.zhengjie.service;
 
+import com.lgmn.common.result.Result;
+import com.lgmn.common.utils.ObjectTransfer;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.domain.CancelInfo;
 import me.zhengjie.domain.ControlPannelInfo;
@@ -13,23 +15,31 @@ import me.zhengjie.terminal.terminal.ReprintPage;
 import me.zhengjie.terminal.terminal.Terminal;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduct;
+import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
 import me.zhengjie.uma_mes.service.ChemicalFiberLabelService;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductService;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductionService;
 import me.zhengjie.uma_mes.service.MachineService;
 import me.zhengjie.uma_mes.service.dto.*;
+import me.zhengjie.uma_mes.service.dto.termina.TerminalUploadDataDto;
+import me.zhengjie.uma_mes.service.terminal.TerminalService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Random;
 
 @Slf4j
 @Component
 public class ControlService {
+
+    @Value("${uma.label.printedIsIn}")
+    boolean printIsIn;
 
     @Autowired
     MachineService machineService;
@@ -42,6 +52,9 @@ public class ControlService {
 
     @Autowired
     ChemicalFiberLabelService labelService;
+
+    @Autowired
+    TerminalService terminalService;
 
     @Autowired
     ControllerPage controllerPage;
@@ -63,6 +76,7 @@ public class ControlService {
      */
     public void updateControlPanelInfo(String machineId, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        UserInfo userinfo = terminal.getUserinfo();
         ControlPannelInfo controlPanelInfo = terminal.getControlPannelInfo();
         MachineDTO machineDTO = machineService.findById(Integer.parseInt(machineId));
 
@@ -154,6 +168,12 @@ public class ControlService {
         ControlPannelInfo controlPanelInfo = terminal.getControlPannelInfo();
         UserInfo userInfo = terminal.getUserinfo();
 
+        int status=0;
+
+        if(printIsIn){
+            status=1;
+        }
+
         ChemicalFiberLabel label = new ChemicalFiberLabel();
         label.setGrossWeight(new BigDecimal(controlPanelInfo.getGrossWeight()));
         label.setNetWeight(new BigDecimal(controlPanelInfo.getNetWeight()));
@@ -162,10 +182,11 @@ public class ControlService {
         label.setProductionId(controlPanelInfo.getProductionId());
         label.setProductId(controlPanelInfo.getProductId());
         label.setShifts(userInfo.getBanci());
-        label.setStatus(1);
+        label.setStatus(status);
         label.setTare(new BigDecimal(controlPanelInfo.getTare()));
         label.setLabelNumber(generateLabelNumber(controlPanelInfo.getMachineNumber()));
         label.setFactPerBagNumber(Integer.parseInt(controlPanelInfo.getFactPerBagNumber()));
+        label.setMachine(controlPanelInfo.getMachineNumber());
 
         ChemicalFiberLabelDTO labelDto = labelService.create(label);
 
@@ -213,15 +234,30 @@ public class ControlService {
 
     }
 
+    public void getReprintInfo(String ip){
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        ReprintInfo reprintInfo = terminal.getReprintInfo();
+
+        ChemicalFiberLabel label = labelService.getByLabelNumber(reprintInfo.getLabelNumber());
+
+        reprintInfo.setChemicalFiberLabel(label);
+        if(label==null){
+            reprintInfo.setChemicalFiberProductDTO(null);
+        }else{
+            ChemicalFiberProductDTO product = productService.findById(label.getProductId());
+            reprintInfo.setChemicalFiberProductDTO(product);
+        }
+    }
+
     /**
      * 补打
      */
     public void reprint(String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         ReprintInfo reprintInfo = terminal.getReprintInfo();
-        GobalSender gobalSender = terminal.getGobalSender();
-        ChemicalFiberLabel label = labelService.getByLabelNumber(reprintInfo.getLabelNumber());
-        ChemicalFiberProductDTO product = productService.findById(label.getProductId());
+
+        ChemicalFiberLabel label = reprintInfo.getChemicalFiberLabel();
+        ChemicalFiberProductDTO product = reprintInfo.getChemicalFiberProductDTO();
 
         terminal.reprint(label,product);
     }
@@ -245,5 +281,10 @@ public class ControlService {
             str.append(random.nextInt(10));
         }
         return str.toString();
+    }
+
+    public ChemicalFiberProduction terminalUploadData(TerminalUploadDataDto terminalUploadDataDto){
+        ChemicalFiberProduction result = terminalService.terminalUploadData(terminalUploadDataDto);
+        return  result;
     }
 }

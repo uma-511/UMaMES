@@ -12,9 +12,12 @@ import me.zhengjie.terminal.annotation.Button;
 import me.zhengjie.terminal.annotation.Screen;
 import me.zhengjie.terminal.annotation.Text;
 import me.zhengjie.terminal.command.SendCommand;
+import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
+import me.zhengjie.uma_mes.service.dto.termina.TerminalUploadDataDto;
 import me.zhengjie.utils.CoderUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -25,6 +28,9 @@ import java.math.BigDecimal;
 public class ControllerPage extends SendCommand {
     @Autowired
     ControlService controlService;
+
+    @Value("${uma.production.createByTerminal}")
+    boolean createByTerminal;
 
     public void setLoginInfo(String loginInfo, String ip) {
         NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setLoginInfo(loginInfo);
@@ -40,15 +46,44 @@ public class ControllerPage extends SendCommand {
     }
 
     public void setCustomerCode(String customerCode, String ip) {
-        NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setCustomerCode(customerCode);
+        Terminal terminal =  NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
+        ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+        if (createByTerminal) {
+            terminal.setXishaji(false);
+            // 洗纱机
+            String xishaji = "9999";
+            // 废料
+            String feiliao = "9998";
+            if(customerCode.equals(xishaji)){
+                terminal.setXishaji(true);
+            }else if(customerCode.equals(feiliao)){
+                controlPannelInfo.setFineness("X");
+                gobalSender.send(sendFineness("X",ip));
+            }else {
+                updateProductionId(ip);
+            }
+            controlPannelInfo.setColor(customerCode);
+        } else {
+            controlPannelInfo.setCustomerCode(customerCode);
+        }
     }
 
     public void setFineness(String fineness, String ip) {
         NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setFineness(fineness);
+        if (createByTerminal) {
+            updateProductionId(ip);
+        }
     }
 
     public void setCoreWeight(String coreWeight, String ip) {
-        NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setCoreWeight(coreWeight);
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+
+        ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+        controlPannelInfo.setCoreWeight(coreWeight);
+        if (terminal.getControlPannelInfo().getMode().equals("manual")) {
+            competeTare(ip);
+        }
     }
 
     public void setBanci(String banci, String ip) {
@@ -56,7 +91,17 @@ public class ControllerPage extends SendCommand {
     }
 
     public void setMachineNumber(String machineNumber, String ip) {
-        NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setMachineNumber(machineNumber);
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+        controlPannelInfo.setMachineNumber(machineNumber);
+
+        if (createByTerminal) {
+            GobalSender gobalSender = terminal.getGobalSender();
+            String banci = controlPannelInfo.getBanci();
+            gobalSender.addCommand(sendBanci(banci + " - " + machineNumber, ip));
+            gobalSender.addCommand(sendJitai2(machineNumber, ip));
+            gobalSender.send();
+        }
     }
 
     public void setFactPerBagNumber(String factPerBagNumber, String ip) {
@@ -65,19 +110,27 @@ public class ControllerPage extends SendCommand {
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
         controlPannelInfo.setFactPerBagNumber(factPerBagNumber);
 
-        if(terminal.getControlPannelInfo().getMode().equals("manual")) {
-            GobalSender gobalSender = terminal.getGobalSender();
-            String coreWeightStr = controlPannelInfo.getCoreWeight();
-
-            BigDecimal bagNumber = new BigDecimal(factPerBagNumber);
-            BigDecimal coreWeight = new BigDecimal(coreWeightStr);
-            BigDecimal tare = bagNumber.multiply(coreWeight);
-
-            String tareStr = tare.toString();
-            controlPannelInfo.setTare(tareStr);
-
-            gobalSender.sendImmediate(sendTare(tareStr, ip));
+        if (terminal.getControlPannelInfo().getMode().equals("manual")) {
+            competeTare(ip);
         }
+    }
+
+    private void competeTare( String ip) {
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+
+        ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+        GobalSender gobalSender = terminal.getGobalSender();
+        String coreWeightStr = controlPannelInfo.getCoreWeight();
+        String factPerBagNumber = controlPannelInfo.getFactPerBagNumber();
+
+        BigDecimal bagNumber = new BigDecimal(factPerBagNumber);
+        BigDecimal coreWeight = new BigDecimal(coreWeightStr);
+        BigDecimal tare = bagNumber.multiply(coreWeight);
+
+        String tareStr = tare.toString();
+        controlPannelInfo.setTare(tareStr);
+
+        gobalSender.sendImmediate(sendTare(tareStr, ip));
     }
 
     public void updateGrossWeight() {
@@ -87,12 +140,12 @@ public class ControllerPage extends SendCommand {
     public void setTare(String tare, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
-        Integer manualModeTimes=controlPannelInfo.getManualModeEventTimes();
+        Integer manualModeTimes = controlPannelInfo.getManualModeEventTimes();
 
-        if(manualModeTimes > 1) {
+        if (manualModeTimes > 1) {
             controlPannelInfo.setTare(tare);
         }
-        manualModeTimes = manualModeTimes+1;
+        manualModeTimes = manualModeTimes + 1;
         controlPannelInfo.setManualModeEventTimes(manualModeTimes);
     }
 
@@ -108,21 +161,24 @@ public class ControllerPage extends SendCommand {
         NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setNetWeight(netWeight);
     }
 
+    public void setJitai2(String jitai2,String ip){
+        log.info("setJitai2 do nothing");
+    }
+
     public void setWeights(String weights, String ip) {
         //YM02AABBM0.000P0.000
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
         try {
-            Terminal terminal = NettyTcpServer.terminalMap.get(ip);
             ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
             String[] weightsArray = weights.replace("YM02AABBM", "").split("P");
 
-//            DecimalFormat df2 =new DecimalFormat("#0.00");
             String grossWeightStr = weightsArray[0];
-//            String tareStr = weightsArray[1];
             String tareStr = controlPannelInfo.getTare();
             String netWeightStr = "";
             BigDecimal grossWeight = new BigDecimal(grossWeightStr);
             String nul = "\u0000";
-            if(StringUtils.isEmpty(tareStr) || nul.equals(tareStr)){
+            if (StringUtils.isEmpty(tareStr) || nul.equals(tareStr)) {
                 tareStr = "0";
             }
             BigDecimal tare = new BigDecimal(tareStr);
@@ -130,23 +186,23 @@ public class ControllerPage extends SendCommand {
             netWeightStr = netWeight.toString();
 
             controlPannelInfo.setGrossWeight(grossWeightStr);
-//            controlPannelInfo.setTare(tareStr);
             controlPannelInfo.setNetWeight(netWeightStr);
-            if(terminal.isPrint) {
-                controlService.print(ip);
-            }else{
-                tareStr = weightsArray[1];
-                controlPannelInfo.setTare(tareStr);
-                terminal.gobalSender.sendImmediate(sendTare(tareStr,ip));
+
+            if(before_print(ip)) {
+                if (terminal.isPrint) {
+                    controlService.print(ip);
+                } else {
+                    tareStr = weightsArray[1];
+                    controlPannelInfo.setTare(tareStr);
+                    gobalSender.sendImmediate(sendTare(tareStr, ip));
+                }
             }
         } catch (Exception exception) {
             exception.printStackTrace();
-            Terminal terminal = NettyTcpServer.terminalMap.get(ip);
-            GobalSender gobalSender = terminal.getGobalSender();
             terminal.addGoControlCommand();
-            if(terminal.getUserinfo().getUserName()==null){
+            if (terminal.getUserinfo().getUserName() == null) {
                 gobalSender.addCommand(sendTip("与服务器断开连接，请重新登录", ip));
-            }else {
+            } else {
                 gobalSender.addCommand(sendTip("获取重量失败,请“置零”后重试", ip));
             }
             gobalSender.send();
@@ -205,12 +261,16 @@ public class ControllerPage extends SendCommand {
         return setTextValue("00 02", "00 0d", netWeight);
     }
 
+    public String sendJitai2(String jitai2, String ip) {
+        return setTextValue("00 02", "00 0d", jitai2);
+    }
+
     public void getWeights(String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.sendImmediate(CoderUtils.stringToHexStr("YM02AABB"));
 
-        gobalSender.sendDeloy(sendTip("",ip),1000);
+        gobalSender.sendDeloy(sendTip("", ip), 1000);
 //        gobalSender.send();
         log.info("getWeights");
     }
@@ -245,8 +305,11 @@ public class ControllerPage extends SendCommand {
     String totalNumber;
     @Text(id = "00 0c", handler = "setTotalWeight")
     String totalWeight;
-    @Text(id = "00 0c", handler = "setNetWeight")
+    @Text(id = "00 0d", handler = "setNetWeight")
     String netWeight;
+
+    @Text(id = "00 0e", handler = "setJitai2")
+    String jitai2;
 
     @Button(id = "00 11", handler = "event_print")
     String btn_print;
@@ -266,16 +329,16 @@ public class ControllerPage extends SendCommand {
     @Button(id = "00 26", handler = "event_cleanTare")
     String btn_cleanTare;
 
-    @Button(id="00 2b", handler = "event_manual")
+    @Button(id = "00 2b", handler = "event_manual")
     String btn_manual;
 
-    @Button(id="00 2c", handler = "event_auto")
+    @Button(id = "00 2c", handler = "event_auto")
     String btn_auto;
 
     @Button(id = "00 2d", handler = "event_back")
     String btn_back;
 
-    public void event_manual(String buttonId,String ip){
+    public void event_manual(String buttonId, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
@@ -290,26 +353,56 @@ public class ControllerPage extends SendCommand {
         String tareStr = tare.toString();
         controlPannelInfo.setTare(tareStr);
         controlPannelInfo.setManualModeEventTimes(0);
-        gobalSender.send(sendTare(tareStr,ip));
+        gobalSender.send(sendTare(tareStr, ip));
     }
 
-    public void event_auto(String button,String ip){
+    public void event_auto(String button, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
         controlPannelInfo.setMode("auto");
         controlPannelInfo.setTare("0");
-        gobalSender.send(sendTare("0",ip));
+        gobalSender.send(sendTare("0", ip));
     }
 
     public void event_print(String buttonId, String ip) {
         log.info("print event");
 //        controlService.beforePrint(ip);
 
+        if(before_print(ip)) {
+            Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+            terminal.isPrint = true;
+            getWeights(ip);
+            terminal.goPrinting();
+        }
+    }
+
+    private boolean before_print(String ip){
+        boolean canPrint = true;
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
-        terminal.isPrint = true;
-        getWeights(ip);
-        terminal.goPrinting();
+        GobalSender gobalSender = terminal.getGobalSender();
+        ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+        boolean isXishaji = terminal.isXishaji;
+
+        if(isXishaji){
+            String fineness = controlPannelInfo.getFineness();
+            if(StringUtils.isEmpty(fineness)){
+                canPrint = false;
+                gobalSender.send(sendTip("洗纱机，请输入纤度", ip));
+            }
+        }
+
+        BigDecimal netWeight = new BigDecimal(controlPannelInfo.getNetWeight());
+
+        if(netWeight.compareTo(new BigDecimal("0"))<0){
+            canPrint = false;
+            gobalSender.send(sendTip("重量值不能为负数",ip));
+        }else if(netWeight.compareTo(new BigDecimal("0"))==0){
+            canPrint = false;
+            gobalSender.send(sendTip("重量值不能等于0",ip));
+        }
+
+        return canPrint;
     }
 
     public void event_cancel(String buttonId, String ip) {
@@ -342,10 +435,11 @@ public class ControllerPage extends SendCommand {
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.addCommand(switchScreen("00 01"));
         cleanControllerPage(ip);
+        cleanControllerPageInfo(ip);
     }
 
     public void event_cleanTare(String buttonId, String ip) {
-        Terminal terminal= NettyTcpServer.terminalMap.get(ip);
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         terminal.isPrint = false;
         getWeights(ip);
     }
@@ -362,6 +456,7 @@ public class ControllerPage extends SendCommand {
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.addCommand(switchScreen("00 03"));
         cleanControllerPage(ip);
+        cleanControllerPageInfo(ip);
     }
 
     public void load(String ip) {
@@ -386,5 +481,43 @@ public class ControllerPage extends SendCommand {
         gobalSender.addCommand(sendTotalNumber("", ip));
         gobalSender.addCommand(sendTotalWeight("", ip));
         gobalSender.send();
+    }
+
+    public void cleanControllerPageInfo(String ip){
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+        controlPannelInfo.setTip("");
+        controlPannelInfo.setMachineNumber("");
+        controlPannelInfo.setCustomerCode("");
+        controlPannelInfo.setFineness("");
+        controlPannelInfo.setCoreWeight("");
+        controlPannelInfo.setBanci("");
+        controlPannelInfo.setMachineNumber("");
+        controlPannelInfo.setFactPerBagNumber("");
+        controlPannelInfo.setTare("");
+        controlPannelInfo.setTotalWeight("");
+        controlPannelInfo.setTotalWeight("");
+    }
+
+    public void updateProductionId(String ip) {
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
+        ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+
+        String color = controlPannelInfo.getColor();
+        String fineness = controlPannelInfo.getFineness();
+        if(StringUtils.isNotEmpty(color) && StringUtils.isNotEmpty(fineness)) {
+            TerminalUploadDataDto terminalUploadDataDto = new TerminalUploadDataDto();
+            terminalUploadDataDto.setColor(color);
+            terminalUploadDataDto.setFineness(fineness);
+            terminalUploadDataDto.setMachineNumber(controlPannelInfo.getMachineNumber());
+            ChemicalFiberProduction chemicalFiberProduction = controlService.terminalUploadData(terminalUploadDataDto);
+
+            controlPannelInfo.setProductionId(chemicalFiberProduction.getId());
+            controlPannelInfo.setProductId(chemicalFiberProduction.getProdId());
+            controlPannelInfo.setProductionNumber(chemicalFiberProduction.getNumber());
+            String command = sendProductionNumber(chemicalFiberProduction.getNumber(), ip);
+            gobalSender.send(command);
+        }
     }
 }

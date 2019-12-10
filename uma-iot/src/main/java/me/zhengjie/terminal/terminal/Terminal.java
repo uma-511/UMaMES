@@ -11,6 +11,7 @@ import me.zhengjie.terminal.GobalSender;
 import me.zhengjie.terminal.command.SendCommand;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductDTO;
+import me.zhengjie.uma_mes.service.dto.HeartBeatDTO;
 import me.zhengjie.utils.CoderUtils;
 import me.zhengjie.utils.SpringContextUtils;
 
@@ -30,8 +31,12 @@ public class Terminal extends SendCommand {
     ReprintInfo reprintInfo;
     GobalSender gobalSender;
     boolean isPrint = false;
+    Integer lossConnectCount = 0;
+    HeartBeatDTO heartBeatDTO;
 
     Map<String, String> banciMap;
+
+    boolean isXishaji = false;
 
     public Terminal(String ip) {
         setIp(ip);
@@ -123,27 +128,30 @@ public class Terminal extends SendCommand {
                 "CLS\r\n" +
                 "DENSITY 7\r\n" +
                 "REFERENCE 0,0\r\n" +
-                "TEXT 70,0,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\" \r\n" +
-                "TEXT 45,65,\"TSS24.BF2\",0,2,2,\"色号：\" \r\n" +
-                "TEXT 165,65,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
-                "TEXT 370,65,\"TSS24.BF2\",0,2,2,\"纤度：\"\r\n" +
-                "TEXT 490,65,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFineness() + "\"\r\n" +
-                "\r\n" +
-                "TEXT 45,122,\"TSS24.BF2\",0,2,2,\"班组：\" \r\n" +
-                "TEXT 165,122,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + "\"\r\n" +
-                "TEXT 370,122,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n" +
-                "TEXT 490,122,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFactPerBagNumber() + "\"\r\n" +
-                "\r\n" +
-                "TEXT 45,180,\"TSS24.BF2\",0,2,2,\"日期：\" \r\n" +
-                "TEXT 165,180,\"TSS24.BF2\",0,1,2,\"" + ym + "\"\r\n" +
-                "TEXT 370,180,\"TSS24.BF2\",0,2,2,\"净\"\r\n" +
-                "TEXT 430,200,\"2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
-                "\r\n" +
-                "TEXT 45,238,\"TSS24.BF2\",0,2,2,\"毛重：\" \r\n" +
-                "TEXT 165,238,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getGrossWeight() + "\"\r\n" +
-                "TEXT 370,238,\"TSS24.BF2\",0,2,2,\"重\"\r\n" +
-                "1TEXT 430,238,\"2\",0,3,4,\"27.00\"\r\n" +
-                "BARCODE 130,320,\"128\",80,1,0,4,4,\"" + labelNum + "\"\r\n" +
+                "TEXT 70,6,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\" \r\n" +
+                "TEXT 70,8,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
+                "TEXT 69,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
+                "TEXT 71,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
+                "TEXT 45,67,\"TSS24.BF2\",0,2,2,\"色号：\" \r\n" +
+                "TEXT 175,67,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
+                "TEXT 370,67,\"TSS24.BF2\",0,2,2,\"纤度：\"\r\n" +
+                "TEXT 500,67,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFineness() + "\"\r\n" +
+                "TEXT 45,124,\"TSS24.BF2\",0,2,2,\"班组：\" \r\n" +
+                "TEXT 175,124,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + " - " + controlPannelInfo.getMachineNumber() + "\"\r\n" +
+                "TEXT 370,124,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n" +
+                "TEXT 500,124,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFactPerBagNumber() + "\"\r\n" +
+                "TEXT 45,182,\"TSS24.BF2\",0,2,2,\"日期：\" \r\n" +
+                "TEXT 175,182,\"TSS24.BF2\",0,1,2,\"" + ym + "\"\r\n" +
+                "TEXT 370,182,\"TSS24.BF2\",0,2,2,\"净\"\r\n" +
+                "TEXT 440,195,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
+                "TEXT 440,199,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
+                "TEXT 438,197,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
+                "TEXT 442,197,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
+                "TEXT 45,240,\"TSS24.BF2\",0,2,2,\"毛重：\" \r\n" +
+                "TEXT 175,240,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getGrossWeight() + "\"\r\n" +
+                "TEXT 370,240,\"TSS24.BF2\",0,2,2,\"重\"\r\n" +
+                "1TEXT 430,240,\"2\",0,3,4,\"27.00\"\r\n" +
+                "BARCODE 130,296,\"128\",105,1,0,4,4,\"" + labelNum + "\"\r\n" +
                 "PRINT 1\r\n";
         gobalSender.send(CoderUtils.stringToHexStr(printCommand));
 
@@ -162,27 +170,30 @@ public class Terminal extends SendCommand {
                 "CLS\r\n" +
                 "DENSITY 7\r\n" +
                 "REFERENCE 0,0\r\n" +
-                "TEXT 70,0,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\" \r\n" +
-                "TEXT 45,65,\"TSS24.BF2\",0,2,2,\"色号：\" \r\n" +
-                "TEXT 165,65,\"TSS24.BF2\",0,2,2,\"" + productDTO.getColor() + "\"\r\n" +
-                "TEXT 370,65,\"TSS24.BF2\",0,2,2,\"纤度：\"\r\n" +
-                "TEXT 490,65,\"TSS24.BF2\",0,2,2,\"" + productDTO.getFineness() + "\"\r\n" +
-                "\r\n" +
-                "TEXT 45,122,\"TSS24.BF2\",0,2,2,\"班组：\" \r\n" +
-                "TEXT 165,122,\"TSS24.BF2\",0,2,2,\"" + label.getShifts() + "\"\r\n" +
-                "TEXT 370,122,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n" +
-                "TEXT 490,122,\"TSS24.BF2\",0,2,2,\"" + label.getFactPerBagNumber() + "\"\r\n" +
-                "\r\n" +
-                "TEXT 45,180,\"TSS24.BF2\",0,2,2,\"日期：\" \r\n" +
-                "TEXT 165,180,\"TSS24.BF2\",0,1,2,\"" + ym + "\"\r\n" +
-                "TEXT 370,180,\"TSS24.BF2\",0,2,2,\"净\"\r\n" +
-                "TEXT 430,200,\"2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
-                "\r\n" +
-                "TEXT 45,238,\"TSS24.BF2\",0,2,2,\"毛重：\" \r\n" +
-                "TEXT 165,238,\"TSS24.BF2\",0,2,2,\"" + label.getGrossWeight() + "\"\r\n" +
-                "TEXT 370,238,\"TSS24.BF2\",0,2,2,\"重\"\r\n" +
-                "1TEXT 430,238,\"2\",0,3,4,\"27.00\"\r\n" +
-                "BARCODE 130,320,\"128\",80,1,0,4,4,\"" + label.getLabelNumber() + "\"\r\n" +
+                "TEXT 70,6,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\" \r\n" +
+                "TEXT 70,8,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
+                "TEXT 69,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
+                "TEXT 71,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
+                "TEXT 45,67,\"TSS24.BF2\",0,2,2,\"色号：\" \r\n" +
+                "TEXT 175,67,\"TSS24.BF2\",0,2,2,\"" + productDTO.getColor() + "\"\r\n" +
+                "TEXT 370,67,\"TSS24.BF2\",0,2,2,\"纤度：\"\r\n" +
+                "TEXT 500,67,\"TSS24.BF2\",0,2,2,\"" + productDTO.getFineness() + "\"\r\n" +
+                "TEXT 45,124,\"TSS24.BF2\",0,2,2,\"班组：\" \r\n" +
+                "TEXT 175,124,\"TSS24.BF2\",0,2,2,\"" + label.getShifts() + "\"\r\n" +
+                "TEXT 370,124,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n" +
+                "TEXT 500,124,\"TSS24.BF2\",0,2,2,\"" + label.getFactPerBagNumber() + "\"\r\n" +
+                "TEXT 45,182,\"TSS24.BF2\",0,2,2,\"日期：\" \r\n" +
+                "TEXT 175,182,\"TSS24.BF2\",0,1,2,\"" + ym + "\"\r\n" +
+                "TEXT 370,182,\"TSS24.BF2\",0,2,2,\"净\"\r\n" +
+                "TEXT 440,195,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
+                "TEXT 440,199,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
+                "TEXT 438,197,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
+                "TEXT 442,197,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
+                "TEXT 45,240,\"TSS24.BF2\",0,2,2,\"毛重：\" \r\n" +
+                "TEXT 175,240,\"TSS24.BF2\",0,2,2,\"" + label.getGrossWeight() + "\"\r\n" +
+                "TEXT 370,240,\"TSS24.BF2\",0,2,2,\"重\"\r\n" +
+                "1TEXT 430,240,\"2\",0,3,4,\"27.00\"\r\n" +
+                "BARCODE 130,296,\"128\",105,1,0,4,4,\"" + label.getLabelNumber() + "\"\r\n" +
                 "PRINT 1\r\n";
         gobalSender.sendDeloy(CoderUtils.stringToHexStr(printCommand), 800);
 

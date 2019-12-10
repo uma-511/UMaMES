@@ -2,6 +2,7 @@ package me.zhengjie.terminal.terminal;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import me.zhengjie.domain.ControlPannelInfo;
 import me.zhengjie.domain.UserInfo;
 import me.zhengjie.server.NettyTcpServer;
 import me.zhengjie.terminal.GobalSender;
@@ -9,6 +10,8 @@ import me.zhengjie.terminal.annotation.Button;
 import me.zhengjie.terminal.annotation.Screen;
 import me.zhengjie.terminal.annotation.Text;
 import me.zhengjie.terminal.command.SendCommand;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,14 +22,19 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 @Screen(id = "00 01")
 @Slf4j
 @Component
 public class LoginPage extends SendCommand {
+
+    @Value("${uma.production.createByTerminal}")
+    boolean createByTerminal;
+
+    @Autowired
+    ControllerPage controllerPage;
+
     final String screenId = "00 01";
     @Text(id = "00 01", handler = "setUserName")
     String userName;
@@ -102,26 +110,35 @@ public class LoginPage extends SendCommand {
         JSONObject resp = restTemplate.exchange("http://localhost:8000/auth/handsetlogin", HttpMethod.POST, requestEntity, JSONObject.class).getBody();
         log.info(resp.toJSONString());
         String loginTip = "未知错误，请重启设备";
-        GobalSender gobalSender1 =  terminal.gobalSender;
+        GobalSender gobalSender1 = terminal.gobalSender;
         if (resp.containsKey("code") && resp.get("code").equals("200")) {
 //            terminal.goMachine();
-            gobalSender.addCommand(switchScreen("00 03"));
+
+            if (createByTerminal) {
+                ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+                controlPannelInfo.setBanci(userInfo.getBanci());
+                gobalSender.addCommand(controllerPage.sendBanci(userInfo.getBanci(), ip));
+                gobalSender.addCommand(switchScreen("00 02"));
+            } else {
+                gobalSender.addCommand(switchScreen("00 03"));
+            }
+
             resetLogin(ip);
         } else if (resp.containsKey("code") && !resp.get("code").equals("200")) {
             loginTip = resp.getString("message");
             gobalSender1.send(setTextValue("00 01", "00 05", loginTip));
-        }else if(resp.containsKey("status") && resp.containsKey("message")){
+        } else if (resp.containsKey("status") && resp.containsKey("message")) {
             loginTip = resp.getString("message");
 
-            loginTip = loginTip.replaceAll("password:","密码").replaceAll("username:","账号");
+            loginTip = loginTip.replaceAll("password:", "密码").replaceAll("username:", "账号");
 
-            if(loginTip.startsWith("User with name") && loginTip.endsWith("does not exist")){
+            if (loginTip.startsWith("User with name") && loginTip.endsWith("does not exist")) {
                 loginTip = "账号不存在";
             }
 
             gobalSender1.addCommand(setTextValue("00 01", "00 05", loginTip));
             resetLogin(ip);
-        }else {
+        } else {
             gobalSender1.send(setTextValue("00 01", "00 05", loginTip));
         }
     }

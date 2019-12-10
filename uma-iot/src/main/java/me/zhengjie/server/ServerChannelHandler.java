@@ -7,10 +7,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.config.HeartbeatConfig;
+import me.zhengjie.service.HeartBeatConsumer;
 import me.zhengjie.terminal.GobalListener;
 import me.zhengjie.terminal.command.BaseCommand;
 import me.zhengjie.terminal.terminal.ControllerPage;
 import me.zhengjie.terminal.terminal.Terminal;
+import me.zhengjie.uma_mes.service.dto.HeartBeatDTO;
 import me.zhengjie.utils.CoderUtils;
 import me.zhengjie.utils.TerminalUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,8 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
     @Autowired
     ControllerPage controllerPage;
 
-    private int lossConnectCount = 0;
+    @Autowired
+    HeartBeatConsumer heartBeatConsumer;
 
     /**
      * 拿到传过来的msg数据，开始处理
@@ -46,7 +49,6 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
-        lossConnectCount = 0;
         System.out.println("Netty tcp server receive msg : " + msg);
 
         String text = msg.toString().toUpperCase().replace("[", "").replace("]", "");
@@ -84,6 +86,9 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
             controllerPage.setWeights(message, ip);
         } else if (text.startsWith(hb)) {
             log.info("heartbeat event:");
+            Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+            terminal.setLossConnectCount(0);
+            heartBeatConsumer.updateResponseTime(terminal.getHeartBeatDTO());
         } else {
             log.info("unknow event:");
 //            unknowEvent();
@@ -177,9 +182,16 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
         System.out.println("客户端循环心跳监测发送: " + new Date());
         if (evt instanceof IdleStateEvent) {
             //当捕获到 IdleStateEvent，发送心跳到远端，并添加一个监听器，如果发送失败就关闭服务端连接
+            String ip = getIPString(ctx);
+            String port = getIPPort(ctx);
+            Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+            HeartBeatDTO heartBeatDTO = heartBeatConsumer.createHeartBeatRecord(ip,port);
             ctx.writeAndFlush(CoderUtils.stringToHexStr(heartbeatConfig.getHeartbeatMsg()));
-            lossConnectCount++;
-            if (lossConnectCount > heartbeatConfig.getReconnectTimes()) {
+            heartBeatConsumer.updateSendTime(heartBeatDTO);
+            terminal.setHeartBeatDTO(heartBeatDTO);
+            Integer lcc = terminal.getLossConnectCount();
+            terminal.setLossConnectCount(lcc+1);
+            if (lcc > heartbeatConfig.getReconnectTimes()) {
                 System.out.println("关闭这个不活跃通道！");
                 ctx.channel().close();
             }
