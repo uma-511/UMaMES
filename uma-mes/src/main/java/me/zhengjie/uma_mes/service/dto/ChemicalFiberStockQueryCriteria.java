@@ -31,7 +31,6 @@ public class ChemicalFiberStockQueryCriteria{
     private String prodFineness;
 
     // 总件数
-    // 小于等于
     @Query(type = Query.Type.GREATER_THAN)
     private Integer totalBag;
 }

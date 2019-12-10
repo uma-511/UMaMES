@@ -66,6 +66,22 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name = "packer")
     private String packer;
 
+    // 机台号
+    @Column(name = "machine")
+    private String machine;
+
+    // 流水号
+    @Column(name = "flow_number")
+    private Integer flowNumber;
+
+    // 纤度
+    @Column(name = "fineness")
+    private String fineness;
+
+    // 色号
+    @Column(name = "color")
+    private String color;
+
     public void copy(ChemicalFiberLabel source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

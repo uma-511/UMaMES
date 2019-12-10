@@ -51,7 +51,7 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public List<ChemicalFiberStockDTO> queryAll(ChemicalFiberStockQueryCriteria criteria){
         return chemicalFiberStockMapper.toDto(chemicalFiberStockRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
