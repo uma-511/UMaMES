@@ -51,13 +51,13 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public List<ChemicalFiberStockDTO> queryAll(ChemicalFiberStockQueryCriteria criteria){
         return chemicalFiberStockMapper.toDto(chemicalFiberStockRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public ChemicalFiberStockDTO findById(Integer id) {
         ChemicalFiberStock chemicalFiberStock = chemicalFiberStockRepository.findById(id).orElseGet(ChemicalFiberStock::new);
         ValidationUtil.isNull(chemicalFiberStock.getId(),"ChemicalFiberStock","id",id);
@@ -65,14 +65,14 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberStockDTO create(ChemicalFiberStock resources) {
         return chemicalFiberStockMapper.toDto(chemicalFiberStockRepository.save(resources));
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(ChemicalFiberStock resources) {
         ChemicalFiberStock chemicalFiberStock = chemicalFiberStockRepository.findById(resources.getId()).orElseGet(ChemicalFiberStock::new);
@@ -82,7 +82,7 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         chemicalFiberStockRepository.deleteById(id);

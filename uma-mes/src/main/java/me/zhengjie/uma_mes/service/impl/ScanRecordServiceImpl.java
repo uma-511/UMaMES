@@ -44,20 +44,20 @@ public class ScanRecordServiceImpl implements ScanRecordService {
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public Map<String,Object> queryAll(ScanRecordQueryCriteria criteria, Pageable pageable){
         Page<ScanRecord> page = scanRecordRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(scanRecordMapper::toDto));
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public List<ScanRecordDTO> queryAll(ScanRecordQueryCriteria criteria){
         return scanRecordMapper.toDto(scanRecordRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public ScanRecordDTO findById(Integer id) {
         ScanRecord scanRecord = scanRecordRepository.findById(id).orElseGet(ScanRecord::new);
         ValidationUtil.isNull(scanRecord.getId(),"ScanRecord","id",id);
@@ -65,14 +65,14 @@ public class ScanRecordServiceImpl implements ScanRecordService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ScanRecordDTO create(ScanRecord resources) {
         return scanRecordMapper.toDto(scanRecordRepository.save(resources));
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(ScanRecord resources) {
         ScanRecord scanRecord = scanRecordRepository.findById(resources.getId()).orElseGet(ScanRecord::new);
@@ -82,7 +82,7 @@ public class ScanRecordServiceImpl implements ScanRecordService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         scanRecordRepository.deleteById(id);

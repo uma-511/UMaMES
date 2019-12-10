@@ -45,7 +45,6 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @Cacheable
     public Map<String,Object> queryAll(CustomerQueryCriteria criteria, Pageable pageable){
         criteria.setDelFlag(0);
         Page<Customer> page = customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
@@ -53,14 +52,13 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @Cacheable
     public List<CustomerDTO> queryAll(CustomerQueryCriteria criteria){
         criteria.setDelFlag(0);
         return customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public CustomerDTO findById(Integer id) {
         Customer customer = customerRepository.findById(id).orElseGet(Customer::new);
         ValidationUtil.isNull(customer.getId(),"Customer","id",id);
@@ -68,7 +66,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public CustomerDTO create(Customer resources) {
         CustomerQueryCriteria criteria = new CustomerQueryCriteria();
@@ -86,7 +84,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(Customer resources) {
         CustomerQueryCriteria criteria = new CustomerQueryCriteria();
@@ -106,7 +104,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         Customer customer = customerRepository.findById(id).orElseGet(Customer::new);

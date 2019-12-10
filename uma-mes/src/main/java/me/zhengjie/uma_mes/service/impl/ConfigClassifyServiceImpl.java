@@ -44,7 +44,6 @@ public class ConfigClassifyServiceImpl implements ConfigClassifyService {
     }
 
     @Override
-    @Cacheable
     public Map<String,Object> queryAll(ConfigClassifyQueryCriteria criteria, Pageable pageable){
         criteria.setDelFlag(0);
         Page<ConfigClassify> page = configClassifyRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
@@ -52,7 +51,6 @@ public class ConfigClassifyServiceImpl implements ConfigClassifyService {
     }
 
     @Override
-    @Cacheable
     public List<ConfigClassifyDTO> queryAll(ConfigClassifyQueryCriteria criteria){
         return configClassifyMapper.toDto(configClassifyRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }

@@ -57,7 +57,7 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public Map<String,Object> queryAll(ChemicalFiberDeliveryDetailQueryCriteria criteria, Pageable pageable){
         Page<ChemicalFiberDeliveryDetail> page = chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberDeliveryDetailMapper::toDto));
@@ -70,7 +70,7 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public ChemicalFiberDeliveryDetailDTO findById(Integer id) {
         ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail = chemicalFiberDeliveryDetailRepository.findById(id).orElseGet(ChemicalFiberDeliveryDetail::new);
         ValidationUtil.isNull(chemicalFiberDeliveryDetail.getId(),"ChemicalFiberDeliveryDetail","id",id);
@@ -78,14 +78,14 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberDeliveryDetailDTO create(ChemicalFiberDeliveryDetail resources) {
         return chemicalFiberDeliveryDetailMapper.toDto(chemicalFiberDeliveryDetailRepository.save(resources));
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(ChemicalFiberDeliveryDetail resources) {
         ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail = chemicalFiberDeliveryDetailRepository.findById(resources.getId()).orElseGet(ChemicalFiberDeliveryDetail::new);
@@ -114,7 +114,7 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         chemicalFiberDeliveryDetailRepository.deleteById(id);

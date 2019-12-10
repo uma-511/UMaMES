@@ -67,7 +67,7 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public ChemicalFiberLabelDTO findById(Integer id) {
         ChemicalFiberLabel chemicalFiberLabel = chemicalFiberLabelRepository.findById(id).orElseGet(ChemicalFiberLabel::new);
         ValidationUtil.isNull(chemicalFiberLabel.getId(),"ChemicalFiberLabel","id",id);
@@ -75,14 +75,14 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberLabelDTO create(ChemicalFiberLabel resources) {
         return chemicalFiberLabelMapper.toDto(chemicalFiberLabelRepository.save(resources));
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(ChemicalFiberLabel resources) {
         ChemicalFiberLabel chemicalFiberLabel = chemicalFiberLabelRepository.findById(resources.getId()).orElseGet(ChemicalFiberLabel::new);
@@ -92,7 +92,7 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         chemicalFiberLabelRepository.deleteById(id);
@@ -120,7 +120,7 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(List<ChemicalFiberLabel> chemicalFiberLabels) {
         chemicalFiberLabelRepository.saveAll(chemicalFiberLabels);

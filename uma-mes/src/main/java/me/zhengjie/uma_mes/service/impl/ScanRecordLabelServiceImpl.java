@@ -44,20 +44,20 @@ public class ScanRecordLabelServiceImpl implements ScanRecordLabelService {
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public Map<String,Object> queryAll(ScanRecordLabelQueryCriteria criteria, Pageable pageable){
         Page<ScanRecordLabel> page = scanRecordLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(scanRecordLabelMapper::toDto));
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public List<ScanRecordLabelDTO> queryAll(ScanRecordLabelQueryCriteria criteria){
         return scanRecordLabelMapper.toDto(scanRecordLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public ScanRecordLabelDTO findById(Integer id) {
         ScanRecordLabel scanRecordLabel = scanRecordLabelRepository.findById(id).orElseGet(ScanRecordLabel::new);
         ValidationUtil.isNull(scanRecordLabel.getId(),"ScanRecordLabel","id",id);
@@ -65,14 +65,14 @@ public class ScanRecordLabelServiceImpl implements ScanRecordLabelService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ScanRecordLabelDTO create(ScanRecordLabel resources) {
         return scanRecordLabelMapper.toDto(scanRecordLabelRepository.save(resources));
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(ScanRecordLabel resources) {
         ScanRecordLabel scanRecordLabel = scanRecordLabelRepository.findById(resources.getId()).orElseGet(ScanRecordLabel::new);
@@ -82,7 +82,7 @@ public class ScanRecordLabelServiceImpl implements ScanRecordLabelService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         scanRecordLabelRepository.deleteById(id);

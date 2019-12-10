@@ -3,18 +3,19 @@ package me.zhengjie.uma_mes.domain;
 import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.math.BigDecimal;
 import java.io.Serializable;
 
 /**
-* @author Tan Jun Ming
-* @date 2019-11-21
-*/
+ * @author Tan Jun Ming
+ * @date 2019-11-21
+ */
 @Entity
 @Data
-@Table(name="uma_chemical_fiber_label")
+@Table(name = "uma_chemical_fiber_label")
 public class ChemicalFiberLabel implements Serializable {
 
     @Id
@@ -23,15 +24,15 @@ public class ChemicalFiberLabel implements Serializable {
     private Integer id;
 
     // 标签编号（条码号）
-    @Column(name = "label_number",nullable = false)
+    @Column(name = "label_number", nullable = false)
     private String labelNumber;
 
     // 生产单id
-    @Column(name = "production_id",nullable = false)
+    @Column(name = "production_id", nullable = false)
     private Integer productionId;
 
     // 产品id
-    @Column(name = "product_id",nullable = false)
+    @Column(name = "product_id", nullable = false)
     private Integer productId;
 
     // 便签状态 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货
@@ -66,7 +67,15 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name = "packer")
     private String packer;
 
-    public void copy(ChemicalFiberLabel source){
-        BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
+    // 机台号
+    @Column(name = "machine")
+    private String machine;
+
+    // 流水号
+    @Column(name = "flow_number")
+    private Integer flow_number;
+
+    public void copy(ChemicalFiberLabel source) {
+        BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
     }
 }

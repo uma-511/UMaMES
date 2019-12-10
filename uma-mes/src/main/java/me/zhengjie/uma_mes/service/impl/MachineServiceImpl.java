@@ -44,7 +44,7 @@ public class MachineServiceImpl implements MachineService {
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public Map<String,Object> queryAll(MachineQueryCriteria criteria, Pageable pageable){
         Page<Machine> page = machineRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(machineMapper::toDto));
@@ -65,14 +65,14 @@ public class MachineServiceImpl implements MachineService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public MachineDTO create(Machine resources) {
         return machineMapper.toDto(machineRepository.save(resources));
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(Machine resources) {
         Machine machine = machineRepository.findById(resources.getId()).orElseGet(Machine::new);
@@ -82,7 +82,7 @@ public class MachineServiceImpl implements MachineService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         machineRepository.deleteById(id);

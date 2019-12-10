@@ -44,20 +44,18 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    @Cacheable
     public Map<String,Object> queryAll(ConfigQueryCriteria criteria, Pageable pageable){
         Page<Config> page = configRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(configMapper::toDto));
     }
 
     @Override
-    @Cacheable
     public List<ConfigDTO> queryAll(ConfigQueryCriteria criteria){
         return configMapper.toDto(configRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public ConfigDTO findById(Integer id) {
         Config config = configRepository.findById(id).orElseGet(Config::new);
         ValidationUtil.isNull(config.getId(),"Config","id",id);
@@ -65,14 +63,14 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ConfigDTO create(Config resources) {
         return configMapper.toDto(configRepository.save(resources));
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(Config resources) {
         Config config = configRepository.findById(resources.getId()).orElseGet(Config::new);
@@ -82,7 +80,7 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         configRepository.deleteById(id);

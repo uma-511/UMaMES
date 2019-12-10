@@ -57,13 +57,13 @@ public class ViewScanRecordServiceImpl implements ViewScanRecordService {
     }
 
     @Override
-    @Cacheable
+//    @Cacheable
     public List<ViewScanRecordDTO> queryAll(ViewScanRecordQueryCriteria criteria){
         return viewScanRecordMapper.toDto(viewScanRecordRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
+//    @Cacheable(key = "#p0")
     public ViewScanRecordDTO findById(Integer id) {
         ViewScanRecord viewScanRecord = viewScanRecordRepository.findById(id).orElseGet(ViewScanRecord::new);
         ValidationUtil.isNull(viewScanRecord.getId(),"ViewScanRecord","id",id);
@@ -71,14 +71,14 @@ public class ViewScanRecordServiceImpl implements ViewScanRecordService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ViewScanRecordDTO create(ViewScanRecord resources) {
         return viewScanRecordMapper.toDto(viewScanRecordRepository.save(resources));
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(ViewScanRecord resources) {
         ViewScanRecord viewScanRecord = viewScanRecordRepository.findById(resources.getId()).orElseGet(ViewScanRecord::new);
@@ -88,7 +88,7 @@ public class ViewScanRecordServiceImpl implements ViewScanRecordService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+//    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         viewScanRecordRepository.deleteById(id);

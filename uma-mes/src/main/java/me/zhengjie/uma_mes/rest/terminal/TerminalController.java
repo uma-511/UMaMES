@@ -5,6 +5,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
+import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
 import me.zhengjie.uma_mes.service.dto.termina.TerminalUploadDataDto;
 import me.zhengjie.uma_mes.service.terminal.TerminalService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class TerminalController {
     @ApiOperation("终端机添加产品，库存，生产单")
     @PostMapping(value = "/terminalUploadData")
     @AnonymousAccess()
-    public Result terminalUploadData(@RequestBody TerminalUploadDataDto terminalUploadDataDto) {
+    public ChemicalFiberProduction terminalUploadData(@RequestBody TerminalUploadDataDto terminalUploadDataDto) {
         return terminalService.terminalUploadData(terminalUploadDataDto);
     }
 

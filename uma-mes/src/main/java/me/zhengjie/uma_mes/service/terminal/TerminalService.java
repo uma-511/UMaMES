@@ -54,7 +54,7 @@ public class TerminalService {
 
     @Transactional(rollbackFor = Exception.class)
 
-    public Result terminalUploadData(TerminalUploadDataDto terminalUploadDataDto) {
+    public ChemicalFiberProduction terminalUploadData(TerminalUploadDataDto terminalUploadDataDto) {
         ChemicalFiberProduct chemicalFiberProduct = new ChemicalFiberProduct();
         String modelAndName = terminalUploadDataDto.getColor() + "-" + terminalUploadDataDto.getFineness();
 
@@ -80,7 +80,7 @@ public class TerminalService {
         }
 
         ChemicalFiberProduction chemicalFiberProduction = getChemicalFiberProduction(chemicalFiberProduct, terminalUploadDataDto);
-        return Result.success(chemicalFiberProduction);
+        return chemicalFiberProduction;
     }
 
     private ChemicalFiberProduction getChemicalFiberProduction(ChemicalFiberProduct chemicalFiberProduct, TerminalUploadDataDto terminalUploadDataDto) {
