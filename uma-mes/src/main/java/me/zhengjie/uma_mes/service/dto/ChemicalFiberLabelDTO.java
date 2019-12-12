@@ -61,4 +61,7 @@ public class ChemicalFiberLabelDTO implements Serializable {
 
     // 色号
     private String color;
+
+    // 芯重
+    private BigDecimal coreWeight;
 }

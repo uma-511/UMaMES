@@ -187,6 +187,9 @@ public class ControlService {
         label.setLabelNumber(generateLabelNumber(controlPanelInfo.getMachineNumber()));
         label.setFactPerBagNumber(Integer.parseInt(controlPanelInfo.getFactPerBagNumber()));
         label.setMachine(controlPanelInfo.getMachineNumber());
+        label.setFineness(controlPanelInfo.getFineness());
+        label.setColor(controlPanelInfo.getColor());
+        label.setCoreWeight(new BigDecimal(controlPanelInfo.getCoreWeight()));
 
         ChemicalFiberLabelDTO labelDto = labelService.create(label);
 
@@ -286,5 +289,10 @@ public class ControlService {
     public ChemicalFiberProduction terminalUploadData(TerminalUploadDataDto terminalUploadDataDto){
         ChemicalFiberProduction result = terminalService.terminalUploadData(terminalUploadDataDto);
         return  result;
+    }
+
+    public ChemicalFiberLabel getLastLabelByMachine(String machine){
+        ChemicalFiberLabel chemicalFiberLabel = labelService.getLastLabelByMachine(machine);
+        return chemicalFiberLabel;
     }
 }

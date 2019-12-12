@@ -13,8 +13,8 @@ public class ControlPannelInfo {
     String color;
     String name;
     String coreWeight;
-    String machineNumber;
-    String factPerBagNumber;
+    String machineNumber = "0";
+    String factPerBagNumber = "0";
 
     Integer productionId;
     Integer productId;
@@ -32,7 +32,7 @@ public class ControlPannelInfo {
     String loginInfo;
     String tip;
     String banci;
-    String netWeight;
+    String netWeight = "0";
     String tare;
 
     /**
@@ -41,4 +41,6 @@ public class ControlPannelInfo {
     String mode = "manual";
 
     Integer manualModeEventTimes = 2;
+
+    boolean hadGetWeight = false;
 }

@@ -12,7 +12,9 @@ import me.zhengjie.terminal.annotation.Button;
 import me.zhengjie.terminal.annotation.Screen;
 import me.zhengjie.terminal.annotation.Text;
 import me.zhengjie.terminal.command.SendCommand;
+import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductDTO;
 import me.zhengjie.uma_mes.service.dto.termina.TerminalUploadDataDto;
 import me.zhengjie.utils.CoderUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,14 +58,19 @@ public class ControllerPage extends SendCommand {
             // 废料
             String feiliao = "9998";
             if(customerCode.equals(xishaji)){
+                controlPannelInfo.setColor("洗机纱");
+                gobalSender.send(sendCustomerCode("洗机纱",ip));
                 terminal.setXishaji(true);
             }else if(customerCode.equals(feiliao)){
+                controlPannelInfo.setColor("废料");
                 controlPannelInfo.setFineness("X");
-                gobalSender.send(sendFineness("X",ip));
+                gobalSender.addCommand(sendCustomerCode("废料",ip));
+                gobalSender.addCommand(sendFineness("X",ip));
+                gobalSender.send();
             }else {
-                updateProductionId(ip);
+                controlPannelInfo.setColor(customerCode);
             }
-            controlPannelInfo.setColor(customerCode);
+            updateProductionId(ip);
         } else {
             controlPannelInfo.setCustomerCode(customerCode);
         }
@@ -100,7 +107,41 @@ public class ControllerPage extends SendCommand {
             String banci = controlPannelInfo.getBanci();
             gobalSender.addCommand(sendBanci(banci + " - " + machineNumber, ip));
             gobalSender.addCommand(sendJitai2(machineNumber, ip));
+            // 修改机台号时，查询最后一个标签信息并更新屏幕
+            ChemicalFiberLabel label = controlService.getLastLabelByMachine(machineNumber);
+            if(label!=null){
+                gobalSender.addCommand(sendCustomerCode(label.getColor(),ip));
+                gobalSender.addCommand(sendFineness(label.getFineness(),ip));
+                gobalSender.addCommand(sendFactPerBagNumber(label.getFactPerBagNumber().toString(),ip));
+                gobalSender.addCommand(sendCoreWeight(label.getCoreWeight().toString(),ip));
+                gobalSender.addCommand(sendTare(label.getTare().toString(),ip));
+                gobalSender.addCommand(sendTotalWeight("",ip));
+                gobalSender.addCommand(sendTotalNumber("",ip));
+                controlPannelInfo.setColor(label.getColor());
+                controlPannelInfo.setFineness(label.getFineness());
+                controlPannelInfo.setFactPerBagNumber(label.getFactPerBagNumber().toString());
+                controlPannelInfo.setCoreWeight(label.getCoreWeight().toString());
+                controlPannelInfo.setTare(label.getTare().toString());
+                controlPannelInfo.setTotalWeight("");
+                controlPannelInfo.setTotalNumber("");
+            }else{
+                gobalSender.addCommand(sendCustomerCode("",ip));
+                gobalSender.addCommand(sendFineness("",ip));
+                gobalSender.addCommand(sendFactPerBagNumber("",ip));
+                gobalSender.addCommand(sendCoreWeight("",ip));
+                gobalSender.addCommand(sendTare("",ip));
+                gobalSender.addCommand(sendTotalWeight("",ip));
+                gobalSender.addCommand(sendTotalNumber("",ip));
+                controlPannelInfo.setColor("");
+                controlPannelInfo.setFineness("");
+                controlPannelInfo.setFactPerBagNumber("");
+                controlPannelInfo.setCoreWeight("");
+                controlPannelInfo.setTare("");
+                controlPannelInfo.setTotalWeight("");
+                controlPannelInfo.setTotalNumber("");
+            }
             gobalSender.send();
+            updateProductionId(ip);
         }
     }
 
@@ -121,7 +162,9 @@ public class ControllerPage extends SendCommand {
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
         GobalSender gobalSender = terminal.getGobalSender();
         String coreWeightStr = controlPannelInfo.getCoreWeight();
+        coreWeightStr = coreWeightStr.equals("") ? "0" : coreWeightStr;
         String factPerBagNumber = controlPannelInfo.getFactPerBagNumber();
+        factPerBagNumber = factPerBagNumber.equals("") ? "0" : factPerBagNumber;
 
         BigDecimal bagNumber = new BigDecimal(factPerBagNumber);
         BigDecimal coreWeight = new BigDecimal(coreWeightStr);
@@ -187,8 +230,8 @@ public class ControllerPage extends SendCommand {
 
             controlPannelInfo.setGrossWeight(grossWeightStr);
             controlPannelInfo.setNetWeight(netWeightStr);
-
-            if(before_print(ip)) {
+            controlPannelInfo.setHadGetWeight(true);
+            if(afterGetWeight(ip)) {
                 if (terminal.isPrint) {
                     controlService.print(ip);
                 } else {
@@ -369,7 +412,7 @@ public class ControllerPage extends SendCommand {
         log.info("print event");
 //        controlService.beforePrint(ip);
 
-        if(before_print(ip)) {
+        if(beforePrint(ip)) {
             Terminal terminal = NettyTcpServer.terminalMap.get(ip);
             terminal.isPrint = true;
             getWeights(ip);
@@ -377,31 +420,82 @@ public class ControllerPage extends SendCommand {
         }
     }
 
-    private boolean before_print(String ip){
+    private boolean beforePrint(String ip){
         boolean canPrint = true;
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
         boolean isXishaji = terminal.isXishaji;
 
-        if(isXishaji){
+//        if(isXishaji){
             String fineness = controlPannelInfo.getFineness();
             if(StringUtils.isEmpty(fineness)){
                 canPrint = false;
-                gobalSender.send(sendTip("洗纱机，请输入纤度", ip));
+                gobalSender.send(sendTip("打印失败，请输入纤度", ip));
+
+                return canPrint;
+            }
+//        }
+
+        if(StringUtils.isEmpty(controlPannelInfo.getColor())){
+            canPrint = false;
+            gobalSender.send(sendTip("打印失败，请输入色号", ip));
+        }
+
+        if(StringUtils.isEmpty(controlPannelInfo.getCoreWeight())){
+            canPrint = false;
+            gobalSender.send(sendTip("打印失败，请输入纸芯重量", ip));
+
+            return canPrint;
+        }
+
+        if(StringUtils.isEmpty(controlPannelInfo.getMachineNumber())){
+            canPrint = false;
+            gobalSender.send(sendTip("打印失败，请输入机台号", ip));
+
+            return canPrint;
+        }
+
+        if(StringUtils.isEmpty(controlPannelInfo.getFactPerBagNumber())){
+            canPrint = false;
+            gobalSender.send(sendTip("打印失败，请输入个数", ip));
+
+            return canPrint;
+        }
+
+        if(StringUtils.isEmpty(controlPannelInfo.getTare())){
+            canPrint = false;
+            gobalSender.send(sendTip("打印失败，请输入皮重", ip));
+
+            return canPrint;
+        }
+
+        return canPrint;
+    }
+
+    public boolean afterGetWeight(String ip){
+        boolean canPrint = true;
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
+        ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+        boolean hadGetWeight = controlPannelInfo.isHadGetWeight();
+        if(hadGetWeight) {
+            BigDecimal netWeight = new BigDecimal(controlPannelInfo.getNetWeight());
+
+            if (netWeight.compareTo(new BigDecimal("0")) < 0) {
+                canPrint = false;
+                terminal.addGoControlCommand();
+                gobalSender.addCommand(sendTip("重量值不能为负数", ip));
+                gobalSender.send();
+            } else if (netWeight.compareTo(new BigDecimal("0")) == 0) {
+                canPrint = false;
+                terminal.addGoControlCommand();
+                gobalSender.addCommand(sendTip("重量值不能等于0", ip));
+                gobalSender.send();
             }
         }
-
-        BigDecimal netWeight = new BigDecimal(controlPannelInfo.getNetWeight());
-
-        if(netWeight.compareTo(new BigDecimal("0"))<0){
-            canPrint = false;
-            gobalSender.send(sendTip("重量值不能为负数",ip));
-        }else if(netWeight.compareTo(new BigDecimal("0"))==0){
-            canPrint = false;
-            gobalSender.send(sendTip("重量值不能等于0",ip));
-        }
-
+        // 重置获取重量状态
+        controlPannelInfo.setHadGetWeight(false);
         return canPrint;
     }
 
@@ -410,7 +504,6 @@ public class ControllerPage extends SendCommand {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         CancelInfo cancelInfo = terminal.getCancelInfo();
         CancelPage cancelPage = new CancelPage();
-
 
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.addCommand(cancelPage.sendLabelNumber(cancelInfo.getLabelNumber(), ip));
@@ -480,6 +573,8 @@ public class ControllerPage extends SendCommand {
         gobalSender.addCommand(sendTare("", ip));
         gobalSender.addCommand(sendTotalNumber("", ip));
         gobalSender.addCommand(sendTotalWeight("", ip));
+        gobalSender.addCommand(sendProductionNumber("",ip));
+        gobalSender.addCommand(sendJitai2("",ip));
         gobalSender.send();
     }
 
@@ -497,6 +592,7 @@ public class ControllerPage extends SendCommand {
         controlPannelInfo.setTare("");
         controlPannelInfo.setTotalWeight("");
         controlPannelInfo.setTotalWeight("");
+        controlPannelInfo.setProductionNumber("");
     }
 
     public void updateProductionId(String ip) {

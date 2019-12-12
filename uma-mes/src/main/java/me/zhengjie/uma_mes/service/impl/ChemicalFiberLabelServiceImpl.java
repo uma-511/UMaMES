@@ -151,4 +151,9 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
     public ChemicalFiberLabel getByLabelNumber(String labelNumber) {
         return chemicalFiberLabelRepository.getByLabelNumber(labelNumber);
     }
+
+    @Override
+    public ChemicalFiberLabel getLastLabelByMachine(String machine) {
+        return chemicalFiberLabelRepository.getLastLabelByMachine(machine);
+    }
 }

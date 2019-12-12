@@ -83,6 +83,9 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name = "color")
     private String color;
 
+    @Column(name="core_weight")
+    private BigDecimal coreWeight;
+
     public void copy(ChemicalFiberLabel source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
     }

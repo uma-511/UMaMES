@@ -151,7 +151,7 @@ public class Terminal extends SendCommand {
                 "TEXT 175,240,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getGrossWeight() + "\"\r\n" +
                 "TEXT 370,240,\"TSS24.BF2\",0,2,2,\"重\"\r\n" +
                 "1TEXT 430,240,\"2\",0,3,4,\"27.00\"\r\n" +
-                "BARCODE 130,296,\"128\",105,1,0,4,4,\"" + labelNum + "\"\r\n" +
+                "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + labelNum + "\"\r\n" +
                 "PRINT 1\r\n";
         gobalSender.send(CoderUtils.stringToHexStr(printCommand));
 
@@ -175,9 +175,9 @@ public class Terminal extends SendCommand {
                 "TEXT 69,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
                 "TEXT 71,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
                 "TEXT 45,67,\"TSS24.BF2\",0,2,2,\"色号：\" \r\n" +
-                "TEXT 175,67,\"TSS24.BF2\",0,2,2,\"" + productDTO.getColor() + "\"\r\n" +
+                "TEXT 175,67,\"TSS24.BF2\",0,2,2,\"" + label.getColor() + "\"\r\n" +
                 "TEXT 370,67,\"TSS24.BF2\",0,2,2,\"纤度：\"\r\n" +
-                "TEXT 500,67,\"TSS24.BF2\",0,2,2,\"" + productDTO.getFineness() + "\"\r\n" +
+                "TEXT 500,67,\"TSS24.BF2\",0,2,2,\"" + label.getFineness() + "\"\r\n" +
                 "TEXT 45,124,\"TSS24.BF2\",0,2,2,\"班组：\" \r\n" +
                 "TEXT 175,124,\"TSS24.BF2\",0,2,2,\"" + label.getShifts() + "\"\r\n" +
                 "TEXT 370,124,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n" +
@@ -185,15 +185,15 @@ public class Terminal extends SendCommand {
                 "TEXT 45,182,\"TSS24.BF2\",0,2,2,\"日期：\" \r\n" +
                 "TEXT 175,182,\"TSS24.BF2\",0,1,2,\"" + ym + "\"\r\n" +
                 "TEXT 370,182,\"TSS24.BF2\",0,2,2,\"净\"\r\n" +
-                "TEXT 440,195,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
-                "TEXT 440,199,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
-                "TEXT 438,197,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
-                "TEXT 442,197,\"TSS24.BF2\",0,3,4,\"" + controlPannelInfo.getNetWeight() + "\"\r\n" +
+                "TEXT 440,195,\"TSS24.BF2\",0,3,4,\"" + label.getNetWeight() + "\"\r\n" +
+                "TEXT 440,199,\"TSS24.BF2\",0,3,4,\"" + label.getNetWeight() + "\"\r\n" +
+                "TEXT 438,197,\"TSS24.BF2\",0,3,4,\"" + label.getNetWeight() + "\"\r\n" +
+                "TEXT 442,197,\"TSS24.BF2\",0,3,4,\"" + label.getNetWeight() + "\"\r\n" +
                 "TEXT 45,240,\"TSS24.BF2\",0,2,2,\"毛重：\" \r\n" +
                 "TEXT 175,240,\"TSS24.BF2\",0,2,2,\"" + label.getGrossWeight() + "\"\r\n" +
                 "TEXT 370,240,\"TSS24.BF2\",0,2,2,\"重\"\r\n" +
                 "1TEXT 430,240,\"2\",0,3,4,\"27.00\"\r\n" +
-                "BARCODE 130,296,\"128\",105,1,0,4,4,\"" + label.getLabelNumber() + "\"\r\n" +
+                "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + label.getLabelNumber() + "\"\r\n" +
                 "PRINT 1\r\n";
         gobalSender.sendDeloy(CoderUtils.stringToHexStr(printCommand), 800);
 

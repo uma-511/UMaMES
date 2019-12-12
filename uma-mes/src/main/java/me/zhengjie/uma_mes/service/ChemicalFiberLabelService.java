@@ -51,4 +51,6 @@ public interface ChemicalFiberLabelService {
     ChemicalFiberLabelTotalDTO getTotalByProductionId(Integer productionId);
 
     ChemicalFiberLabel getByLabelNumber(String labelNumber);
+
+    ChemicalFiberLabel getLastLabelByMachine(String machine);
 }

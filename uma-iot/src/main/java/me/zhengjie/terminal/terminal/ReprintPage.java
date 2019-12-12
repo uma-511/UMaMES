@@ -25,7 +25,7 @@ public class ReprintPage extends SendCommand {
     String labelNumber;
 
     public void setLabelNumber(String labelNumber,String ip){
-        NettyTcpServer.terminalMap.get(ip).getCancelInfo().setLabelNumber(labelNumber);
+        NettyTcpServer.terminalMap.get(ip).getReprintInfo().setLabelNumber(labelNumber);
     }
 
     public String sendLabelNumber(String labelNumber,String ip) {
@@ -55,7 +55,7 @@ public class ReprintPage extends SendCommand {
         ChemicalFiberLabel chemicalFiberLabel = reprintInfo.getChemicalFiberLabel();
         ChemicalFiberProductDTO chemicalFiberProductDTO = reprintInfo.getChemicalFiberProductDTO();
         if(chemicalFiberLabel == null){
-            gobalSender.send(sendTip("标签条码号无效，请确认",ip));
+            gobalSender.send(sendTip("找不到标签记录",ip));
         }else if(chemicalFiberLabel.getStatus()==3){
             gobalSender.send(sendTip("标签条码号已作废，不能补打",ip));
         }else if(chemicalFiberLabel != null && chemicalFiberProductDTO==null){

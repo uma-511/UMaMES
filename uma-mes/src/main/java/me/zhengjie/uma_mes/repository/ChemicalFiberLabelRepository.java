@@ -19,4 +19,7 @@ public interface ChemicalFiberLabelRepository extends JpaRepository<ChemicalFibe
 
     ChemicalFiberLabel getByLabelNumber(String labelNumber);
 
+    @Query(value = "select * from uma_chemical_fiber_label where machine=:machine order by id desc limit 1",nativeQuery = true)
+    ChemicalFiberLabel getLastLabelByMachine(@Param("machine") String machine);
+
 }
