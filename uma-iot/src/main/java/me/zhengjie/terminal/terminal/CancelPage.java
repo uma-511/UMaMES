@@ -59,7 +59,6 @@ public class CancelPage  extends SendCommand {
     String btn_back;
 
     public void event_back(String buttonId,String ip){
-        Terminal terminal= NettyTcpServer.terminalMap.get(ip);
-        terminal.goControl();
+        controlService.updateControllerPageTotalFields(ip);
     }
 }
