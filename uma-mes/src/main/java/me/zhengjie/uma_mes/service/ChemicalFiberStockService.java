@@ -48,4 +48,6 @@ public interface ChemicalFiberStockService {
     void download(List<ChemicalFiberStockDTO> all, HttpServletResponse response) throws IOException;
 
     void stockTask();
+
+    ChemicalFiberStock findByColorAndFineness(String color, String fineness);
 }

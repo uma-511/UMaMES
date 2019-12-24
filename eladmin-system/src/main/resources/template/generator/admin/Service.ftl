@@ -32,16 +32,16 @@ public interface ${className}Service {
 
     /**
      * 根据ID查询
-     * @param ${pkChangeColName} ID
+     * @param ${pkChangeColName?default('id')} ID
      * @return ${className}DTO
      */
-    ${className}DTO findById(${pkColumnType} ${pkChangeColName});
+    ${className}DTO findById(${pkColumnType?default('Integer')} ${pkChangeColName?default('id')});
 
     ${className}DTO create(${className} resources);
 
     void update(${className} resources);
 
-    void delete(${pkColumnType} ${pkChangeColName});
+    void delete(${pkColumnType?default('Integer')} ${pkChangeColName?default('id')});
 
     void download(List<${className}DTO> all, HttpServletResponse response) throws IOException;
 }

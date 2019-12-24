@@ -20,11 +20,11 @@ import ${package}.service.mapper.${className}Mapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-<#if !auto && pkColumnType = 'Long'>
+<#if !auto && pkColumnType?if_exists && pkColumnType = 'Long'>
 import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
 </#if>
-<#if !auto && pkColumnType = 'String'>
+<#if !auto && pkColumnType?if_exists && pkColumnType = 'String'>
 import cn.hutool.core.util.IdUtil;
 </#if>
 import org.springframework.cache.annotation.CacheConfig;
@@ -74,9 +74,9 @@ public class ${className}ServiceImpl implements ${className}Service {
 
     @Override
     @Cacheable(key = "#p0")
-    public ${className}DTO findById(${pkColumnType} ${pkChangeColName}) {
-        ${className} ${changeClassName} = ${changeClassName}Repository.findById(${pkChangeColName}).orElseGet(${className}::new);
-        ValidationUtil.isNull(${changeClassName}.get${pkCapitalColName}(),"${className}","${pkChangeColName}",${pkChangeColName});
+    public ${className}DTO findById(${pkColumnType?default('Integer')} ${pkChangeColName?default('id')}) {
+        ${className} ${changeClassName} = ${changeClassName}Repository.findById(${pkChangeColName?default('id')}).orElseGet(${className}::new);
+        ValidationUtil.isNull(${changeClassName}.get${pkCapitalColName?default('Id')}(),"${className}","${pkChangeColName?default('id')}",${pkChangeColName?default('id')});
         return ${changeClassName}Mapper.toDto(${changeClassName});
     }
 
@@ -84,12 +84,12 @@ public class ${className}ServiceImpl implements ${className}Service {
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ${className}DTO create(${className} resources) {
-<#if !auto && pkColumnType = 'Long'>
+<#if !auto && pkColumnType?if_exists && pkColumnType = 'Long'>
         Snowflake snowflake = IdUtil.createSnowflake(1, 1);
-        resources.set${pkCapitalColName}(snowflake.nextId()); 
+        resources.set${pkCapitalColName?default('Id')}(snowflake.nextId()); 
 </#if>
-<#if !auto && pkColumnType = 'String'>
-        resources.set${pkCapitalColName}(IdUtil.simpleUUID()); 
+<#if !auto && pkColumnType?if_exists && pkColumnType = 'String'>
+        resources.set${pkCapitalColName?default('Id')}(IdUtil.simpleUUID()); 
 </#if>
 <#if columns??>
     <#list columns as column>
@@ -107,8 +107,8 @@ public class ${className}ServiceImpl implements ${className}Service {
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(${className} resources) {
-        ${className} ${changeClassName} = ${changeClassName}Repository.findById(resources.get${pkCapitalColName}()).orElseGet(${className}::new);
-        ValidationUtil.isNull( ${changeClassName}.get${pkCapitalColName}(),"${className}","id",resources.get${pkCapitalColName}());
+        ${className} ${changeClassName} = ${changeClassName}Repository.findById(resources.get${pkCapitalColName?default('Id')}()).orElseGet(${className}::new);
+        ValidationUtil.isNull( ${changeClassName}.get${pkCapitalColName?default('Id')}(),"${className}","id",resources.get${pkCapitalColName?default('Id')}());
 <#if columns??>
     <#list columns as column>
         <#if column.columnKey = 'UNI'>
@@ -116,7 +116,7 @@ public class ${className}ServiceImpl implements ${className}Service {
         ${className} ${changeClassName}1 = null;
         </#if>
         ${changeClassName}1 = ${changeClassName}Repository.findBy${column.capitalColumnName}(resources.get${column.capitalColumnName}());
-        if(${changeClassName}1 != null && !${changeClassName}1.get${pkCapitalColName}().equals(${changeClassName}.get${pkCapitalColName}())){
+        if(${changeClassName}1 != null && !${changeClassName}1.get${pkCapitalColName?default('Id')}().equals(${changeClassName}.get${pkCapitalColName?default('Id')}())){
             throw new EntityExistException(${className}.class,"${column.columnName}",resources.get${column.capitalColumnName}());
         }
         </#if>
@@ -129,8 +129,8 @@ public class ${className}ServiceImpl implements ${className}Service {
     @Override
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public void delete(${pkColumnType} ${pkChangeColName}) {
-        ${changeClassName}Repository.deleteById(${pkChangeColName});
+    public void delete(${pkColumnType?default('Integer')} ${pkChangeColName?default('id')}) {
+        ${changeClassName}Repository.deleteById(${pkChangeColName?default('id')});
     }
 
 

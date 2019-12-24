@@ -56,13 +56,13 @@
           <el-button v-permission="['admin','${changeClassName}:edit']" size="mini" type="primary" icon="el-icon-edit" @click="edit(scope.row)"/>
           <el-popover
             v-permission="['admin','${changeClassName}:del']"
-            :ref="scope.row.${pkChangeColName}"
+            :ref="scope.row.${pkChangeColName?default('Id')}?default('id')}"
             placement="top"
             width="180">
             <p>确定删除本条数据吗？</p>
             <div style="text-align: right; margin: 0">
-              <el-button size="mini" type="text" @click="$refs[scope.row.${pkChangeColName}].doClose()">取消</el-button>
-              <el-button :loading="delLoading" type="primary" size="mini" @click="subDelete(scope.row.${pkChangeColName})">确定</el-button>
+              <el-button size="mini" type="text" @click="$refs[scope.row.${pkChangeColName?default('Id')}?default('id')}].doClose()">取消</el-button>
+              <el-button :loading="delLoading" type="primary" size="mini" @click="subDelete(scope.row.${pkChangeColName?default('Id')}?default('id')})">确定</el-button>
             </div>
             <el-button slot="reference" type="danger" icon="el-icon-delete" size="mini"/>
           </el-popover>
@@ -117,7 +117,7 @@ export default {
     checkPermission,
     beforeInit() {
       this.url = 'api/${changeClassName}'
-      const sort = '${pkChangeColName},desc'
+      const sort = '${pkChangeColName?default('Id')}?default('id')},desc'
       this.params = { page: this.page, size: this.size, sort: sort }
       <#if hasQuery>
       const query = this.query
@@ -127,11 +127,11 @@ export default {
       </#if>
       return true
     },
-    subDelete(${pkChangeColName}) {
+    subDelete(${pkChangeColName?default('Id')}}) {
       this.delLoading = true
-      del(${pkChangeColName}).then(res => {
+      del(${pkChangeColName?default('Id')}}).then(res => {
         this.delLoading = false
-        this.$refs[${pkChangeColName}].doClose()
+        this.$refs[${pkChangeColName?default('Id')}}].doClose()
         this.dleChangePage()
         this.init()
         this.$notify({
@@ -141,7 +141,7 @@ export default {
         })
       }).catch(err => {
         this.delLoading = false
-        this.$refs[${pkChangeColName}].doClose()
+        this.$refs[${pkChangeColName?default('Id')}}].doClose()
         console.log(err.response.data.message)
       })
     },

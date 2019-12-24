@@ -26,7 +26,7 @@ public class ${className} implements Serializable {
     <#if column.columnComment != ''>
     // ${column.columnComment}
     </#if>
-    <#if column.columnKey = 'PRI'>
+    <#if column.columnKey = 'PRI' || column.columnName='id'>
     @Id
     <#if auto>
     @GeneratedValue(strategy = GenerationType.IDENTITY)

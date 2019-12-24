@@ -24,6 +24,8 @@ import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.dto.termina.TerminalUploadDataDto;
 import me.zhengjie.uma_mes.service.terminal.TerminalService;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,13 +33,12 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.Random;
 
 @Slf4j
 @Component
 public class ControlService {
-
+    private static final Logger logger = LoggerFactory.getLogger(ControlService.class);
     @Value("${uma.label.printedIsIn}")
     boolean printIsIn;
 

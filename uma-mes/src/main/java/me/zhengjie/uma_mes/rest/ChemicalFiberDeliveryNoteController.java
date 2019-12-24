@@ -81,8 +81,8 @@ public class ChemicalFiberDeliveryNoteController {
         chemicalFiberDeliveryNoteService.downloadDeliveryNote(id, response);
     }
 
-    @Log("导出出库单")
-    @ApiOperation("导出出库单")
+    @Log("导出磅码单")
+    @ApiOperation("导出磅码单")
     @PostMapping(value = "/exportPoundExcel")
     @AnonymousAccess()
     public void exportPoundExcel(HttpServletResponse response, @RequestBody ChemicalFiberDeliveryNoteExportPoundExcelDto chemicalFiberDeliveryNoteExportPoundExcelDto) {

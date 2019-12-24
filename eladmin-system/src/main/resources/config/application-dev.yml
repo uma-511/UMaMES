@@ -93,3 +93,6 @@ uma:
     createByTerminal: true
   label:
     printedIsIn: true
+
+logging:
+  path: D:/UMa_Mes/log

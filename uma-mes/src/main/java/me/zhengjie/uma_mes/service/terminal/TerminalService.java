@@ -8,10 +8,7 @@ import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductionRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductService;
 import me.zhengjie.uma_mes.service.ChemicalFiberStockService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductQueryCriteria;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.dto.termina.TerminalUploadDataDto;
 import me.zhengjie.uma_mes.service.handheld.HandheldService;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberProductionMapper;
@@ -55,6 +52,7 @@ public class TerminalService {
     @Transactional(rollbackFor = Exception.class)
 
     public ChemicalFiberProduction terminalUploadData(TerminalUploadDataDto terminalUploadDataDto) {
+
         ChemicalFiberProduct chemicalFiberProduct = new ChemicalFiberProduct();
         String modelAndName = terminalUploadDataDto.getColor() + "-" + terminalUploadDataDto.getFineness();
 
@@ -72,36 +70,43 @@ public class TerminalService {
             chemicalFiberProduct.setDelFlag(0);
             chemicalFiberProductService.createForTerminal(chemicalFiberProduct);
 
+
             // 添加库存
             saveChemicalFiberStock(chemicalFiberProduct);
         } else {
             ChemicalFiberProductDTO chemicalFiberProductDTO = chemicalFiberProductDTOS.get(0);
             ObjectTransfer.transValue(chemicalFiberProductDTO, chemicalFiberProduct);
         }
-
         ChemicalFiberProduction chemicalFiberProduction = getChemicalFiberProduction(chemicalFiberProduct, terminalUploadDataDto);
         return chemicalFiberProduction;
     }
 
     private ChemicalFiberProduction getChemicalFiberProduction(ChemicalFiberProduct chemicalFiberProduct, TerminalUploadDataDto terminalUploadDataDto) {
-        // 添加生产单
-        ChemicalFiberProduction chemicalFiberProduction = new ChemicalFiberProduction();
-        chemicalFiberProduction.setNumber(getChemicalFiberProductionNumber());
-        chemicalFiberProduction.setProdId(chemicalFiberProduct.getId());
-        chemicalFiberProduction.setProdModel(chemicalFiberProduct.getModel());
-        chemicalFiberProduction.setProdName(chemicalFiberProduct.getName());
-        chemicalFiberProduction.setProdFineness(chemicalFiberProduct.getFineness());
-        chemicalFiberProduction.setProdColor(chemicalFiberProduct.getColor());
-        chemicalFiberProduction.setCoreWeight(new BigDecimal(0.1));
-        chemicalFiberProduction.setPerBagNumber(1);
-        chemicalFiberProduction.setPlanNumber(new BigDecimal(999));
-        chemicalFiberProduction.setDeliveryDate(new Timestamp(System.currentTimeMillis()));
-        chemicalFiberProduction.setMachineNumber(terminalUploadDataDto.getMachineNumber());
-        chemicalFiberProduction.setStatus(1);
-        chemicalFiberProduction.setCreateTime(new Timestamp(System.currentTimeMillis()));
-        chemicalFiberProduction.setCreateUser("admin");
-        chemicalFiberProduction.setDelFlag(0);
-        return chemicalFiberProductionRepository.save(chemicalFiberProduction);
+        ChemicalFiberProduction production = null;
+        List<ChemicalFiberProduction> productions = chemicalFiberProductionRepository.findByProdIdAndMachineNumber(chemicalFiberProduct.getId(),terminalUploadDataDto.getMachineNumber());
+        if(productions==null || productions.size()==0) {
+            // 添加生产单
+            ChemicalFiberProduction chemicalFiberProduction = new ChemicalFiberProduction();
+            chemicalFiberProduction.setNumber(getChemicalFiberProductionNumber());
+            chemicalFiberProduction.setProdId(chemicalFiberProduct.getId());
+            chemicalFiberProduction.setProdModel(chemicalFiberProduct.getModel());
+            chemicalFiberProduction.setProdName(chemicalFiberProduct.getName());
+            chemicalFiberProduction.setProdFineness(chemicalFiberProduct.getFineness());
+            chemicalFiberProduction.setProdColor(chemicalFiberProduct.getColor());
+            chemicalFiberProduction.setCoreWeight(new BigDecimal(0.1));
+            chemicalFiberProduction.setPerBagNumber(1);
+            chemicalFiberProduction.setPlanNumber(new BigDecimal(999));
+            chemicalFiberProduction.setDeliveryDate(new Timestamp(System.currentTimeMillis()));
+            chemicalFiberProduction.setMachineNumber(terminalUploadDataDto.getMachineNumber());
+            chemicalFiberProduction.setStatus(1);
+            chemicalFiberProduction.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            chemicalFiberProduction.setCreateUser("admin");
+            chemicalFiberProduction.setDelFlag(0);
+            production = chemicalFiberProductionRepository.save(chemicalFiberProduction);
+        }else {
+            production = productions.get(0);
+        }
+        return production;
     }
 
     public void saveChemicalFiberStock(ChemicalFiberProduct chemicalFiberProduct) {
@@ -111,8 +116,11 @@ public class TerminalService {
         chemicalFiberStock.setProdModel(chemicalFiberProduct.getModel());
         chemicalFiberStock.setProdColor(chemicalFiberProduct.getColor());
         chemicalFiberStock.setProdFineness(chemicalFiberProduct.getFineness());
-        chemicalFiberStockService.create(chemicalFiberStock);
-        chemicalFiberStockService.stockTask();
+        ChemicalFiberStock fiberStock = chemicalFiberStockService.findByColorAndFineness(chemicalFiberProduct.getColor(),chemicalFiberProduct.getFineness());
+        if(fiberStock==null) {
+            chemicalFiberStockService.create(chemicalFiberStock);
+            chemicalFiberStockService.stockTask();
+        }
     }
 
     private String getChemicalFiberProductionNumber() {

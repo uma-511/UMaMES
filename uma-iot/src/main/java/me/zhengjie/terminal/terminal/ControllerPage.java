@@ -14,10 +14,11 @@ import me.zhengjie.terminal.annotation.Text;
 import me.zhengjie.terminal.command.SendCommand;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductDTO;
 import me.zhengjie.uma_mes.service.dto.termina.TerminalUploadDataDto;
 import me.zhengjie.utils.CoderUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,7 @@ import java.math.BigDecimal;
 @Slf4j
 @Component
 public class ControllerPage extends SendCommand {
+    private static final Logger logger = LoggerFactory.getLogger(ControllerPage.class);
     @Autowired
     ControlService controlService;
 
@@ -70,16 +72,23 @@ public class ControllerPage extends SendCommand {
             }else {
                 controlPannelInfo.setColor(customerCode);
             }
-            updateProductionId(ip);
+//            updateProductionId(ip);
+            gobalSender.sendImmediate(sendProductionNumber("",ip));
+            controlPannelInfo.setProductionNumber("");
         } else {
             controlPannelInfo.setCustomerCode(customerCode);
         }
     }
 
     public void setFineness(String fineness, String ip) {
-        NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setFineness(fineness);
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
+        terminal.getControlPannelInfo().setFineness(fineness);
         if (createByTerminal) {
-            updateProductionId(ip);
+//            updateProductionId(ip);
+            ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+            gobalSender.sendImmediate(sendProductionNumber("",ip));
+            controlPannelInfo.setProductionNumber("");
         }
     }
 
@@ -124,7 +133,9 @@ public class ControllerPage extends SendCommand {
                 controlPannelInfo.setTare(label.getTare().toString());
                 controlPannelInfo.setTotalWeight("");
                 controlPannelInfo.setTotalNumber("");
+                updateProductionId(ip);
             }else{
+                gobalSender.addCommand(sendProductionNumber("",ip));
                 gobalSender.addCommand(sendCustomerCode("",ip));
                 gobalSender.addCommand(sendFineness("",ip));
                 gobalSender.addCommand(sendFactPerBagNumber("",ip));
@@ -132,6 +143,7 @@ public class ControllerPage extends SendCommand {
                 gobalSender.addCommand(sendTare("",ip));
                 gobalSender.addCommand(sendTotalWeight("",ip));
                 gobalSender.addCommand(sendTotalNumber("",ip));
+                controlPannelInfo.setProductionNumber("");
                 controlPannelInfo.setColor("");
                 controlPannelInfo.setFineness("");
                 controlPannelInfo.setFactPerBagNumber("");
@@ -141,7 +153,6 @@ public class ControllerPage extends SendCommand {
                 controlPannelInfo.setTotalNumber("");
             }
             gobalSender.send();
-            updateProductionId(ip);
         }
     }
 
@@ -249,6 +260,8 @@ public class ControllerPage extends SendCommand {
                 gobalSender.addCommand(sendTip("获取重量失败,请“置零”后重试", ip));
             }
             gobalSender.send();
+        }finally {
+            terminal.isPrint = false;
         }
     }
 
@@ -311,7 +324,7 @@ public class ControllerPage extends SendCommand {
     public void getWeights(String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
-        gobalSender.sendImmediate(CoderUtils.stringToHexStr("YM02AABB"));
+        gobalSender.send(CoderUtils.stringToHexStr("YM02AABB"));
 
         gobalSender.sendDeloy(sendTip("", ip), 1000);
 //        gobalSender.send();
@@ -412,9 +425,9 @@ public class ControllerPage extends SendCommand {
         log.info("print event");
 //        controlService.beforePrint(ip);
 
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        terminal.isPrint = true;
         if(beforePrint(ip)) {
-            Terminal terminal = NettyTcpServer.terminalMap.get(ip);
-            terminal.isPrint = true;
             getWeights(ip);
             terminal.goPrinting();
         }
@@ -426,6 +439,14 @@ public class ControllerPage extends SendCommand {
         GobalSender gobalSender = terminal.getGobalSender();
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
         boolean isXishaji = terminal.isXishaji;
+
+        String productionNumber = controlPannelInfo.getProductionNumber();
+        if(createByTerminal && StringUtils.isEmpty(productionNumber)) {
+            canPrint = false;
+            //点击打印时查询/创建订单
+            updateProductionId(ip);
+            return canPrint;
+        }
 
 //        if(isXishaji){
             String fineness = controlPannelInfo.getFineness();
@@ -469,7 +490,6 @@ public class ControllerPage extends SendCommand {
 
             return canPrint;
         }
-
         return canPrint;
     }
 
@@ -587,7 +607,6 @@ public class ControllerPage extends SendCommand {
         controlPannelInfo.setFineness("");
         controlPannelInfo.setCoreWeight("");
         controlPannelInfo.setBanci("");
-        controlPannelInfo.setMachineNumber("");
         controlPannelInfo.setFactPerBagNumber("");
         controlPannelInfo.setTare("");
         controlPannelInfo.setTotalWeight("");
@@ -600,6 +619,11 @@ public class ControllerPage extends SendCommand {
         GobalSender gobalSender = terminal.getGobalSender();
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
 
+        if(terminal.isPrint()) {
+            gobalSender.sendImmediate(sendTip("正在创建订单，请稍候！", ip));
+        }else{
+            gobalSender.sendImmediate(sendTip("正在查询订单，请稍候！", ip));
+        }
         String color = controlPannelInfo.getColor();
         String fineness = controlPannelInfo.getFineness();
         if(StringUtils.isNotEmpty(color) && StringUtils.isNotEmpty(fineness)) {
@@ -612,8 +636,15 @@ public class ControllerPage extends SendCommand {
             controlPannelInfo.setProductionId(chemicalFiberProduction.getId());
             controlPannelInfo.setProductId(chemicalFiberProduction.getProdId());
             controlPannelInfo.setProductionNumber(chemicalFiberProduction.getNumber());
-            String command = sendProductionNumber(chemicalFiberProduction.getNumber(), ip);
-            gobalSender.send(command);
+            gobalSender.addCommand(sendProductionNumber(chemicalFiberProduction.getNumber(), ip));
+            gobalSender.addCommand(sendTip("",ip));
+//            String command = sendProductionNumber(chemicalFiberProduction.getNumber(), ip);
+            gobalSender.send();
+
+            if(terminal.isPrint()) {
+                gobalSender.sendImmediate(sendTip("准备打印，请稍候！",ip));
+                event_print("", ip);
+            }
         }
     }
 }

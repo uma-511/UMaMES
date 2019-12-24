@@ -62,12 +62,12 @@ public class ${className}Controller {
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(value = "/{${pkChangeColName}}")
+    @DeleteMapping(value = "/{${pkChangeColName?default('id')}}")
     @Log("删除${className}")
     @ApiOperation("删除${className}")
     @PreAuthorize("@el.check('${changeClassName}:del')")
-    public ResponseEntity delete(@PathVariable ${pkColumnType} ${pkChangeColName}){
-        ${changeClassName}Service.delete(${pkChangeColName});
+    public ResponseEntity delete(@PathVariable ${pkColumnType?default('Integer')} ${pkChangeColName?default('id')}){
+        ${changeClassName}Service.delete(${pkChangeColName?default('id')});
         return new ResponseEntity(HttpStatus.OK);
     }
 }

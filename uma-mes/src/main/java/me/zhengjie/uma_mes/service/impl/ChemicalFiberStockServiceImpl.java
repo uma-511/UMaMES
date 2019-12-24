@@ -117,4 +117,9 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
     public void stockTask() {
         chemicalFiberStockRepository.stockTask();
     }
+
+    @Override
+    public ChemicalFiberStock findByColorAndFineness(String color, String fineness) {
+        return chemicalFiberStockRepository.findByProdColorAndProdFineness(color,fineness);
+    }
 }

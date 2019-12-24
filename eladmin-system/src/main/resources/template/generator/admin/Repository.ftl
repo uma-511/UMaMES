@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 * @author ${author}
 * @date ${date}
 */
-public interface ${className}Repository extends JpaRepository<${className}, ${pkColumnType}>, JpaSpecificationExecutor<${className}> {
+public interface ${className}Repository extends JpaRepository<${className}, ${pkColumnType?default('Integer')}>, JpaSpecificationExecutor<${className}> {
 <#if columns??>
     <#list columns as column>
         <#if column.columnKey = 'UNI'>

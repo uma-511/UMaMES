@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.uma_mes.domain.HeartBeat;
 import me.zhengjie.uma_mes.service.HeartBeatService;
 import me.zhengjie.uma_mes.service.dto.HeartBeatDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import java.sql.Timestamp;
 @Slf4j
 @Component
 public class HeartBeatConsumer {
+    private static final Logger logger = LoggerFactory.getLogger(HeartBeatConsumer.class);
     @Autowired
     HeartBeatService heartBeatService;
 

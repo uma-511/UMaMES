@@ -3,7 +3,7 @@
     <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
 <#if columns??>
   <#list columns as column>
-  <#if column.changeColumnName != '${pkChangeColName}'>
+  <#if column.changeColumnName != '${pkChangeColName?default("Id")}'>
       <el-form-item label="<#if column.columnComment != ''>${column.columnComment}<#else>${column.changeColumnName}</#if>" <#if column.columnKey = 'UNI'>prop="${column.changeColumnName}"</#if>>
         <#if column.columnType != 'Timestamp'>
         <el-input v-model="form.${column.changeColumnName}" style="width: 370px;"/>

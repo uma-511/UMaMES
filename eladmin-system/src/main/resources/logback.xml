@@ -10,9 +10,46 @@
         </encoder>
     </appender>
 
+    <!--本地日志文件配置-->
+    <appender name="fileInfoLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <!--根据范围过滤，是ERROR过滤，不是的话使用该规则-->
+            <level>ERROR</level>
+            <onMatch>DENY</onMatch>
+            <onMismatch>ACCEPT</onMismatch>
+        </filter>
+        <encoder>
+            <pattern>
+                [%p][%t][%d{yyyy-MM-dd HH\:mm\:ss}][%C][%L] - %m%n
+            </pattern>
+        </encoder>
+        <!--滚动策略-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--路径-->
+            <fileNamePattern>logs/info.%d.log</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="fileErrorLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder>
+            <pattern>
+                [%p][%t][%d{yyyy-MM-dd HH\:mm\:ss}][%C][%L] - %m%n
+            </pattern>
+        </encoder>
+        <!--滚动策略-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--根据日期自动创建本地文件夹-->
+            <fileNamePattern>logs/error.%d.log</fileNamePattern>
+        </rollingPolicy>
+    </appender>
     <!--普通日志输出到控制台-->
     <root level="info">
         <appender-ref ref="console" />
+        <appender-ref ref="fileInfoLog"/>
+        <appender-ref ref="fileErrorLog"/>
     </root>
 
     <!--监控sql日志输出 -->

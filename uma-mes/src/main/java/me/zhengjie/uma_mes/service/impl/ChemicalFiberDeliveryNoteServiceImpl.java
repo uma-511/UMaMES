@@ -227,14 +227,18 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             total = total.add(new BigDecimal(1));
             totalWeight = totalWeight.add(chemicalFiberLabelDTOSTemp.get(i - 1).getNetWeight());
             Integer yu = i % 12;
+
             BigDecimal cellValue=chemicalFiberLabelDTOSTemp.get(i-1).getNetWeight();
-            row.put(yu.toString(),cellValue.toString());
             rowTotal = rowTotal.add(cellValue);
+
             if(i%12==0) {
+                row.put("12",cellValue.toString());
                 row.put("total",rowTotal.toString());
                 listMap.add(row);
                 rowTotal=new BigDecimal(0);
                 row = initRow();
+            }else{
+                row.put(yu.toString(),cellValue.toString());
             }
         }
         row.put("total",rowTotal.toString());

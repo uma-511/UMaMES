@@ -12,4 +12,6 @@ import org.springframework.data.jpa.repository.query.Procedure;
 public interface ChemicalFiberStockRepository extends JpaRepository<ChemicalFiberStock, Integer>, JpaSpecificationExecutor<ChemicalFiberStock> {
     @Procedure(procedureName = "proc_update_stock")
     void stockTask();
+
+    ChemicalFiberStock findByProdColorAndProdFineness(String color,String fineness);
 }
