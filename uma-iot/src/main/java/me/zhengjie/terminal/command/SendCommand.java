@@ -17,7 +17,25 @@ public class SendCommand extends BaseCommand {
         return getSetValue() + " " + screenId + " " + textId + value + getFunctionEndingFrame();
     }
 
+    public String getTextValue(String screenId,String textId){
+        return getGetValue() + " " + screenId + " " + textId + " " + getFunctionEndingFrame();
+    }
+
     public String setFontColor(String screenId,String textId,String value){
         return getSetValue() + " " + screenId + " " + textId + " " + value + " " + getFunctionEndingFrame();
+    }
+
+    public String setControlStatus(String screenId,String controlId,String value){
+        return getSetControlStatus() + " " + screenId + " " + controlId + " " + value + " " + getFunctionEndingFrame();
+    }
+
+    public String setControlEnable(String screenId,String controlId){
+        String value = "01";
+        return setControlStatus(screenId,controlId,value);
+    }
+
+    public String setControlDisable(String screenId,String controlId){
+        String value = "00";
+        return setControlStatus(screenId,controlId,value);
     }
 }

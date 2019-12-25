@@ -36,6 +36,8 @@ public class ControllerPage extends SendCommand {
     @Value("${uma.production.createByTerminal}")
     boolean createByTerminal;
 
+    final String screenId = "00 02";
+
     public void setLoginInfo(String loginInfo, String ip) {
         NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setLoginInfo(loginInfo);
     }
@@ -113,6 +115,7 @@ public class ControllerPage extends SendCommand {
 
         if (createByTerminal) {
             GobalSender gobalSender = terminal.getGobalSender();
+
             String banci = controlPannelInfo.getBanci();
             gobalSender.addCommand(sendBanci(banci + " - " + machineNumber, ip));
             gobalSender.addCommand(sendJitai2(machineNumber, ip));
@@ -152,6 +155,7 @@ public class ControllerPage extends SendCommand {
                 controlPannelInfo.setTotalWeight("");
                 controlPannelInfo.setTotalNumber("");
             }
+//            gobalSender.addCommand(enablePrint());
             gobalSender.send();
         }
     }
@@ -428,8 +432,8 @@ public class ControllerPage extends SendCommand {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         terminal.isPrint = true;
         if(beforePrint(ip)) {
-            getWeights(ip);
             terminal.goPrinting();
+            getWeights(ip);
         }
     }
 
@@ -619,11 +623,14 @@ public class ControllerPage extends SendCommand {
         GobalSender gobalSender = terminal.getGobalSender();
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
 
+        // 设置打印按钮不可用
+        gobalSender.addCommand(disablePrint());
         if(terminal.isPrint()) {
-            gobalSender.sendImmediate(sendTip("正在创建订单，请稍候！", ip));
+            gobalSender.addCommand(sendTip("正在创建订单，请稍候！", ip));
         }else{
-            gobalSender.sendImmediate(sendTip("正在查询订单，请稍候！", ip));
+            gobalSender.addCommand(sendTip("正在查询订单，请稍候！", ip));
         }
+        gobalSender.sendImmediate();
         String color = controlPannelInfo.getColor();
         String fineness = controlPannelInfo.getFineness();
         if(StringUtils.isNotEmpty(color) && StringUtils.isNotEmpty(fineness)) {
@@ -639,12 +646,24 @@ public class ControllerPage extends SendCommand {
             gobalSender.addCommand(sendProductionNumber(chemicalFiberProduction.getNumber(), ip));
             gobalSender.addCommand(sendTip("",ip));
 //            String command = sendProductionNumber(chemicalFiberProduction.getNumber(), ip);
+            // 设置打印按钮可用
+            gobalSender.addCommand(enablePrint());
             gobalSender.send();
+
+            controlService.updateControllerPageTotalFields(ip);
 
             if(terminal.isPrint()) {
                 gobalSender.sendImmediate(sendTip("准备打印，请稍候！",ip));
                 event_print("", ip);
             }
         }
+    }
+
+    public String enablePrint(){
+        return setControlEnable(screenId,"00 11");
+    }
+
+    public String disablePrint(){
+        return setControlDisable(screenId,"00 11");
     }
 }

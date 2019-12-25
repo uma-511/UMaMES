@@ -78,6 +78,7 @@ public class Terminal extends SendCommand {
     }
 
     public void goControl() {
+//        gobalSender.send(2000);
         gobalSender.send(switchScreen("00 02"));
     }
 
@@ -94,7 +95,7 @@ public class Terminal extends SendCommand {
     }
 
     public void goPrinting() {
-        gobalSender.send(switchScreen("00 04"));
+        gobalSender.sendImmediate(switchScreen("00 04"));
     }
 
     public void addGoPrintingCommand() {
@@ -153,9 +154,9 @@ public class Terminal extends SendCommand {
                 "1TEXT 430,240,\"2\",0,3,4,\"27.00\"\r\n" +
                 "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + labelNum + "\"\r\n" +
                 "PRINT 1\r\n";
-        gobalSender.send(CoderUtils.stringToHexStr(printCommand));
+        gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand));
 
-        goPrinting();
+//        goPrinting();
     }
 
     public void reprint(ChemicalFiberLabel label, ChemicalFiberProductDTO productDTO) {

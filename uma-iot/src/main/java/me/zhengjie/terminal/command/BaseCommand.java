@@ -30,7 +30,16 @@ public class BaseCommand {
      * 设置字体颜色
      */
     private String setFontColor="EE B1 19";
-
+    /**
+     * 设置控件是否可用
+     * EE B1 04 {screenId} {controlId} {value} FF FC FF FF
+     * screenId: 00 01
+     * controlId: 00 01
+     * value:
+     *      disable: 00
+     *      enable:  01
+     */
+    private String setControlStatus="EE B1 04";
     /**
      * 获取毛重、皮重
      */

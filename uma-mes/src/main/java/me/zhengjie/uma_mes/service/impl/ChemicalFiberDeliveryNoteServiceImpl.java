@@ -212,51 +212,83 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         List<ChemicalFiberLabelDTO> chemicalFiberLabelDTOS = chemicalFiberLabelService.queryAll(chemicalFiberLabelQueryCriteria);
         List<ChemicalFiberLabelDTO> chemicalFiberLabelDTOSTemp = new ArrayList<>();
         for (ChemicalFiberLabelDTO chemicalFiberLabelDTO : chemicalFiberLabelDTOS) {
-            if (chemicalFiberLabelDTO.getProductId() == chemicalFiberDeliveryNoteExportPoundExcelDto.getProdId()) {
+            if (chemicalFiberLabelDTO.getProductId().equals(chemicalFiberDeliveryNoteExportPoundExcelDto.getProdId())) {
                 chemicalFiberLabelDTOSTemp.add(chemicalFiberLabelDTO);
             }
         }
 
-        Map<String, Object> map = new HashMap<String, Object>();
-        List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
-        Map<String, String> row = initRow();
-        BigDecimal rowTotal = new BigDecimal(0);
-        BigDecimal total = new BigDecimal(0);
-        BigDecimal totalWeight = new BigDecimal(0);
-        for (int i = 1; i < chemicalFiberLabelDTOSTemp.size()+1; i++) {
-            total = total.add(new BigDecimal(1));
-            totalWeight = totalWeight.add(chemicalFiberLabelDTOSTemp.get(i - 1).getNetWeight());
-            Integer yu = i % 12;
+        int pageSize = 144;
+        List<List<ChemicalFiberLabelDTO>> tablePages=genPoundTablePages(chemicalFiberLabelDTOSTemp,pageSize);
 
-            BigDecimal cellValue=chemicalFiberLabelDTOSTemp.get(i-1).getNetWeight();
-            rowTotal = rowTotal.add(cellValue);
+        Map<String,Object> tempData = new HashMap<>();
+        tempData.put("totalPage",tablePages.size());
+        List<Map<String,Object>> tempPages=new ArrayList<>();
+        for (int p=0;p<tablePages.size();p++) {
+            List<ChemicalFiberLabelDTO> page = tablePages.get(p);
+            Map<String, Object> map = new HashMap<>();
+            List<Map<String, String>> listMap = new ArrayList<>();
+            Map<String, String> row = initRow();
+            BigDecimal rowTotal = new BigDecimal(0);
+            BigDecimal total = new BigDecimal(0);
+            BigDecimal totalWeight = new BigDecimal(0);
 
-            if(i%12==0) {
-                row.put("12",cellValue.toString());
-                row.put("total",rowTotal.toString());
-                listMap.add(row);
-                rowTotal=new BigDecimal(0);
-                row = initRow();
-            }else{
-                row.put(yu.toString(),cellValue.toString());
+            for (int i = 1; i < page.size()+1; i++) {
+                total = total.add(new BigDecimal(1));
+                totalWeight = totalWeight.add(page.get(i - 1).getNetWeight());
+                Integer yu = i % 12;
+
+                BigDecimal cellValue=page.get(i-1).getNetWeight();
+                rowTotal = rowTotal.add(cellValue);
+
+                if(i%12==0) {
+                    row.put("12",cellValue.toString());
+                    row.put("total",rowTotal.toString());
+                    listMap.add(row);
+                    rowTotal=new BigDecimal(0);
+                    row = initRow();
+                }else{
+                    row.put(yu.toString(),cellValue.toString());
+                }
             }
-        }
-        row.put("total",rowTotal.toString());
-        listMap.add(row);
-        map.put("poundList", listMap);
+            row.put("total",rowTotal.toString());
+            listMap.add(row);
+            map.put("poundList", listMap);
 
-        map.put("customerName", chemicalFiberDeliveryNoteExportPoundExcelDto.getCustomerName());
-        map.put("prodName", chemicalFiberDeliveryNoteExportPoundExcelDto.getProdName());
-        map.put("createDate", new Timestamp(chemicalFiberDeliveryNoteExportPoundExcelDto.getCreateDate()));
-        map.put("total", total);
-        map.put("totalWeight", totalWeight);
+            map.put("customerName", chemicalFiberDeliveryNoteExportPoundExcelDto.getCustomerName());
+            map.put("prodName", chemicalFiberDeliveryNoteExportPoundExcelDto.getProdName());
+            map.put("createDate", new Timestamp(chemicalFiberDeliveryNoteExportPoundExcelDto.getCreateDate()));
+            map.put("total", total);
+            map.put("totalWeight", totalWeight);
+            map.put("currPage",p+1);
+            tempPages.add(map);
+        }
+        tempData.put("pages",tempPages);
+
 
         Workbook workbook = null;
         String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/pound_temp.xls";
         // 加载模板
         TemplateExportParams params = new TemplateExportParams(templatePath);
-        workbook = ExcelExportUtil.exportExcel(params, map);
+        workbook = ExcelExportUtil.exportExcel(params, tempData);
         FileUtil.downLoadExcel("磅码单导出.xls", response, workbook);
+    }
+
+    public List<List<ChemicalFiberLabelDTO>> genPoundTablePages(List<ChemicalFiberLabelDTO> list,Integer pageSize){
+        List<List<ChemicalFiberLabelDTO>> result = new ArrayList<>();
+        List<ChemicalFiberLabelDTO> page = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if(page.size()<pageSize){
+                page.add(list.get(i));
+            }else if(page.size()==pageSize){
+                page.add(list.get(i));
+                result.add(page);
+                page = new ArrayList<>();
+            }
+            if(i == list.size()-1 && page.size()>0){
+                result.add(page);
+            }
+        }
+        return result;
     }
 
     private Map<String,String> initRow(){

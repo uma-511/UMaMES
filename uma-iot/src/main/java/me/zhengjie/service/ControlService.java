@@ -130,7 +130,12 @@ public class ControlService {
         gobalSender.addCommand(controllerPage.sendTotalNumber(controlPanelInfo.getTotalNumber(), ip));
         gobalSender.addCommand(controllerPage.sendTotalWeight(controlPanelInfo.getTotalWeight(), ip));
         gobalSender.addCommand(controllerPage.sendTip("",ip));
-        gobalSender.send();
+        gobalSender.send(2000);
+    }
+
+    public void updateControllerPageTotalFieldsAndGoControl(String ip){
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        updateControllerPageTotalFields(ip);
         terminal.goControl();
     }
 
@@ -157,7 +162,7 @@ public class ControlService {
         gobalSender.addCommand(controllerPage.sendFactPerBagNumber(controlPanelInfo.getFactPerBagNumber(), ip));
         gobalSender.addCommand(controllerPage.sendTare(controlPanelInfo.getTare(), ip));
 
-        updateControllerPageTotalFields(ip);
+        updateControllerPageTotalFieldsAndGoControl(ip);
     }
 
     /**
@@ -203,7 +208,7 @@ public class ControlService {
         terminal.getCancelInfo().setLabelNumber(labelDto.getLabelNumber());
         log.info("after print");
 
-        updateControllerPageTotalFields(ip);
+        updateControllerPageTotalFieldsAndGoControl(ip);
     }
 
     /**

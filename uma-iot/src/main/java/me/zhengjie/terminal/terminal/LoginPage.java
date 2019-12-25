@@ -36,12 +36,18 @@ public class LoginPage extends SendCommand {
     ControllerPage controllerPage;
 
     final String screenId = "00 01";
+
+    int status = 0;
+    boolean loginClicked = false;
+
     @Text(id = "00 01", handler = "setUserName")
     String userName;
 
     public void setUserName(String userName, String ip) {
         log.info("setUserName");
         NettyTcpServer.terminalMap.get(ip).getUserinfo().setUserName(userName);
+        status = status + 1;
+        login(ip);
     }
 
     @Text(id = "00 02", handler = "setPassword")
@@ -50,6 +56,8 @@ public class LoginPage extends SendCommand {
     public void setPassword(String password, String ip) {
         log.info("setPassword");
         NettyTcpServer.terminalMap.get(ip).getUserinfo().setPassword(password);
+        status = status + 1;
+        login(ip);
     }
 
     @Text(id = "00 03", handler = "setBanci")
@@ -58,6 +66,7 @@ public class LoginPage extends SendCommand {
     public void setBanci(String banci, String ip) {
         log.info("setBanci");
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
         Map<String, String> map = terminal.banciMap;
         String bc = "";
         if (map.containsKey(banci)) {
@@ -65,7 +74,10 @@ public class LoginPage extends SendCommand {
         } else {
             bc = banci;
         }
+//        gobalSender.sendImmediate(setTextValue("00 01", "00 03", bc));
         terminal.getUserinfo().setBanci(bc);
+        status = status + 1;
+        login(ip);
     }
 
     @Text(id = "00 04", handler = "setJitai")
@@ -91,55 +103,64 @@ public class LoginPage extends SendCommand {
 
     public void event_login(String buttonId, String ip) {
         log.info("login click");
+        loginClicked = true;
+        syncFromTerminal(ip);
 
-        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
-        GobalSender gobalSender = terminal.getGobalSender();
-        gobalSender.send(setTextValue("00 01", "00 05", "登录中，请稍后！"));
+        login(ip);
+    }
 
-        UserInfo userInfo = terminal.getUserinfo();
+    private void login(String ip) {
+        if(status >= 3 && loginClicked) {
+            status = 0;
+            loginClicked = false;
+            Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+            GobalSender gobalSender = terminal.getGobalSender();
 
-        RestTemplate restTemplate = getRestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+            UserInfo userInfo = terminal.getUserinfo();
 
-        JSONObject requestBody = new JSONObject();
-        requestBody.put("username", userInfo.getUserName());
-        requestBody.put("password", userInfo.getPassword());
+            RestTemplate restTemplate = getRestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<JSONObject> requestEntity = new HttpEntity<JSONObject>(requestBody, headers);
-        JSONObject resp = restTemplate.exchange("http://localhost:8000/auth/handsetlogin", HttpMethod.POST, requestEntity, JSONObject.class).getBody();
-        log.info(resp.toJSONString());
-        String loginTip = "未知错误，请重启设备";
-        GobalSender gobalSender1 = terminal.gobalSender;
-        if (resp.containsKey("code") && resp.get("code").equals("200")) {
+            JSONObject requestBody = new JSONObject();
+            requestBody.put("username", userInfo.getUserName());
+            requestBody.put("password", userInfo.getPassword());
+
+            HttpEntity<JSONObject> requestEntity = new HttpEntity<JSONObject>(requestBody, headers);
+            JSONObject resp = restTemplate.exchange("http://localhost:8000/auth/handsetlogin", HttpMethod.POST, requestEntity, JSONObject.class).getBody();
+            log.info(resp.toJSONString());
+            String loginTip = "未知错误，请重启设备";
+            GobalSender gobalSender1 = terminal.gobalSender;
+            if (resp.containsKey("code") && resp.get("code").equals("200")) {
 //            terminal.goMachine();
 
-            if (createByTerminal) {
-                ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
-                controlPannelInfo.setBanci(userInfo.getBanci());
-                gobalSender.addCommand(switchScreen("00 02"));
-                gobalSender.addCommand(controllerPage.sendBanci(userInfo.getBanci(), ip));
+                if (createByTerminal) {
+                    ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+                    controlPannelInfo.setBanci(userInfo.getBanci());
+                    gobalSender.addCommand(switchScreen("00 02"));
+                    gobalSender.addCommand(controllerPage.sendBanci(userInfo.getBanci(), ip));
+                } else {
+                    gobalSender.addCommand(switchScreen("00 03"));
+                }
+
+                resetLogin(ip);
+            } else if (resp.containsKey("code") && !resp.get("code").equals("200")) {
+                loginTip = resp.getString("message");
+                gobalSender1.send(setTextValue("00 01", "00 05", loginTip));
+            } else if (resp.containsKey("status") && resp.containsKey("message")) {
+                loginTip = resp.getString("message");
+
+                loginTip = loginTip.replaceAll("password:", "密码").replaceAll("username:", "账号");
+
+                if (loginTip.startsWith("User with name") && loginTip.endsWith("does not exist")) {
+                    loginTip = "账号不存在";
+                }
+
+                gobalSender1.addCommand(setTextValue("00 01", "00 05", loginTip));
+                resetLogin(ip);
             } else {
-                gobalSender.addCommand(switchScreen("00 03"));
+                gobalSender1.send(setTextValue("00 01", "00 05", loginTip));
             }
-
-            resetLogin(ip);
-        } else if (resp.containsKey("code") && !resp.get("code").equals("200")) {
-            loginTip = resp.getString("message");
-            gobalSender1.send(setTextValue("00 01", "00 05", loginTip));
-        } else if (resp.containsKey("status") && resp.containsKey("message")) {
-            loginTip = resp.getString("message");
-
-            loginTip = loginTip.replaceAll("password:", "密码").replaceAll("username:", "账号");
-
-            if (loginTip.startsWith("User with name") && loginTip.endsWith("does not exist")) {
-                loginTip = "账号不存在";
-            }
-
-            gobalSender1.addCommand(setTextValue("00 01", "00 05", loginTip));
-            resetLogin(ip);
-        } else {
-            gobalSender1.send(setTextValue("00 01", "00 05", loginTip));
         }
     }
 
@@ -154,6 +175,16 @@ public class LoginPage extends SendCommand {
 
     public void send_cancel() {
         log.info("cancel_login");
+    }
+
+    public void syncFromTerminal(String ip){
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
+        gobalSender.addCommand(setTextValue("00 01", "00 05", "登录中，请稍后！"));
+        gobalSender.addCommand(getTextValue(screenId,"00 01"));
+        gobalSender.addCommand(getTextValue(screenId,"00 02"));
+        gobalSender.addCommand(getTextValue(screenId,"00 03"));
+        gobalSender.sendImmediate();
     }
 
     private void resetLogin(String ip) {

@@ -50,7 +50,6 @@ public class TerminalService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-
     public ChemicalFiberProduction terminalUploadData(TerminalUploadDataDto terminalUploadDataDto) {
 
         ChemicalFiberProduct chemicalFiberProduct = new ChemicalFiberProduct();
