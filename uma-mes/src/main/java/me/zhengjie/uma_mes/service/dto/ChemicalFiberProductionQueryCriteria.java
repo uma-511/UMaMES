@@ -63,4 +63,10 @@ public class ChemicalFiberProductionQueryCriteria{
     // 删除标识
     @Query
     private Integer delFlag;
+
+    // 临时开始时间
+    private Long tempStartTime;
+
+    // 临时结束时间
+    private Long tempEndTime;
 }

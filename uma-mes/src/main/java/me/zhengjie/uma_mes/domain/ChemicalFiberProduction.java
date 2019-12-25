@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.math.BigDecimal;
 import java.io.Serializable;
+import java.util.List;
 
 /**
 * @author Tan Jun Ming
@@ -117,6 +118,9 @@ public class ChemicalFiberProduction implements Serializable {
     // 删除标识
     @Column(name = "del_flag")
     private Integer delFlag;
+
+    @OneToMany(mappedBy = "productionId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
+    private List<ChemicalFiberLabel> chemicalFiberLabels;
 
     public void copy(ChemicalFiberProduction source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

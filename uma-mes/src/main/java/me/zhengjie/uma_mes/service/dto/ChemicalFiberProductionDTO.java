@@ -1,9 +1,12 @@
 package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
+import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
+
 import java.sql.Timestamp;
 import java.math.BigDecimal;
 import java.io.Serializable;
+import java.util.List;
 
 
 /**
@@ -86,4 +89,6 @@ public class ChemicalFiberProductionDTO implements Serializable {
 
     // 删除标识
     private Integer delFlag;
+
+    private List<ChemicalFiberLabel> chemicalFiberLabels;
 }

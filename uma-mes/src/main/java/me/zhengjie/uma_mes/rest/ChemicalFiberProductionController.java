@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.rest;
 
+import com.lgmn.common.result.Result;
 import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
@@ -89,5 +90,21 @@ public class ChemicalFiberProductionController {
     @AnonymousAccess()
     public ResponseEntity setProductionStatus(@RequestBody ChemicalFiberProductionSetProductionStatusDTO resources){
         return new ResponseEntity<>(chemicalFiberProductionService.setProductionStatus(resources),HttpStatus.CREATED);
+    }
+
+    @GetMapping(value = "/getProductionReport")
+    @Log("获取生产报表")
+    @ApiOperation("获取生产报表")
+    @PreAuthorize("@el.check('chemicalFiberProduction:productionReport')")
+    public ResponseEntity getProductionReport(ChemicalFiberProductionQueryCriteria criteria, Pageable pageable) {
+        return new ResponseEntity<>(chemicalFiberProductionService.getProductionReport(criteria,pageable),HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/getProductionReportSummaries")
+    @Log("获取生产报表合计")
+    @ApiOperation("获取生产报表合计")
+    @PreAuthorize("@el.check('chemicalFiberProduction:productionReport')")
+    public Result getProductionReportSummaries(@RequestBody ChemicalFiberProductionQueryCriteria criteria) {
+        return chemicalFiberProductionService.getProductionReportSummaries(criteria);
     }
 }

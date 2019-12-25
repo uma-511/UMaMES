@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.service;
 
+import com.lgmn.common.result.Result;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionQueryCriteria;
@@ -50,4 +51,8 @@ public interface ChemicalFiberProductionService {
     ChemicalFiberProduction setMachines(ChemicalFiberProductionSetMachinesDTO resources);
 
     ChemicalFiberProduction setProductionStatus(ChemicalFiberProductionSetProductionStatusDTO resources);
+
+    Map<String,Object> getProductionReport(ChemicalFiberProductionQueryCriteria criteria, Pageable pageable);
+
+    Result getProductionReportSummaries(ChemicalFiberProductionQueryCriteria criteria);
 }
