@@ -1,19 +1,20 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import com.lgmn.common.result.Result;
 import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.*;
+import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryNoteMapper;
 import me.zhengjie.utils.ValidationUtil;
 import me.zhengjie.utils.FileUtil;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryDetailRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryDetailMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

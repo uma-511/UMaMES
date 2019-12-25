@@ -22,6 +22,10 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
     private Integer id;
 
     // 出库单号
+    @Column(name = "delivery_note_id",nullable = false)
+    private Integer deliveryNoteId;
+
+    // 出库单号
     @Column(name = "scan_number",nullable = false)
     private String scanNumber;
 

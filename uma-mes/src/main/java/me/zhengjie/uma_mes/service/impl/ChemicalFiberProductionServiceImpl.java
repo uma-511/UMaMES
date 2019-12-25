@@ -334,7 +334,7 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         // 毛重
         BigDecimal toVoidGrossWeight = new BigDecimal(0.0);
         List<Object> list = new ArrayList<>();
-        list.add("合计");
+        list.add("总计");
         list.add("");
         list.add("");
         for (ChemicalFiberProductionDTO chemicalFiberProductionDTO : chemicalFiberProductionDTOS) {

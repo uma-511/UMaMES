@@ -19,6 +19,8 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     // 出库单号
     private String scanNumber;
 
+    private Integer deliveryNoteId;
+
     // 产品id
     private Integer prodId;
 

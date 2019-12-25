@@ -6,6 +6,8 @@ import cn.hutool.extra.template.Template;
 import cn.hutool.extra.template.TemplateConfig;
 import cn.hutool.extra.template.TemplateEngine;
 import cn.hutool.extra.template.TemplateUtil;
+import com.lgmn.common.result.Result;
+import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
@@ -16,6 +18,7 @@ import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryNoteMapper;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -266,5 +269,70 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         }
         result.put("total","");
         return result;
+    }
+
+    @Override
+    public Map<String, Object> getSalesReport(ChemicalFiberDeliveryNoteQueryCriteria criteria, Pageable pageable) {
+        if (criteria.getTempStartTime() != null) {
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+        }
+
+        List<ChemicalFiberDeliveryNoteSalesReportDTO> chemicalFiberDeliveryNoteSalesReportDTOS = new ArrayList<>();
+        Page<ChemicalFiberDeliveryNote> page = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        for (ChemicalFiberDeliveryNote chemicalFiberDeliveryNote : page.getContent()) {
+            ChemicalFiberDeliveryNoteSalesReportDTO chemicalFiberDeliveryNoteSalesReportDTO = new ChemicalFiberDeliveryNoteSalesReportDTO();
+            ObjectTransfer.transValue(chemicalFiberDeliveryNote, chemicalFiberDeliveryNoteSalesReportDTO);
+            for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryNoteSalesReportDTO.getChemicalFiberDeliveryDetails()) {
+                chemicalFiberDeliveryNoteSalesReportDTO.setOutOfStockPackageNumber(chemicalFiberDeliveryNoteSalesReportDTO.getOutOfStockPackageNumber() + 1);
+                chemicalFiberDeliveryNoteSalesReportDTO.setOutOfStockFactPerBagNumber(chemicalFiberDeliveryNoteSalesReportDTO.getOutOfStockFactPerBagNumber() + (chemicalFiberDeliveryDetail.getTotalNumber() == null ? 0 : chemicalFiberDeliveryDetail.getTotalNumber()));
+                chemicalFiberDeliveryNoteSalesReportDTO.setOutOfStockNetWeight(chemicalFiberDeliveryNoteSalesReportDTO.getOutOfStockNetWeight().add(chemicalFiberDeliveryDetail.getTotalWeight() == null ? new BigDecimal(0.0) : chemicalFiberDeliveryDetail.getTotalWeight()));
+                chemicalFiberDeliveryNoteSalesReportDTO.setReceivablePrice(chemicalFiberDeliveryNoteSalesReportDTO.getReceivablePrice().add(chemicalFiberDeliveryDetail.getTotalPrice()));
+                chemicalFiberDeliveryNoteSalesReportDTO.setTotalCost(chemicalFiberDeliveryNoteSalesReportDTO.getTotalCost().add(chemicalFiberDeliveryDetail.getTotalCost()));
+            }
+            chemicalFiberDeliveryNoteSalesReportDTOS.add(chemicalFiberDeliveryNoteSalesReportDTO);
+        }
+        return PageUtil.toPage(new PageImpl<ChemicalFiberDeliveryNoteSalesReportDTO>(chemicalFiberDeliveryNoteSalesReportDTOS, pageable, page.getTotalElements()));
+    }
+
+    @Override
+    public Result getSalesReportSummaries(ChemicalFiberDeliveryNoteQueryCriteria criteria) {
+        List<ChemicalFiberDeliveryNote> chemicalFiberDeliveryNotes = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+
+        // 总成本
+        BigDecimal totalCost = new BigDecimal(0.0);
+
+        // 总金额
+        BigDecimal totalPrice = new BigDecimal(0.0);
+
+        // 总件数
+        Integer totalBag = 0;
+
+        // 总数量
+        Integer totalNumber = 0;
+
+        // 总重量
+        BigDecimal totalWeight = new BigDecimal(0.0);
+
+        for (ChemicalFiberDeliveryNote chemicalFiberDeliveryNote : chemicalFiberDeliveryNotes) {
+            for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryNote.getChemicalFiberDeliveryDetails()) {
+                totalCost = totalCost.add(chemicalFiberDeliveryDetail.getTotalCost());
+                totalPrice = totalPrice.add(chemicalFiberDeliveryDetail.getTotalPrice());
+                totalBag = totalBag + (chemicalFiberDeliveryDetail.getTotalBag() == null ? 0 : chemicalFiberDeliveryDetail.getTotalBag());
+                totalNumber = totalNumber + (chemicalFiberDeliveryDetail.getTotalNumber() == null ? 0 : chemicalFiberDeliveryDetail.getTotalNumber());
+                totalWeight = totalWeight.add(chemicalFiberDeliveryDetail.getTotalWeight() == null ? new BigDecimal(0.0) : chemicalFiberDeliveryDetail.getTotalWeight());
+            }
+        }
+
+        List<Object> list = new ArrayList<>();
+        list.add("总计");
+        list.add("");
+        list.add(totalBag);
+        list.add(totalNumber);
+        list.add(totalWeight);
+        list.add(totalCost);
+        list.add(totalPrice);
+        list.add("");
+        return Result.success(list);
     }
 }

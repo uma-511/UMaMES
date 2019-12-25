@@ -1,11 +1,12 @@
 package me.zhengjie.uma_mes.rest;
 
+import com.lgmn.common.result.Result;
 import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +15,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
-import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 /**

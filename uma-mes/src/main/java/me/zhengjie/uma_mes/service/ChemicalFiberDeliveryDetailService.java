@@ -1,8 +1,10 @@
 package me.zhengjie.uma_mes.service;
 
+import com.lgmn.common.result.Result;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import java.util.Map;
 import java.util.List;

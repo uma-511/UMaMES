@@ -1,11 +1,14 @@
 package me.zhengjie.uma_mes.rest;
 
+import com.lgmn.common.result.Result;
 import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteExportPoundExcelDto;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,5 +90,22 @@ public class ChemicalFiberDeliveryNoteController {
     @AnonymousAccess()
     public void exportPoundExcel(HttpServletResponse response, @RequestBody ChemicalFiberDeliveryNoteExportPoundExcelDto chemicalFiberDeliveryNoteExportPoundExcelDto) {
         chemicalFiberDeliveryNoteService.exportPoundExcel(chemicalFiberDeliveryNoteExportPoundExcelDto, response);
+    }
+
+    @GetMapping(value = "/getSalesReport")
+    @Log("获取销售报表")
+    @ApiOperation("获取销售报表")
+//    @PreAuthorize("@el.check('chemicalFiberDeliveryDetail:list')")
+    @AnonymousAccess
+    public ResponseEntity getSalesReport(ChemicalFiberDeliveryNoteQueryCriteria criteria, Pageable pageable){
+        return new ResponseEntity<>(chemicalFiberDeliveryNoteService.getSalesReport(criteria,pageable),HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/getSalesReportSummaries")
+    @Log("获取销售报表合计")
+    @ApiOperation("获取销售报表合计")
+    @AnonymousAccess
+    public Result getSalesReportSummaries(@RequestBody ChemicalFiberDeliveryNoteQueryCriteria criteria) {
+        return chemicalFiberDeliveryNoteService.getSalesReportSummaries(criteria);
     }
 }

@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.math.BigDecimal;
 import java.io.Serializable;
+import java.util.List;
 
 /**
 * @author Tan Jun Ming
@@ -78,6 +79,9 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     // 制单人
     @Column(name = "create_user")
     private String createUser;
+
+    @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
+    private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;
 
     public void copy(ChemicalFiberDeliveryNote source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

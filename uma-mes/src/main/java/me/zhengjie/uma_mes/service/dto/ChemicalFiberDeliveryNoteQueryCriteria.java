@@ -2,6 +2,7 @@ package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
 import me.zhengjie.annotation.Query;
+import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 
 import java.sql.Timestamp;
 
