@@ -1,5 +1,7 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import com.lgmn.common.result.Result;
+import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
 import me.zhengjie.uma_mes.domain.Machine;
 import me.zhengjie.uma_mes.repository.MachineRepository;
@@ -13,6 +15,7 @@ import me.zhengjie.uma_mes.repository.ChemicalFiberProductionRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductionService;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberProductionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +25,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
@@ -238,6 +243,141 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         return chemicalFiberProduction;
     }
 
+    @Override
+    public Map<String, Object> getProductionReport(ChemicalFiberProductionQueryCriteria criteria, Pageable pageable) {
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+        }
+        criteria.setDelFlag(0);
+        Page<ChemicalFiberProduction> page = chemicalFiberProductionRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        List<ChemicalFiberProductionReportDTO> chemicalFiberProductionReportDTOS = new ArrayList<>();
+        for (ChemicalFiberProduction chemicalFiberProduction : page.getContent()) {
+            ChemicalFiberProductionReportDTO chemicalFiberProductionReportDTO = new ChemicalFiberProductionReportDTO();
+            chemicalFiberProductionReportDTO.setNumber(chemicalFiberProduction.getNumber());
+            chemicalFiberProductionReportDTO.setProdColor(chemicalFiberProduction.getProdColor());
+            chemicalFiberProductionReportDTO.setProdFineness(chemicalFiberProduction.getProdFineness());
+            for (ChemicalFiberLabel chemicalFiberLabel : chemicalFiberProduction.getChemicalFiberLabels()) {
+                // 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货
+                switch (chemicalFiberLabel.getStatus()) {
+                    case 1:
+                        chemicalFiberProductionReportDTO.setWarehousingPacketNumber(chemicalFiberProductionReportDTO.getWarehousingPacketNumber() + 1);
+                        chemicalFiberProductionReportDTO.setWarehousingFactPerBagNumber(chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() + chemicalFiberLabel.getFactPerBagNumber());
+                        chemicalFiberProductionReportDTO.setWarehousingNetWeight(chemicalFiberProductionReportDTO.getWarehousingNetWeight().add(chemicalFiberLabel.getNetWeight()));
+                        chemicalFiberProductionReportDTO.setWarehousingGrossWeight(chemicalFiberProductionReportDTO.getWarehousingGrossWeight().add(chemicalFiberLabel.getGrossWeight()));
+                        break;
+                    case 2:
+                        chemicalFiberProductionReportDTO.setOutOfstockPacketNumber(chemicalFiberProductionReportDTO.getOutOfstockPacketNumber() + 1);
+                        chemicalFiberProductionReportDTO.setOutOfstockFactPerBagNumber(chemicalFiberProductionReportDTO.getOutOfstockFactPerBagNumber() + chemicalFiberLabel.getFactPerBagNumber());
+                        chemicalFiberProductionReportDTO.setOutOfstockNetWeight(chemicalFiberProductionReportDTO.getOutOfstockNetWeight().add(chemicalFiberLabel.getNetWeight()));
+                        chemicalFiberProductionReportDTO.setOutOfstockGrossWeight(chemicalFiberProductionReportDTO.getOutOfstockGrossWeight().add(chemicalFiberLabel.getGrossWeight()));
+                        break;
+                    case 3:
+                        chemicalFiberProductionReportDTO.setToVoidPacketNumber(chemicalFiberProductionReportDTO.getToVoidPacketNumber() + 1);
+                        chemicalFiberProductionReportDTO.setToVoidFactPerBagNumber(chemicalFiberProductionReportDTO.getToVoidFactPerBagNumber() + chemicalFiberLabel.getFactPerBagNumber());
+                        chemicalFiberProductionReportDTO.setToVoidNetWeight(chemicalFiberProductionReportDTO.getToVoidNetWeight().add(chemicalFiberLabel.getNetWeight()));
+                        chemicalFiberProductionReportDTO.setToVoidGrossWeight(chemicalFiberProductionReportDTO.getToVoidGrossWeight().add(chemicalFiberLabel.getGrossWeight()));
+                        break;
+                }
+            }
+            double tempWarehousingPacketRatio = chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() == 0 ? 0.0 : Double.parseDouble(chufa((chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() - chemicalFiberProductionReportDTO.getOutOfstockFactPerBagNumber()), chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber()));
+            BigDecimal tempWarehousingNetWeightRatio = chemicalFiberProductionReportDTO.getWarehousingNetWeight().compareTo(BigDecimal.ZERO) == 0 ? new BigDecimal(0.0) : chemicalFiberProductionReportDTO.getWarehousingNetWeight().subtract(chemicalFiberProductionReportDTO.getOutOfstockNetWeight()).divide(chemicalFiberProductionReportDTO.getWarehousingNetWeight(), 2, BigDecimal.ROUND_HALF_UP);
+            chemicalFiberProductionReportDTO.setWarehousingPacketRatio(tempWarehousingPacketRatio * 100);
+            chemicalFiberProductionReportDTO.setWarehousingNetWeightRatio(tempWarehousingNetWeightRatio.multiply(new BigDecimal(100)));
+            chemicalFiberProductionReportDTOS.add(chemicalFiberProductionReportDTO);
+        }
+        return PageUtil.toPage(new PageImpl<ChemicalFiberProductionReportDTO>(chemicalFiberProductionReportDTOS, pageable, page.getTotalElements()));
+    }
+
+    @Override
+    public Result getProductionReportSummaries(ChemicalFiberProductionQueryCriteria criteria) {
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+        }
+        criteria.setDelFlag(0);
+        List<ChemicalFiberProductionDTO> chemicalFiberProductionDTOS = chemicalFiberProductionMapper.toDto(chemicalFiberProductionRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+        // 入库包数
+        Integer warehousingPacketNumber = 0;
+        // 实际每袋个数
+        Integer warehousingFactPerBagNumber = 0;
+
+        // 净重
+        BigDecimal warehousingNetWeight = new BigDecimal(0.0);
+
+        // 毛重
+        BigDecimal warehousingGrossWeight = new BigDecimal(0.0);
+
+        // 出库
+        // 包数
+        Integer outOfstockPacketNumber = 0;
+
+        // 实际每袋个数
+        Integer outOfstockFactPerBagNumber = 0;
+
+        // 净重
+        BigDecimal outOfstockNetWeight = new BigDecimal(0.0);
+
+        // 毛重
+        BigDecimal outOfstockGrossWeight = new BigDecimal(0.0);
+
+        // 作废
+        // 包数
+        Integer toVoidPacketNumber = 0;
+
+        // 实际每袋个数
+        Integer toVoidFactPerBagNumber = 0;
+
+        // 净重
+        BigDecimal toVoidNetWeight = new BigDecimal(0.0);
+
+        // 毛重
+        BigDecimal toVoidGrossWeight = new BigDecimal(0.0);
+        List<Object> list = new ArrayList<>();
+        list.add("合计");
+        list.add("");
+        list.add("");
+        for (ChemicalFiberProductionDTO chemicalFiberProductionDTO : chemicalFiberProductionDTOS) {
+            for (ChemicalFiberLabel chemicalFiberLabel : chemicalFiberProductionDTO.getChemicalFiberLabels()) {
+                switch (chemicalFiberLabel.getStatus()) {
+                    case 1:
+                        warehousingPacketNumber = warehousingPacketNumber + 1;
+                        warehousingFactPerBagNumber = warehousingFactPerBagNumber + chemicalFiberLabel.getFactPerBagNumber();
+                        warehousingNetWeight = warehousingNetWeight.add(chemicalFiberLabel.getNetWeight());
+                        warehousingGrossWeight = warehousingGrossWeight.add(chemicalFiberLabel.getGrossWeight());
+                        break;
+                    case 2:
+                        outOfstockPacketNumber = outOfstockPacketNumber + 1;
+                        outOfstockFactPerBagNumber = outOfstockFactPerBagNumber + chemicalFiberLabel.getFactPerBagNumber();
+                        outOfstockNetWeight = outOfstockNetWeight.add(chemicalFiberLabel.getNetWeight());
+                        outOfstockGrossWeight = outOfstockGrossWeight.add(chemicalFiberLabel.getGrossWeight());
+                        break;
+                    case 3:
+                        toVoidPacketNumber = toVoidPacketNumber + 1;
+                        toVoidFactPerBagNumber = toVoidFactPerBagNumber + chemicalFiberLabel.getFactPerBagNumber();
+                        toVoidNetWeight = toVoidNetWeight.add(chemicalFiberLabel.getNetWeight());
+                        toVoidGrossWeight = toVoidGrossWeight.add(chemicalFiberLabel.getGrossWeight());
+                        break;
+                }
+            }
+        }
+        list.add(warehousingPacketNumber);
+        list.add(warehousingFactPerBagNumber);
+        list.add(warehousingNetWeight);
+        list.add(warehousingGrossWeight);
+        list.add(outOfstockPacketNumber);
+        list.add(outOfstockFactPerBagNumber);
+        list.add(outOfstockNetWeight);
+        list.add(outOfstockGrossWeight);
+        list.add("");
+        list.add("");
+        list.add(toVoidPacketNumber);
+        list.add(toVoidFactPerBagNumber);
+        list.add(toVoidNetWeight);
+        list.add(toVoidGrossWeight);
+        return Result.success(list);
+    }
+
     private String getChemicalFiberProductionNumber() {
         String productionNumber;
         ChemicalFiberProductionQueryCriteria criteria = new ChemicalFiberProductionQueryCriteria();
@@ -257,4 +397,13 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         }
         return productionNumber;
     }
+
+    //定义方法
+    public static String chufa(int a,int b) {
+        //“0.00000000”确定精度
+        DecimalFormat dF = new DecimalFormat("0.00");
+        return dF.format((float)a/b);
+    }
+
+
 }
