@@ -33,6 +33,16 @@ public class IotConfig {
      */
     private String setFontColor="EE B1 19";
     /**
+     * 设置控件是否可用
+     * EE B1 04 {screenId} {controlId} {value} FF FC FF FF
+     * screenId: 00 01
+     * controlId: 00 01
+     * value:
+     *      disable: 00
+     *      enable:  01
+     */
+    private String setControlEnable="EE B1 04";
+    /**
      * 服务端发送指令的固定结尾
      */
     private String functionEndingFrame="FF FC FF FF";

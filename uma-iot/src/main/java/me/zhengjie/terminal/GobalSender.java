@@ -69,11 +69,18 @@ public class GobalSender extends SendCommand {
         commandBuffer.append(command).append(" 0D 0A ");
     }
 
+    public void unshiftCommand(String command){
+        commandBuffer.insert(0,command + " 0D 0A ");
+    }
+
     public void send(){
         send(commandBuffer.toString());
     }
 
     public void send(long times){
         sendDeloy(commandBuffer.toString(),times);
+    }
+    public void sendImmediate(){
+        sendImmediate(commandBuffer.toString());
     }
 }

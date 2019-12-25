@@ -59,6 +59,6 @@ public class CancelPage  extends SendCommand {
     String btn_back;
 
     public void event_back(String buttonId,String ip){
-        controlService.updateControllerPageTotalFields(ip);
+        controlService.updateControllerPageTotalFieldsAndGoControl(ip);
     }
 }
