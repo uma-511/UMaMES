@@ -226,6 +226,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         int tempIndex = 1;
         int sheelAllitem = 144;
         List<Map<String, Object>> list = new ArrayList<>();
+        BigDecimal totalTotalWeights=new BigDecimal(0);
         int sheelPages = (chemicalFiberLabelDTOSTemp.size() + sheelAllitem) / sheelAllitem;
         for (int item = 1; item < sheelPages + 1; item++) {
             Map<String, Object> map = new HashMap<String, Object>();
@@ -260,6 +261,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             }
             row.put("total",rowTotal.toString());
             listMap.add(row);
+            totalTotalWeights = totalTotalWeights.add(totalWeight);
             map.put("poundList", listMap);
             map.put("customerName", chemicalFiberDeliveryNoteExportPoundExcelDto.getCustomerName());
             map.put("prodName", chemicalFiberDeliveryNoteExportPoundExcelDto.getProdName());
@@ -268,8 +270,14 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             map.put("totalWeight", totalWeight);
             map.put("currPage", item);
             map.put("totalPage", sheelPages);
+            map.put("totalNumber", chemicalFiberLabelDTOSTemp.size());
+//            map.put("weight", totalTotalWeights);
             map.put(SHEET_NAME,"第" + item + "页");
             list.add(map);
+        }
+
+        for (Map<String, Object> map : list) {
+            map.put("weight", totalTotalWeights);
         }
 
         String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/pound_temp.xls";
