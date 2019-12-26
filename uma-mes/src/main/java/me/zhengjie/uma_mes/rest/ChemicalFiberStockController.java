@@ -3,6 +3,7 @@ package me.zhengjie.uma_mes.rest;
 import com.lgmn.common.result.Result;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
+import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
 import me.zhengjie.uma_mes.service.ChemicalFiberStockService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
@@ -33,7 +34,8 @@ public class ChemicalFiberStockController {
 
     private final ChemicalFiberStockService chemicalFiberStockService;
 
-    public ChemicalFiberStockController(ChemicalFiberStockService chemicalFiberStockService) {
+    public ChemicalFiberStockController(ChemicalFiberStockService chemicalFiberStockService,
+                                        ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService) {
         this.chemicalFiberStockService = chemicalFiberStockService;
     }
 
@@ -51,6 +53,7 @@ public class ChemicalFiberStockController {
     @PreAuthorize("@el.check('chemicalFiberStock:list')")
     public ResponseEntity getChemicalFiberStocks(ChemicalFiberStockQueryCriteria criteria, Pageable pageable){
         criteria.setTotalBag(1);
+        chemicalFiberStockService.stockTask();
         return new ResponseEntity<>(chemicalFiberStockService.queryAll(criteria,pageable),HttpStatus.OK);
     }
 
