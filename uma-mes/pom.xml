@@ -13,6 +13,10 @@
     <artifactId>uma-mes</artifactId>
     <name>优码MES</name>
 
+    <properties>
+        <easyPoi.version>4.1.3</easyPoi.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>me.zhengjie</groupId>
@@ -39,17 +43,17 @@
         <dependency>
             <groupId>cn.afterturn</groupId>
             <artifactId>easypoi-base</artifactId>
-            <version>3.2.0</version>
+            <version>${easyPoi.version}</version>
         </dependency>
         <dependency>
             <groupId>cn.afterturn</groupId>
             <artifactId>easypoi-web</artifactId>
-            <version>3.2.0</version>
+            <version>${easyPoi.version}</version>
         </dependency>
         <dependency>
             <groupId>cn.afterturn</groupId>
             <artifactId>easypoi-annotation</artifactId>
-            <version>3.2.0</version>
+            <version>${easyPoi.version}</version>
         </dependency>
         <!--<dependency>-->
         <!--<groupId>cn.cyejing</groupId>-->

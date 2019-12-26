@@ -287,9 +287,6 @@ public class FileUtil extends cn.hutool.core.io.FileUtil {
             response.setContentType("application/octet-stream");
             // 下载文件能正常显示中文
             response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "UTF-8"));
-
-
-
             workbook.write(response.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
