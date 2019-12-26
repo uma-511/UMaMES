@@ -61,6 +61,7 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
 
         String hb = CoderUtils.stringToHexStr(heartbeatConfig.getHeartbeatMsg()).trim();
         String sc = CoderUtils.stringToHexStr(baseCommand.getScanValue()).trim();
+        String rp = CoderUtils.stringToHexStr(baseCommand.getRevicePrintCommand()).trim();
         if (text.startsWith(baseCommand.getGetValue())) {
             if (text.endsWith(baseCommand.getInputEventEndingFrame())) {
                 String[] texts = text.split(" 00 FF FC FF FF EE B1 11 ");
@@ -85,10 +86,16 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
             log.info("getWeights event:" + message);
             controllerPage.setWeights(message, ip);
         } else if (text.startsWith(hb)) {
-            log.info("heartbeat event:");
+            log.info("heartbeat event");
             Terminal terminal = NettyTcpServer.terminalMap.get(ip);
             terminal.setLossConnectCount(0);
             heartBeatConsumer.updateResponseTime(terminal.getHeartBeatDTO());
+        } else if(text.startsWith(rp)) {
+            log.info("revice print command event");
+            Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+            terminal.setRp(true);
+//            terminal.setLossConnectCount(0);
+//            heartBeatConsumer.updateResponseTime(terminal.getHeartBeatDTO());
         } else {
             log.info("unknow event:");
 //            unknowEvent();
