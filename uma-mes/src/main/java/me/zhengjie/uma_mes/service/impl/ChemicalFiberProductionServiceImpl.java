@@ -4,6 +4,7 @@ import com.lgmn.common.result.Result;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
 import me.zhengjie.uma_mes.domain.Machine;
+import me.zhengjie.uma_mes.repository.ChemicalFiberLabelRepository;
 import me.zhengjie.uma_mes.repository.MachineRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductService;
 import me.zhengjie.uma_mes.service.CustomerService;
@@ -51,6 +52,8 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
 
     private final MachineRepository machineRepository;
 
+    private final ChemicalFiberLabelRepository chemicalFiberLabelRepository;
+
     @Autowired
     HandheldService handheldService;
 
@@ -58,12 +61,14 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
                                               ChemicalFiberProductionMapper chemicalFiberProductionMapper,
                                               ChemicalFiberProductService chemicalFiberProductService,
                                               CustomerService customerService,
-                                              MachineRepository machineRepository) {
+                                              MachineRepository machineRepository,
+                                              ChemicalFiberLabelRepository chemicalFiberLabelRepository) {
         this.chemicalFiberProductionRepository = chemicalFiberProductionRepository;
         this.chemicalFiberProductionMapper = chemicalFiberProductionMapper;
         this.chemicalFiberProductService = chemicalFiberProductService;
         this.customerService = customerService;
         this.machineRepository = machineRepository;
+        this.chemicalFiberLabelRepository = chemicalFiberLabelRepository;
     }
 
     @Override
@@ -280,7 +285,6 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
                         break;
                 }
             }
-            String temp = chufa((chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber()), chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() + chemicalFiberProductionReportDTO.getOutOfstockFactPerBagNumber());
             double tempWarehousingPacketRatio = chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() == 0 ? 0.0 : Double.parseDouble(chufa((chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber()), chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() + chemicalFiberProductionReportDTO.getOutOfstockFactPerBagNumber()));
             BigDecimal tempWarehousingNetWeightRatio = chemicalFiberProductionReportDTO.getWarehousingNetWeight().compareTo(BigDecimal.ZERO) == 0 ? new BigDecimal(0.0) : chemicalFiberProductionReportDTO.getWarehousingNetWeight().divide(chemicalFiberProductionReportDTO.getWarehousingNetWeight().add(chemicalFiberProductionReportDTO.getOutOfstockNetWeight()), 2, BigDecimal.ROUND_HALF_UP);
             chemicalFiberProductionReportDTO.setWarehousingPacketRatio(tempWarehousingPacketRatio * 100);
@@ -288,6 +292,46 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
             chemicalFiberProductionReportDTOS.add(chemicalFiberProductionReportDTO);
         }
         return PageUtil.toPage(new PageImpl<ChemicalFiberProductionReportDTO>(chemicalFiberProductionReportDTOS, pageable, page.getTotalElements()));
+
+//        Page<ChemicalFiberLabel> page = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+//        List<ChemicalFiberProductionReportDTO> chemicalFiberProductionReportDTOS = new ArrayList<>();
+//        for (ChemicalFiberLabel chemicalFiberLabel : page.getContent()) {
+//            ChemicalFiberProductionReportDTO chemicalFiberProductionReportDTO = new ChemicalFiberProductionReportDTO();
+//            chemicalFiberProductionReportDTO.setNumber(chemicalFiberLabel.getLabelNumber());
+//            chemicalFiberProductionReportDTO.setProdColor(chemicalFiberLabel.getColor());
+//            chemicalFiberProductionReportDTO.setProdFineness(chemicalFiberLabel.getFineness());
+////            for (ChemicalFiberLabel chemicalFiberLabel : chemicalFiberLabel.getChemicalFiberLabels()) {
+////
+////            }
+//            // 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货
+//            switch (chemicalFiberLabel.getStatus()) {
+//                case 1:
+//                    chemicalFiberProductionReportDTO.setWarehousingPacketNumber(chemicalFiberProductionReportDTO.getWarehousingPacketNumber() + 1);
+//                    chemicalFiberProductionReportDTO.setWarehousingFactPerBagNumber(chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() + chemicalFiberLabel.getFactPerBagNumber());
+//                    chemicalFiberProductionReportDTO.setWarehousingNetWeight(chemicalFiberProductionReportDTO.getWarehousingNetWeight().add(chemicalFiberLabel.getNetWeight()));
+//                    chemicalFiberProductionReportDTO.setWarehousingGrossWeight(chemicalFiberProductionReportDTO.getWarehousingGrossWeight().add(chemicalFiberLabel.getGrossWeight()));
+//                    break;
+//                case 2:
+//                    chemicalFiberProductionReportDTO.setOutOfstockPacketNumber(chemicalFiberProductionReportDTO.getOutOfstockPacketNumber() + 1);
+//                    chemicalFiberProductionReportDTO.setOutOfstockFactPerBagNumber(chemicalFiberProductionReportDTO.getOutOfstockFactPerBagNumber() + chemicalFiberLabel.getFactPerBagNumber());
+//                    chemicalFiberProductionReportDTO.setOutOfstockNetWeight(chemicalFiberProductionReportDTO.getOutOfstockNetWeight().add(chemicalFiberLabel.getNetWeight()));
+//                    chemicalFiberProductionReportDTO.setOutOfstockGrossWeight(chemicalFiberProductionReportDTO.getOutOfstockGrossWeight().add(chemicalFiberLabel.getGrossWeight()));
+//                    break;
+//                case 3:
+//                    chemicalFiberProductionReportDTO.setToVoidPacketNumber(chemicalFiberProductionReportDTO.getToVoidPacketNumber() + 1);
+//                    chemicalFiberProductionReportDTO.setToVoidFactPerBagNumber(chemicalFiberProductionReportDTO.getToVoidFactPerBagNumber() + chemicalFiberLabel.getFactPerBagNumber());
+//                    chemicalFiberProductionReportDTO.setToVoidNetWeight(chemicalFiberProductionReportDTO.getToVoidNetWeight().add(chemicalFiberLabel.getNetWeight()));
+//                    chemicalFiberProductionReportDTO.setToVoidGrossWeight(chemicalFiberProductionReportDTO.getToVoidGrossWeight().add(chemicalFiberLabel.getGrossWeight()));
+//                    break;
+//            }
+//            double tempWarehousingPacketRatio = chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() == 0 ? 0.0 : Double.parseDouble(chufa((chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber()), chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() + chemicalFiberProductionReportDTO.getOutOfstockFactPerBagNumber()));
+//            BigDecimal tempWarehousingNetWeightRatio = chemicalFiberProductionReportDTO.getWarehousingNetWeight().compareTo(BigDecimal.ZERO) == 0 ? new BigDecimal(0.0) : chemicalFiberProductionReportDTO.getWarehousingNetWeight().divide(chemicalFiberProductionReportDTO.getWarehousingNetWeight().add(chemicalFiberProductionReportDTO.getOutOfstockNetWeight()), 2, BigDecimal.ROUND_HALF_UP);
+//            chemicalFiberProductionReportDTO.setWarehousingPacketRatio(tempWarehousingPacketRatio * 100);
+//            chemicalFiberProductionReportDTO.setWarehousingNetWeightRatio(tempWarehousingNetWeightRatio.multiply(new BigDecimal(100)));
+//            chemicalFiberProductionReportDTOS.add(chemicalFiberProductionReportDTO);
+//        }
+//        return PageUtil.toPage(new PageImpl<ChemicalFiberProductionReportDTO>(chemicalFiberProductionReportDTOS, pageable, page.getTotalElements()));
+
     }
 
     @Override
