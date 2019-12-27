@@ -37,6 +37,7 @@ public class ControllerPage extends SendCommand {
     boolean createByTerminal;
 
     final String screenId = "00 02";
+    final String tipId = "00 02";
 
     public void setLoginInfo(String loginInfo, String ip) {
         NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setLoginInfo(loginInfo);
@@ -110,6 +111,10 @@ public class ControllerPage extends SendCommand {
 
     public void setMachineNumber(String machineNumber, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        boolean hadlogin=terminal.checkLoginStatus(screenId,tipId);
+        if(!hadlogin){
+            return;
+        }
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
         controlPannelInfo.setMachineNumber(machineNumber);
 
@@ -430,6 +435,10 @@ public class ControllerPage extends SendCommand {
 //        controlService.beforePrint(ip);
 
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        boolean hadlogin=terminal.checkLoginStatus(screenId,tipId);
+        if(!hadlogin){
+            return;
+        }
         terminal.isPrint = true;
         if(beforePrint(ip)) {
             terminal.goPrinting();
@@ -526,6 +535,12 @@ public class ControllerPage extends SendCommand {
     public void event_cancel(String buttonId, String ip) {
         log.info("cancel event");
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+
+        boolean hadlogin=terminal.checkLoginStatus(screenId,tipId);
+        if(!hadlogin){
+            return;
+        }
+
         CancelInfo cancelInfo = terminal.getCancelInfo();
         CancelPage cancelPage = new CancelPage();
 
@@ -538,6 +553,12 @@ public class ControllerPage extends SendCommand {
     public void event_reprint(String buttonId, String ip) {
         log.info("reprint event");
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+
+        boolean hadlogin=terminal.checkLoginStatus(screenId,tipId);
+        if(!hadlogin){
+            return;
+        }
+
         ReprintInfo reprintInfo = terminal.getReprintInfo();
         ReprintPage reprintPage = new ReprintPage();
 

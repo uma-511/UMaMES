@@ -46,6 +46,11 @@ public class BaseCommand {
     private String getWeights="59 4D 30 32 41 41 42 42";
 
     /**
+     * 成功接收打印指令
+     */
+    private String revicePrintCommand="YM03";
+
+    /**
      * 扫描抢
      */
     private String scanValue="SC:";

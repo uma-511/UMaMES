@@ -14,6 +14,7 @@ import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductDTO;
 import me.zhengjie.uma_mes.service.dto.HeartBeatDTO;
 import me.zhengjie.utils.CoderUtils;
 import me.zhengjie.utils.SpringContextUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.String;
 import java.text.SimpleDateFormat;
@@ -37,6 +38,8 @@ public class Terminal extends SendCommand {
     Map<String, String> banciMap;
 
     boolean isXishaji = false;
+
+    boolean rp = false;
 
     public Terminal(String ip) {
         setIp(ip);
@@ -196,9 +199,31 @@ public class Terminal extends SendCommand {
                 "1TEXT 430,240,\"2\",0,3,4,\"27.00\"\r\n" +
                 "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + label.getLabelNumber() + "\"\r\n" +
                 "PRINT 1\r\n";
-        gobalSender.sendDeloy(CoderUtils.stringToHexStr(printCommand), 800);
-
+        String command = CoderUtils.stringToHexStr(printCommand);
+        gobalSender.sendDeloy(command,800);
+//        checkPrintStatus(command);
         ReprintPage reprintPage = new ReprintPage();
         reprintPage.back(ip);
+    }
+
+    public boolean checkLoginStatus(String screenId,String tipId){
+        boolean result = true;
+        String username=userinfo.getUserName();
+        String password=userinfo.getPassword();
+        String tip = "登录状态失效，请重新登录";
+        if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password) ){
+            result = false;
+            gobalSender.sendImmediate(setTextValue(screenId,tipId,tip));
+        }
+        return result;
+    }
+
+    public void checkPrintStatus(String command){
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+//            log.error("发送指令延时任务");
+            e.printStackTrace();
+        }
     }
 }
