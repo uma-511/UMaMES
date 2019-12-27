@@ -331,13 +331,14 @@ public class ControllerPage extends SendCommand {
     }
 
     public void getWeights(String ip) {
+        log.info("getWeights");
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.send(CoderUtils.stringToHexStr("YM02AABB"));
 
-        gobalSender.sendDeloy(sendTip("", ip), 1000);
-//        gobalSender.send();
-        log.info("getWeights");
+        if(!terminal.isPrint()){
+            gobalSender.sendDeloy(sendTip("", ip), 1000);
+        }
     }
 
     public void getSettingStatus(String ip) {

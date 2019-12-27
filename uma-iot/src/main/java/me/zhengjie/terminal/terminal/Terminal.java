@@ -183,7 +183,7 @@ public class Terminal extends SendCommand {
                 "TEXT 370,67,\"TSS24.BF2\",0,2,2,\"纤度：\"\r\n" +
                 "TEXT 500,67,\"TSS24.BF2\",0,2,2,\"" + label.getFineness() + "\"\r\n" +
                 "TEXT 45,124,\"TSS24.BF2\",0,2,2,\"班组：\" \r\n" +
-                "TEXT 175,124,\"TSS24.BF2\",0,2,2,\"" + label.getShifts() + "\"\r\n" +
+                "TEXT 175,124,\"TSS24.BF2\",0,2,2,\"" + label.getShifts() + " - " + label.getMachine() + "\"\r\n" +
                 "TEXT 370,124,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n" +
                 "TEXT 500,124,\"TSS24.BF2\",0,2,2,\"" + label.getFactPerBagNumber() + "\"\r\n" +
                 "TEXT 45,182,\"TSS24.BF2\",0,2,2,\"日期：\" \r\n" +
