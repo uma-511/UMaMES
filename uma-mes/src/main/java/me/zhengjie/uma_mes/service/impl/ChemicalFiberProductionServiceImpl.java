@@ -280,8 +280,9 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
                         break;
                 }
             }
-            double tempWarehousingPacketRatio = chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() == 0 ? 0.0 : Double.parseDouble(chufa((chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() - chemicalFiberProductionReportDTO.getOutOfstockFactPerBagNumber()), chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber()));
-            BigDecimal tempWarehousingNetWeightRatio = chemicalFiberProductionReportDTO.getWarehousingNetWeight().compareTo(BigDecimal.ZERO) == 0 ? new BigDecimal(0.0) : chemicalFiberProductionReportDTO.getWarehousingNetWeight().subtract(chemicalFiberProductionReportDTO.getOutOfstockNetWeight()).divide(chemicalFiberProductionReportDTO.getWarehousingNetWeight(), 2, BigDecimal.ROUND_HALF_UP);
+            String temp = chufa((chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber()), chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() + chemicalFiberProductionReportDTO.getOutOfstockFactPerBagNumber());
+            double tempWarehousingPacketRatio = chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() == 0 ? 0.0 : Double.parseDouble(chufa((chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber()), chemicalFiberProductionReportDTO.getWarehousingFactPerBagNumber() + chemicalFiberProductionReportDTO.getOutOfstockFactPerBagNumber()));
+            BigDecimal tempWarehousingNetWeightRatio = chemicalFiberProductionReportDTO.getWarehousingNetWeight().compareTo(BigDecimal.ZERO) == 0 ? new BigDecimal(0.0) : chemicalFiberProductionReportDTO.getWarehousingNetWeight().divide(chemicalFiberProductionReportDTO.getWarehousingNetWeight().add(chemicalFiberProductionReportDTO.getOutOfstockNetWeight()), 2, BigDecimal.ROUND_HALF_UP);
             chemicalFiberProductionReportDTO.setWarehousingPacketRatio(tempWarehousingPacketRatio * 100);
             chemicalFiberProductionReportDTO.setWarehousingNetWeightRatio(tempWarehousingNetWeightRatio.multiply(new BigDecimal(100)));
             chemicalFiberProductionReportDTOS.add(chemicalFiberProductionReportDTO);
