@@ -280,9 +280,20 @@ public class ControlService {
         String jt = "000" + jitai;
         jt = jt.substring(jt.length() - 4);
         String labelNumber = type + ym + random + jt;
+        if(!checkLabelNumber(labelNumber)){
+            labelNumber = generateLabelNumber(jitai);
+        }
         return labelNumber;
     }
 
+    private boolean checkLabelNumber(String labelNumber) {
+        boolean res = false;
+        ChemicalFiberLabel label = labelService.getByLabelNumber(labelNumber);
+        if (label == null) {
+            res = true;
+        }
+        return res;
+    }
     public String randomCode() {
         StringBuilder str = new StringBuilder();
         Random random = new Random();
