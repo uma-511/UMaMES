@@ -59,4 +59,7 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
 
     // 总重量
     private BigDecimal totalWeight;
+
+    // 备注
+    private String remark;
 }

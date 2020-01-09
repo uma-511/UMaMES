@@ -193,6 +193,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             lm.put("unit", chemicalFiberDeliveryDetailDTO.getUnit());
             lm.put("sellingPrice", chemicalFiberDeliveryDetailDTO.getSellingPrice() + "");
             lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");
+            lm.put("remark", chemicalFiberDeliveryDetailDTO.getRemark());
             listMap.add(lm);
         }
         map.put("deliveryList", listMap);
