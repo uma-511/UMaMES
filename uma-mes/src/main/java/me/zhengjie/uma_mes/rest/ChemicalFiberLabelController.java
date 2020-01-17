@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +86,10 @@ public class ChemicalFiberLabelController {
         Integer sumFactPerBagNumber = 0;
         BigDecimal sumNetWeight = new BigDecimal(0);
         BigDecimal sumGrossWeight = new BigDecimal(0);
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+        }
         List<ChemicalFiberLabelDTO> chemicalFiberLabelDTOList = chemicalFiberLabelService.queryAll(criteria);
         for (ChemicalFiberLabelDTO chemicalFiberLabelDTO : chemicalFiberLabelDTOList) {
             sumFactPerBagNumber = sumFactPerBagNumber + chemicalFiberLabelDTO.getFactPerBagNumber();
