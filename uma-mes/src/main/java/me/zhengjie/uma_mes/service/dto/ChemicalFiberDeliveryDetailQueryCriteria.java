@@ -3,6 +3,8 @@ package me.zhengjie.uma_mes.service.dto;
 import lombok.Data;
 import me.zhengjie.annotation.Query;
 
+import java.util.List;
+
 /**
 * @author Tan Jun Ming
 * @date 2019-11-20
@@ -28,4 +30,7 @@ public class ChemicalFiberDeliveryDetailQueryCriteria{
 
     @Query
     private String scanNumber;
+
+    @Query(type = Query.Type.IN, propName = "scanNumber")
+    private List<String> scanNumbers;
 }

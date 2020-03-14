@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.Column;
 import java.math.BigDecimal;
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 
 /**
@@ -62,4 +63,6 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
 
     // 备注
     private String remark;
+
+    private Timestamp createDate;
 }
