@@ -1,14 +1,14 @@
 package me.zhengjie.uma_mes.rest;
 
 import com.lgmn.common.result.Result;
+import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
+import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
+import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailQueryCriteria;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteExportPoundExcelDto;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteQueryCriteria;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -30,8 +31,11 @@ public class ChemicalFiberDeliveryNoteController {
 
     private final ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService;
 
-    public ChemicalFiberDeliveryNoteController(ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService) {
+    private final ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService;
+
+    public ChemicalFiberDeliveryNoteController(ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService, ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService) {
         this.chemicalFiberDeliveryNoteService = chemicalFiberDeliveryNoteService;
+        this.chemicalFiberDeliveryDetailService = chemicalFiberDeliveryDetailService;
     }
 
     @Log("导出数据")
@@ -64,6 +68,15 @@ public class ChemicalFiberDeliveryNoteController {
     @PreAuthorize("@el.check('chemicalFiberDeliveryNote:edit')")
     public ResponseEntity update(@Validated @RequestBody ChemicalFiberDeliveryNote resources){
         chemicalFiberDeliveryNoteService.update(resources);
+        ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
+        chemicalFiberDeliveryDetailQueryCriteria.setDeliveryNoteId(resources.getId());
+        List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailList = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
+        for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailList) {
+            chemicalFiberDeliveryDetailDTO.setCustomerName(resources.getCustomerName());
+            ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail = new ChemicalFiberDeliveryDetail();
+            ObjectTransfer.transValue(chemicalFiberDeliveryDetailDTO, chemicalFiberDeliveryDetail);
+            chemicalFiberDeliveryDetailService.update(chemicalFiberDeliveryDetail);
+        }
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 

@@ -6,6 +6,7 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 /**
 * @author Tan Jun Ming
@@ -84,6 +85,14 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
     // 备注
     @Column(name = "remark")
     private String remark;
+
+    // 制单日期
+    @Column(name = "create_date")
+    private Timestamp createDate;
+
+    // 客户名称
+    @Column(name = "customer_name")
+    private String customerName;
 
     public void copy(ChemicalFiberDeliveryDetail source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

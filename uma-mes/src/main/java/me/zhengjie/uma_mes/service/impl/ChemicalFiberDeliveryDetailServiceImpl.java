@@ -27,6 +27,7 @@ import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
@@ -60,8 +61,24 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
     @Override
 //    @Cacheable
     public Map<String,Object> queryAll(ChemicalFiberDeliveryDetailQueryCriteria criteria, Pageable pageable){
+        if (criteria.getTempStartTime() != null) {
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+        }
         Page<ChemicalFiberDeliveryDetail> page = chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
-        return PageUtil.toPage(page.map(chemicalFiberDeliveryDetailMapper::toDto));
+
+        List<ChemicalFiberDeliveryDetailVo> chemicalFiberDeliveryDetailVos = new ArrayList<>();
+        List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails = page.getContent();
+        for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryDetails) {
+            ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.getOne(chemicalFiberDeliveryDetail.getDeliveryNoteId());
+            ChemicalFiberDeliveryDetailVo chemicalFiberDeliveryDetailVo = new ChemicalFiberDeliveryDetailVo();
+            ObjectTransfer.transValue(chemicalFiberDeliveryNote, chemicalFiberDeliveryDetailVo);
+            ObjectTransfer.transValue(chemicalFiberDeliveryDetail, chemicalFiberDeliveryDetailVo);
+            chemicalFiberDeliveryDetailVo.setDetailTotalCost(chemicalFiberDeliveryDetail.getTotalCost());
+            chemicalFiberDeliveryDetailVos.add(chemicalFiberDeliveryDetailVo);
+        }
+
+        return PageUtil.toPage(new PageImpl<>(chemicalFiberDeliveryDetailVos, pageable, page.getTotalElements()));
     }
 
     @Override
@@ -141,5 +158,55 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
             list.add(map);
         }
         FileUtil.downloadExcel(list, response);
+    }
+
+    @Override
+    public Result getSalesReportSummaries(ChemicalFiberDeliveryDetailQueryCriteria criteria) {
+        if (criteria.getTempStartTime() != null) {
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+        }
+
+        List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails = chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+
+        // 包数
+        Integer totalNumber = 0;
+
+        // 个数
+        Integer totalBag = 0;
+
+        // 净重
+        BigDecimal totalWeight = new BigDecimal(0.0);
+
+        // 成本
+        BigDecimal totalCost = new BigDecimal(0.0);
+
+        // 销售
+        BigDecimal totalPrice = new BigDecimal(0.0);
+
+
+        for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryDetails) {
+            totalNumber = totalNumber + (chemicalFiberDeliveryDetail.getTotalBag() == null ? 0 : chemicalFiberDeliveryDetail.getTotalBag());
+            totalBag = totalBag + (chemicalFiberDeliveryDetail.getTotalNumber() == null ? 0 : chemicalFiberDeliveryDetail.getTotalNumber());
+            totalWeight = totalWeight.add((chemicalFiberDeliveryDetail.getTotalWeight() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalWeight()));
+            totalCost = totalCost.add((chemicalFiberDeliveryDetail.getTotalCost() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalCost()));
+            totalPrice = totalPrice.add((chemicalFiberDeliveryDetail.getTotalPrice() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalPrice()));
+        }
+
+        List<Object> list = new ArrayList<>();
+        list.add("总计");
+        list.add("");
+        list.add("");
+        list.add("");
+        list.add("");
+        list.add("");
+        list.add(totalNumber);
+        list.add(totalBag);
+        list.add(totalWeight);
+        list.add("");
+        list.add(totalCost);
+        list.add("");
+        list.add(totalPrice);
+        return Result.success(list);
     }
 }

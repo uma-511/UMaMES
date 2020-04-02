@@ -6,6 +6,7 @@ import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryDetailQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -81,5 +82,13 @@ public class ChemicalFiberDeliveryDetailController {
     public ResponseEntity delete(@PathVariable Integer id){
         chemicalFiberDeliveryDetailService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/getSalesReportSummaries")
+    @Log("获取销售报表合计")
+    @ApiOperation("获取销售报表合计")
+    @AnonymousAccess
+    public Result getSalesReportSummaries(@RequestBody ChemicalFiberDeliveryDetailQueryCriteria criteria) {
+        return chemicalFiberDeliveryDetailService.getSalesReportSummaries(criteria);
     }
 }

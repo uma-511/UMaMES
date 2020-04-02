@@ -46,4 +46,6 @@ public interface ChemicalFiberDeliveryDetailService {
     void delete(Integer id);
 
     void download(List<ChemicalFiberDeliveryDetailDTO> all, HttpServletResponse response) throws IOException;
+
+    Result getSalesReportSummaries(ChemicalFiberDeliveryDetailQueryCriteria criteria);
 }

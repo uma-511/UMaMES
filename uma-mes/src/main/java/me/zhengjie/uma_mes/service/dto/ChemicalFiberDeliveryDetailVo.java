@@ -2,29 +2,29 @@ package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
 
-import javax.persistence.Column;
 import java.math.BigDecimal;
-import java.io.Serializable;
 import java.sql.Timestamp;
 
-
-/**
-* @author Tan Jun Ming
-* @date 2019-11-20
-*/
 @Data
-public class ChemicalFiberDeliveryDetailDTO implements Serializable {
-
-    private Integer id;
-
-    // 出库单号
+public class ChemicalFiberDeliveryDetailVo  {
+    // 单号
     private String scanNumber;
+    // 客户名称
+    private String customerName;
+    // 出库包数
+    private Integer outOfStockPackageNumber = 0;
+    // 出库个数
+    private Integer outOfStockFactPerBagNumber = 0;
+    // 出库净重
+    private BigDecimal outOfStockNetWeight = new BigDecimal(0.0);
+    // 应收金额
+    private BigDecimal receivablePrice = new BigDecimal(0.0);
+    // 总成本
+    private BigDecimal totalCost = new BigDecimal(0.0);
+    // 制单时间
+    private Timestamp createDate;
 
-    private Integer deliveryNoteId;
-
-    // 产品id
-    private Integer prodId;
-
+//    ----------------------------
     // 产品型号
     private String prodModel;
 
@@ -47,7 +47,7 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     private String unit;
 
     // 总成本
-    private BigDecimal totalCost;
+    private BigDecimal detailTotalCost;
 
     // 总金额
     private BigDecimal totalPrice;
@@ -63,8 +63,4 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
 
     // 备注
     private String remark;
-
-    private Timestamp createDate;
-
-    private String customerName;
 }
