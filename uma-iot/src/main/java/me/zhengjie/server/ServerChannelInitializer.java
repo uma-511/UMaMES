@@ -3,6 +3,8 @@ package me.zhengjie.server;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -35,9 +37,13 @@ public class ServerChannelInitializer extends ChannelInitializer<SocketChannel> 
         pipeline.addLast(
 //                new StringDecoder(),
 //                new StringEncoder(),
+//                new LengthFieldBasedFrameDecoder(1024*1024*1024,0,4,0,4),
+//                new LengthFieldPrepender(4),
                 new SocketDecoder(),
                 new SocketEncoder()
         );
+        pipeline.addLast();
+
         //自定义Handler
         pipeline.addLast("serverChannelHandler", serverChannelHandler);
     }

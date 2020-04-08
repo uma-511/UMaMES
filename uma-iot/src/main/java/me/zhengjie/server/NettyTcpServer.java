@@ -62,9 +62,10 @@ public class NettyTcpServer {
                 //设置通道处理者ChannelHandler////workerGroup的处理器
                 .childHandler(serverChannelInitializer)
                 //socket参数，当服务器请求处理程全满时，用于临时存放已完成三次握手请求的队列的最大长度。如果未设置或所设置的值小于1，Java将使用默认值50。
-                .option(ChannelOption.SO_BACKLOG, 1024)
+                .option(ChannelOption.SO_BACKLOG, 1024*5)
                 //启用心跳保活机制，tcp，默认2小时发一次心跳
-                .childOption(ChannelOption.SO_KEEPALIVE, true);
+                .childOption(ChannelOption.SO_KEEPALIVE, Boolean.TRUE)
+                .childOption(ChannelOption.SO_SNDBUF, 1024);
         //Future：异步任务的生命周期，可用来获取任务结果
         //绑定端口，开启监听，同步等待
         ChannelFuture channelFuture1 = serverBootstrap.bind(port).syncUninterruptibly();

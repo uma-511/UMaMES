@@ -1,6 +1,7 @@
 package me.zhengjie.utils;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Vector;
 
 public abstract class CoderUtils {
 
@@ -150,6 +151,16 @@ public abstract class CoderUtils {
         for (int i = 0; i < str.length() / 2; i ++) {
             String sub = str.substring(i*2, i*2 + 2);
             bytes[i]=(byte)Integer.parseInt(sub.toLowerCase(),16);
+        }
+        return bytes;
+    }
+
+    public static Vector<Byte> cvtStr2Hex2(String str) {
+        str=str.replaceAll(" ","");
+        Vector<Byte> bytes = new Vector<Byte>();
+        for (int i = 0; i < str.length() / 2; i ++) {
+            String sub = str.substring(i*2, i*2 + 2);
+            bytes.add((byte)Integer.parseInt(sub.toLowerCase(),16));
         }
         return bytes;
     }

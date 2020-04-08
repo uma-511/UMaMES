@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.config.HeartbeatConfig;
 import me.zhengjie.service.HeartBeatConsumer;
 import me.zhengjie.terminal.GobalListener;
+import me.zhengjie.terminal.PrintData;
+import me.zhengjie.terminal.PrintDataHolder;
+import me.zhengjie.terminal.PrintExector;
 import me.zhengjie.terminal.command.BaseCommand;
 import me.zhengjie.terminal.terminal.ControllerPage;
 import me.zhengjie.terminal.terminal.Terminal;
@@ -96,6 +99,10 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
             terminal.setRp(true);
 //            terminal.setLossConnectCount(0);
 //            heartBeatConsumer.updateResponseTime(terminal.getHeartBeatDTO());
+
+//            PrintData printData = PrintDataHolder.getInstance().getTask(ip);
+//            printData.addCurr();
+//            PrintExector.getInstance().print(ip);
         } else {
             log.info("unknow event:");
 //            unknowEvent();

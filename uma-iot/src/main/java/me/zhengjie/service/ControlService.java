@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -168,7 +169,7 @@ public class ControlService {
     /**
      * 打印
      */
-    public void print(String ip) {
+    public void print(String ip) throws UnsupportedEncodingException {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
 
         ControlPannelInfo controlPanelInfo = terminal.getControlPannelInfo();

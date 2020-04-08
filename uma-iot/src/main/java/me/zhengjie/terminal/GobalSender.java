@@ -8,6 +8,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Vector;
 
 @Slf4j
 @Component
@@ -30,9 +31,21 @@ public class GobalSender extends SendCommand {
     public void sendImmediate(String command){
         channel.writeAndFlush(command);
     }
+
+    public void sendImmediate(byte[] command){
+        channel.writeAndFlush(command);
+    }
+
+    public void sendImmediate(Vector<Byte> command){
+        channel.writeAndFlush(command);
+    }
     
     public void send(String command){
-        sendDeloy(command,800);
+        sendDeloy(command,1500);
+    }
+
+    public void send(Vector<Byte> command){
+        sendDeloy(command,1500);
     }
 
     public void sendDeloy(String command,long times){
@@ -55,6 +68,16 @@ public class GobalSender extends SendCommand {
 //                commandBuffer.setLength(0);
 //            }
 //        });
+    }
+
+    public void sendDeloy(Vector<Byte> command,long times){
+        try {
+            Thread.sleep(times);
+            channel.writeAndFlush(command);
+        } catch (InterruptedException e) {
+            log.error("发送指令延时任务");
+            e.printStackTrace();
+        }
     }
 
     public void send(List<String> commands){
