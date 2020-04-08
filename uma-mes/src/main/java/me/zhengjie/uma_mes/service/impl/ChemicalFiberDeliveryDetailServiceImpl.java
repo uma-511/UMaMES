@@ -209,4 +209,16 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
         list.add(totalPrice);
         return Result.success(list);
     }
+
+    @Override
+//    @Cacheable
+    public Map<String,Object> queryStatementDetailsAll(ChemicalFiberDeliveryDetailQueryCriteria criteria, Pageable pageable){
+        if (criteria.getTempStartTime() != null) {
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+        }
+
+        Page<ChemicalFiberDeliveryDetail> page = chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        return PageUtil.toPage(page.map(chemicalFiberDeliveryDetailMapper::toDto));
+    }
 }

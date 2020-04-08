@@ -48,4 +48,6 @@ public interface ChemicalFiberDeliveryDetailService {
     void download(List<ChemicalFiberDeliveryDetailDTO> all, HttpServletResponse response) throws IOException;
 
     Result getSalesReportSummaries(ChemicalFiberDeliveryDetailQueryCriteria criteria);
+
+    Map<String,Object> queryStatementDetailsAll(ChemicalFiberDeliveryDetailQueryCriteria criteria, Pageable pageable);
 }
