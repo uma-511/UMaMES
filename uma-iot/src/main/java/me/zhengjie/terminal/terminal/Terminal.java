@@ -1,5 +1,8 @@
 package me.zhengjie.terminal.terminal;
 
+import com.lgmn.utils.SvgUtils;
+import com.lgmn.utils.printer.Command;
+import com.lgmn.utils.printer.PrintProps;
 import io.netty.channel.Channel;
 import lombok.Data;
 import me.zhengjie.domain.CancelInfo;
@@ -8,6 +11,9 @@ import me.zhengjie.domain.ReprintInfo;
 import me.zhengjie.domain.UserInfo;
 import me.zhengjie.server.NettyTcpServer;
 import me.zhengjie.terminal.GobalSender;
+import me.zhengjie.terminal.PrintData;
+import me.zhengjie.terminal.PrintDataHolder;
+import me.zhengjie.terminal.PrintExector;
 import me.zhengjie.terminal.command.SendCommand;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductDTO;
@@ -16,10 +22,12 @@ import me.zhengjie.utils.CoderUtils;
 import me.zhengjie.utils.SpringContextUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.String;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 @Data
 public class Terminal extends SendCommand {
@@ -98,7 +106,9 @@ public class Terminal extends SendCommand {
     }
 
     public void goPrinting() {
-        gobalSender.sendImmediate(switchScreen("00 04"));
+//        gobalSender.sendImmediate(switchScreen("00 04"));
+        // 需还原
+        gobalSender.send(switchScreen("00 04"));
     }
 
     public void addGoPrintingCommand() {
@@ -123,9 +133,73 @@ public class Terminal extends SendCommand {
         gobalSender.addCommand(switchScreen("00 06"));
     }
 
-    public void print(String labelNum) {
+    public void print(String labelNum) throws UnsupportedEncodingException {
         SimpleDateFormat myFmt = new SimpleDateFormat("yyyy.MM.dd");
         String ym = myFmt.format(System.currentTimeMillis());
+
+//        Map<String, String> dataMap = new HashMap<>();
+//        dataMap.put("color",controlPannelInfo.getColor() );
+//        dataMap.put("banci",userinfo.getBanci() + " - " + controlPannelInfo.getMachineNumber());
+//        dataMap.put("date",ym);
+//        dataMap.put("grossWeight",controlPannelInfo.getGrossWeight());
+//        dataMap.put("fineness",controlPannelInfo.getFineness());
+//        dataMap.put("factPerBagNumber",controlPannelInfo.getFactPerBagNumber());
+//        dataMap.put("netWeight",controlPannelInfo.getNetWeight());
+//        dataMap.put("labelNumber",labelNum);
+//
+//        PrintProps printProps = new PrintProps();
+//        printProps.setWidth(50);
+//        printProps.setHeight(40);
+//
+//        Vector<Byte> data = new  SvgUtils().getTeminalPrintData("E:\\项目资料\\优码\\清远\\清远.svg",printProps,dataMap);
+//
+//        Vector<Vector<Byte>> frames = new Vector<>();
+//
+//
+//
+//        String pt = "PT:\r\n";
+//
+//        byte[] ptByte = pt.getBytes("GB2312");
+//
+//
+//        int frameLen = 768 - ptByte.length;
+//        Vector<Byte> frame = new Vector<>();
+//        for (byte b : ptByte) {
+//            frame.add(b);
+//        }
+//
+//        for (int i = 0; i < data.size(); i++) {
+//            if(i%frameLen==0){
+//                frames.add(frame);
+//                frame=new Vector<>();
+//                for (byte b : ptByte) {
+//                    frame.add(b);
+//                }
+//            }
+//            if (i==data.size()-2){
+//                frames.add(frame);
+//            }
+//            frame.add(data.get(i));
+//        }
+//
+//        PrintData printData = new PrintData();
+//        printData.setCurr(0);
+//        printData.setFrames(frames);
+//        printData.setGobalSender(gobalSender);
+//        printData.setIp(ip);
+//
+//        PrintDataHolder.getInstance().addData(ip,printData);
+//
+//        PrintExector.getInstance().print(ip);
+
+//        for (Vector<Byte> bytes : frames) {
+//            gobalSender.sendImmediate(bytes);
+//        }
+//        Command command = Command.getInstance();
+//        command.addInitializeTeminalPrinter(printProps.getWidth(),printProps.getHeight(),printProps.getGap_m(),printProps.getGap_n());
+//        command.addPrint();
+//        Vector<Byte> data =  command.getCommand();
+//        gobalSender.sendDeloy(data,2000);
         String printCommand = "PT:\r\n" +
                 "SIZE 60 mm,40 mm\r\n" +
                 "GAP 2 mm,4 mm\r\n" +
@@ -137,7 +211,10 @@ public class Terminal extends SendCommand {
                 "TEXT 69,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
                 "TEXT 71,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
                 "TEXT 45,67,\"TSS24.BF2\",0,2,2,\"色号：\" \r\n" +
-                "TEXT 175,67,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
+                "TEXT 175,66,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
+                "TEXT 175,68,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
+                "TEXT 174,67,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
+                "TEXT 176,67,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
                 "TEXT 370,67,\"TSS24.BF2\",0,2,2,\"纤度：\"\r\n" +
                 "TEXT 500,67,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFineness() + "\"\r\n" +
                 "TEXT 45,124,\"TSS24.BF2\",0,2,2,\"班组：\" \r\n" +
@@ -159,7 +236,7 @@ public class Terminal extends SendCommand {
                 "PRINT 1\r\n";
         gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand));
 
-//        goPrinting();
+        goPrinting();
     }
 
     public void reprint(ChemicalFiberLabel label, ChemicalFiberProductDTO productDTO) {
@@ -168,6 +245,24 @@ public class Terminal extends SendCommand {
 
         SimpleDateFormat myFmt = new SimpleDateFormat("yyyy.MM.dd");
         String ym = myFmt.format(label.getPrintTime());
+
+//        Map<String, String> dataMap = new HashMap<>();
+//        dataMap.put("color",label.getColor() );
+//        dataMap.put("banci", label.getShifts() + " - " + label.getMachine());
+//        dataMap.put("date",ym);
+//        dataMap.put("grossWeight",label.getGrossWeight().toString());
+//        dataMap.put("fineness",label.getFineness());
+//        dataMap.put("factPerBagNumber",label.getFactPerBagNumber().toString());
+//        dataMap.put("netWeight",label.getNetWeight().toString());
+//        dataMap.put("labelNumber",label.getLabelNumber());
+
+//        PrintProps printProps = new PrintProps();
+//        printProps.setWidth(60);
+//        printProps.setHeight(40);
+//
+//        Vector<Byte> data = new SvgUtils().getTeminalPrintData("E:\\项目资料\\优码\\清远\\清远.svg",printProps,dataMap);
+//        gobalSender.sendDeloy(data,800);
+
         String printCommand = "PT:\r\n" +
                 "SIZE 60 mm,40 mm\r\n" +
                 "GAP 2 mm,4 mm\r\n" +
@@ -179,7 +274,10 @@ public class Terminal extends SendCommand {
                 "TEXT 69,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
                 "TEXT 71,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
                 "TEXT 45,67,\"TSS24.BF2\",0,2,2,\"色号：\" \r\n" +
-                "TEXT 175,67,\"TSS24.BF2\",0,2,2,\"" + label.getColor() + "\"\r\n" +
+                "TEXT 175,66,\"TSS24.BF2\",0,2,2,\"" + label.getColor() + "\"\r\n" +
+                "TEXT 175,68,\"TSS24.BF2\",0,2,2,\"" + label.getColor() + "\"\r\n" +
+                "TEXT 174,67,\"TSS24.BF2\",0,2,2,\"" + label.getColor() + "\"\r\n" +
+                "TEXT 176,67,\"TSS24.BF2\",0,2,2,\"" + label.getColor() + "\"\r\n" +
                 "TEXT 370,67,\"TSS24.BF2\",0,2,2,\"纤度：\"\r\n" +
                 "TEXT 500,67,\"TSS24.BF2\",0,2,2,\"" + label.getFineness() + "\"\r\n" +
                 "TEXT 45,124,\"TSS24.BF2\",0,2,2,\"班组：\" \r\n" +
