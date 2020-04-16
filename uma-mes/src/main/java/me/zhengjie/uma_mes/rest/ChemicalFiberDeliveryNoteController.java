@@ -8,7 +8,9 @@ import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
+import me.zhengjie.uma_mes.service.CustomerService;
 import me.zhengjie.uma_mes.service.dto.*;
+import me.zhengjie.uma_mes.service.impl.CustomerServiceImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +35,14 @@ public class ChemicalFiberDeliveryNoteController {
 
     private final ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService;
 
-    public ChemicalFiberDeliveryNoteController(ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService, ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService) {
+    private final CustomerService customerService;
+
+    public ChemicalFiberDeliveryNoteController(ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService,
+                                               ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService,
+                                               CustomerService customerService) {
         this.chemicalFiberDeliveryNoteService = chemicalFiberDeliveryNoteService;
         this.chemicalFiberDeliveryDetailService = chemicalFiberDeliveryDetailService;
+        this.customerService = customerService;
     }
 
     @Log("导出数据")
@@ -71,8 +78,9 @@ public class ChemicalFiberDeliveryNoteController {
         ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
         chemicalFiberDeliveryDetailQueryCriteria.setDeliveryNoteId(resources.getId());
         List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailList = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
+        CustomerDTO customerDTO = customerService.findById(resources.getCustomerId());
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailList) {
-            chemicalFiberDeliveryDetailDTO.setCustomerName(resources.getCustomerName());
+            chemicalFiberDeliveryDetailDTO.setCustomerName(customerDTO.getName());
             ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail = new ChemicalFiberDeliveryDetail();
             ObjectTransfer.transValue(chemicalFiberDeliveryDetailDTO, chemicalFiberDeliveryDetail);
             chemicalFiberDeliveryDetailService.update(chemicalFiberDeliveryDetail);
