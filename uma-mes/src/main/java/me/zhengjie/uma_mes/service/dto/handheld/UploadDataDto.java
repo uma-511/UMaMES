@@ -14,4 +14,9 @@ public class UploadDataDto {
     private Integer status;
     @ApiModelProperty("扫描员")
     private String scanUser;
+    @ApiModelProperty("出库号")
+    private String scanNumber;
+    @ApiModelProperty("是否添加")
+    private Boolean isAdd;
+    private Boolean isCheckLabel;
 }

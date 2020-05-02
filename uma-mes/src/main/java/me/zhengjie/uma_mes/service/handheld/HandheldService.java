@@ -38,6 +38,8 @@ public class HandheldService {
 
     private final ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService;
 
+    private final ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService;
+
     public HandheldService(
             ChemicalFiberLabelService chemicalFiberLabelService,
             ChemicalFiberProductionService chemicalFiberProductionService,
@@ -45,7 +47,8 @@ public class HandheldService {
             ScanRecordLabelService scanRecordLabelService,
             ConfigClassifyService configClassifyService,
             ConfigService configService,
-            ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService) {
+            ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService,
+            ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService) {
 
         this.chemicalFiberLabelService = chemicalFiberLabelService;
         this.chemicalFiberProductionService = chemicalFiberProductionService;
@@ -54,6 +57,7 @@ public class HandheldService {
         this.configClassifyService = configClassifyService;
         this.configService = configService;
         this.chemicalFiberDeliveryNoteService = chemicalFiberDeliveryNoteService;
+        this.chemicalFiberDeliveryDetailService = chemicalFiberDeliveryDetailService;
     }
 
     public Result getLabelMsg(LabelMsgDto labelMsgDto) {
@@ -62,11 +66,30 @@ public class HandheldService {
             return Result.error(ResultEnum.DATA_NOT_EXISTS);
         }
 
-        // 标签信息
-        String checkLabelStatusStr = checkLabelStatus(chemicalFiberLabelDTO, labelMsgDto.getStatus());
-        if (!"".equals(checkLabelStatusStr)) {
-            return Result.error(ResultEnum.NOT_SCHEDULED_ERROR.getCode(), checkLabelStatusStr);
+        if (labelMsgDto.getIsCheckLabel()) {
+            if (labelMsgDto.getStatus() != 6) {
+                // 标签信息
+                String checkLabelStatusStr = checkLabelStatus(chemicalFiberLabelDTO, labelMsgDto.getStatus());
+                if (!"".equals(checkLabelStatusStr)) {
+                    return Result.error(ResultEnum.NOT_SCHEDULED_ERROR.getCode(), checkLabelStatusStr);
+                }
+            }
+        } else {
+            ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
+            scanRecordQueryCriteria.setAccurateScanNumber(labelMsgDto.getScanNumber());
+            List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
+            if (scanRecordDTOS.size() <= 0) {
+                return Result.serverError("[" + labelMsgDto.getScanNumber() +"]出库单号不存在");
+            }
+            ScanRecordLabelQueryCriteria scanRecordLabelQueryCriteria = new ScanRecordLabelQueryCriteria();
+            scanRecordLabelQueryCriteria.setScanRecordId(scanRecordDTOS.get(0).getId());
+            scanRecordLabelQueryCriteria.setLabelId(chemicalFiberLabelDTO.getId());
+            List<ScanRecordLabelDTO> scanRecordLabelDTOS = scanRecordLabelService.queryAll(scanRecordLabelQueryCriteria);
+            if (scanRecordLabelDTOS.size() <= 0) {
+                return Result.serverError("此标签不存在于 [" + labelMsgDto.getScanNumber() + "] 出库号内");
+            }
         }
+
         ChemicalFiberLabelInfoVo chemicalFiberLabelInfoVo = new ChemicalFiberLabelInfoVo();
         ObjectTransfer.transValue(chemicalFiberLabelDTO, chemicalFiberLabelInfoVo);
 
@@ -78,55 +101,96 @@ public class HandheldService {
         return Result.success(labelMsgVo);
     }
 
-    @Transactional(rollbackFor = Exception.class)
+//    @Transactional(rollbackFor = Exception.class)
     public Result uploadData(UploadDataDto uploadDataDto) {
         // 需要修改的标签列表
         List<ChemicalFiberLabel> chemicalFiberLabels = new ArrayList<>();
-        // 扫描单号
-        String scanNumber = getScanNumber(uploadDataDto.getStatus());
+        ScanRecord scanRecord;
+        String scanNumber;
+        if (uploadDataDto.getStatus() != 7) {
+            // 扫描单号
+            scanNumber = getScanNumber(uploadDataDto.getStatus());
 
-        // 新增扫描记录
-        ScanRecord scanRecord = new ScanRecord();
-        scanRecord.setScanNumber(scanNumber);
-        scanRecord.setScanUser(uploadDataDto.getScanUser());
-        scanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
-        scanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
-        scanRecordService.create(scanRecord);
+            // 新增扫描记录
+            scanRecord = new ScanRecord();
+            scanRecord.setScanNumber(scanNumber);
+            scanRecord.setScanUser(uploadDataDto.getScanUser());
+            scanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
+            scanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
+            scanRecordService.create(scanRecord);
+        } else {
+            ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
+            scanRecordQueryCriteria.setAccurateScanNumber(uploadDataDto.getScanNumber());
+            List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
+            if (scanRecordDTOS.size() <= 0) {
+                return Result.serverError("[" + uploadDataDto.getScanNumber() +"]出库单号不存在");
+            }
+            ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(0);
+            ScanRecord tempScanRecord = new ScanRecord();
+            ObjectTransfer.transValue(scanRecordDTO, tempScanRecord);
+            scanRecord = tempScanRecord;
+            scanNumber = uploadDataDto.getScanNumber();
+        }
 
         List<ScanRecordLabel> scanRecordLabels = new ArrayList<>();
         for (Map map : uploadDataDto.getLabelList()) {
             String labelNumber = map.get("labelNumber").toString();
             String scanTime = map.get("scanTime").toString();
             ChemicalFiberLabelDTO chemicalFiberLabelDTO = getChemicalFiberLabelDTOByLabelNumber(labelNumber);
-            if (chemicalFiberLabelDTO == null) {
+            if (chemicalFiberLabelDTO == null && uploadDataDto.getStatus() != 7) {
                 scanRecordService.delete(scanRecord.getId());
                 return Result.error(ResultEnum.DATA_NOT_EXISTS);
             }
 
-            String checkLabelStatusStr = checkLabelStatus(chemicalFiberLabelDTO, uploadDataDto.getStatus());
-            if (!"".equals(checkLabelStatusStr)) {
-                scanRecordService.delete(scanRecord.getId());
-                return Result.error(ResultEnum.NOT_SCHEDULED_ERROR.getCode(), checkLabelStatusStr);
+            if (uploadDataDto.getIsCheckLabel()) {
+                if (uploadDataDto.getStatus() != 6) {
+                    // 标签信息
+                    String checkLabelStatusStr = checkLabelStatus(chemicalFiberLabelDTO, uploadDataDto.getStatus());
+                    if (!"".equals(checkLabelStatusStr)) {
+                        return Result.error(ResultEnum.NOT_SCHEDULED_ERROR.getCode(), checkLabelStatusStr);
+                    }
+                }
             }
 
-            ChemicalFiberLabelDTO newChemicalFiberLabelDTO = getNewChemicalFiberLabelDTO(chemicalFiberLabelDTO, uploadDataDto.getStatus());
+            ChemicalFiberLabelDTO newChemicalFiberLabelDTO = getNewChemicalFiberLabelDTO(chemicalFiberLabelDTO, uploadDataDto.getStatus(), uploadDataDto.getIsAdd());
             ChemicalFiberLabel chemicalFiberLabel = new ChemicalFiberLabel();
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberLabel);
             chemicalFiberLabels.add(chemicalFiberLabel);
 
-            Timestamp tempTimestamp = new Timestamp(Long.parseLong(scanTime));
-            ScanRecordLabel scanRecordLabel = new ScanRecordLabel();
-            scanRecordLabel.setLabelId(chemicalFiberLabel.getId());
-            scanRecordLabel.setScanRecordId(scanRecord.getId());
-            scanRecordLabel.setScanTime(tempTimestamp);
-            scanRecordLabels.add(scanRecordLabel);
+            if (uploadDataDto.getIsAdd()) {
+                Timestamp tempTimestamp = new Timestamp(Long.parseLong(scanTime));
+                ScanRecordLabel scanRecordLabel = new ScanRecordLabel();
+                scanRecordLabel.setLabelId(chemicalFiberLabel.getId());
+                scanRecordLabel.setScanRecordId(scanRecord.getId());
+                scanRecordLabel.setScanTime(tempTimestamp);
+                scanRecordLabels.add(scanRecordLabel);
+            } else {
+                if (!uploadDataDto.getIsAdd() && uploadDataDto.getStatus() == 7) {
+                    ScanRecordLabelQueryCriteria scanRecordLabelQueryCriteria = new ScanRecordLabelQueryCriteria();
+                    scanRecordLabelQueryCriteria.setScanRecordId(scanRecord.getId());
+                    scanRecordLabelQueryCriteria.setLabelId(chemicalFiberLabelDTO.getId());
+                    List<ScanRecordLabelDTO> scanRecordLabelDTOS = scanRecordLabelService.queryAll(scanRecordLabelQueryCriteria);
+                    if (scanRecordLabelDTOS.size() <= 0) {
+                        return Result.serverError("此标签不存在于 [" + uploadDataDto.getScanNumber() + "] 出库号内");
+                    }
+                    for(ScanRecordLabelDTO scanRecordLabelDTO : scanRecordLabelDTOS) {
+                        scanRecordLabelService.delete(scanRecordLabelDTO.getId());
+                    }
+                }
+            }
+
+
         }
 
-        // 修改标签
-        chemicalFiberLabelService.update(chemicalFiberLabels);
+        if (uploadDataDto.getStatus() != 6) {
+            // 修改标签
+            chemicalFiberLabelService.update(chemicalFiberLabels);
+        }
 
-        // 新增标签扫描记录
-        scanRecordLabelService.create(scanRecordLabels);
+        if (uploadDataDto.getIsAdd()) {
+            // 新增标签扫描记录
+            scanRecordLabelService.create(scanRecordLabels);
+        }
 
         if (uploadDataDto.getStatus() == 2) {
             ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = new ChemicalFiberDeliveryNote();
@@ -135,6 +199,18 @@ public class HandheldService {
             chemicalFiberDeliveryNote.setTotalPrice(new BigDecimal(0));
             chemicalFiberDeliveryNote.setCreateDate(new Timestamp(System.currentTimeMillis()));
             chemicalFiberDeliveryNoteService.create(chemicalFiberDeliveryNote);
+            chemicalFiberDeliveryNoteService.deliveryNoteStoredProcedure(scanNumber);
+        }
+
+        if (uploadDataDto.getStatus() == 7) {
+            ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
+            List<String> scanNumbers = new ArrayList<>();
+            scanNumbers.add(scanNumber);
+            chemicalFiberDeliveryDetailQueryCriteria.setScanNumbers(scanNumbers);
+            List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
+            for(ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
+                chemicalFiberDeliveryDetailService.delete(chemicalFiberDeliveryDetailDTO.getId());
+            }
             chemicalFiberDeliveryNoteService.deliveryNoteStoredProcedure(scanNumber);
         }
 
@@ -154,11 +230,11 @@ public class HandheldService {
     /**
      *
      * @param chemicalFiberLabelDTO
-     * @param status 入库：RK 出库：SH 退库：TK 退货：TH
-     *               便签状态 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货
+     * @param status 入库：RK 出库：SH 退库：TK 退货：TH 盘点：PD
+     *               便签状态 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货 6：盘点
      * @return
      */
-    private ChemicalFiberLabelDTO getNewChemicalFiberLabelDTO(ChemicalFiberLabelDTO chemicalFiberLabelDTO, Integer status) {
+    private ChemicalFiberLabelDTO getNewChemicalFiberLabelDTO(ChemicalFiberLabelDTO chemicalFiberLabelDTO, Integer status, boolean isAdd) {
         switch (status) {
             case 1:
                 chemicalFiberLabelDTO.setStatus(1);
@@ -169,8 +245,18 @@ public class HandheldService {
             case 4:
                 chemicalFiberLabelDTO.setStatus(4);
                 break;
-            default:
+            case 5:
                 chemicalFiberLabelDTO.setStatus(5);
+                break;
+            case 7:
+                if (isAdd) {
+                    chemicalFiberLabelDTO.setStatus(2);
+                } else {
+                    chemicalFiberLabelDTO.setStatus(1);
+                }
+                break;
+            default:
+                chemicalFiberLabelDTO.setStatus(6);
         }
         return chemicalFiberLabelDTO;
     }
@@ -217,8 +303,11 @@ public class HandheldService {
             case 4:
                 type = "TK";
                 break;
-            default:
+            case 5:
                 type = "TH";
+                break;
+            default:
+                type = "PD";
         }
         return type;
     }
@@ -251,7 +340,7 @@ public class HandheldService {
                 checkLabelStatusStr = status != 1 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【待入仓】，请先入仓" : "";
                 break;
             case 1:
-                checkLabelStatusStr = status != 2 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已入仓】，请出仓" : "";
+                checkLabelStatusStr = status != 2 && status != 7 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已入仓】，请出仓" : "";
                 break;
             case 2:
                 checkLabelStatusStr = status != 4 && status != 5 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已出仓】，请返仓或退货" : "";
