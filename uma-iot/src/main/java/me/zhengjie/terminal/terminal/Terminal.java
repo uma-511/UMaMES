@@ -49,6 +49,9 @@ public class Terminal extends SendCommand {
 
     boolean rp = false;
 
+    // 打印类型 未知：-1 打印：0 补打：1
+    int printType = -1;
+
     public Terminal(String ip) {
         setIp(ip);
         this.userinfo = new UserInfo();
@@ -90,7 +93,7 @@ public class Terminal extends SendCommand {
 
     public void goControl() {
 //        gobalSender.send(2000);
-        gobalSender.send(switchScreen("00 02"));
+        gobalSender.sendImmediate(switchScreen("00 02"));
     }
 
     public void addGoControlCommand() {
@@ -108,7 +111,7 @@ public class Terminal extends SendCommand {
     public void goPrinting() {
 //        gobalSender.sendImmediate(switchScreen("00 04"));
         // 需还原
-        gobalSender.send(switchScreen("00 04"));
+        gobalSender.sendImmediate(switchScreen("00 04"));
     }
 
     public void addGoPrintingCommand() {
@@ -124,9 +127,7 @@ public class Terminal extends SendCommand {
     }
 
     public void goReprint() {
-//         ReprintPage reprintPage = new ReprintPage();
-//         reprintPage.sendLabelNumber()
-        gobalSender.send(switchScreen("00 06"));
+        gobalSender.sendImmediate(switchScreen("00 06"));
     }
 
     public void addGoReprintCommand() {
@@ -134,6 +135,7 @@ public class Terminal extends SendCommand {
     }
 
     public void print(String labelNum) throws UnsupportedEncodingException {
+        printType = 0;
         SimpleDateFormat myFmt = new SimpleDateFormat("yyyy.MM.dd");
         String ym = myFmt.format(System.currentTimeMillis());
 
@@ -234,15 +236,15 @@ public class Terminal extends SendCommand {
                 "1TEXT 430,240,\"2\",0,3,4,\"27.00\"\r\n" +
                 "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + labelNum + "\"\r\n" +
                 "PRINT 1\r\n";
-        gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand));
+        gobalSender.send(CoderUtils.stringToHexStr(printCommand));
 
-        goPrinting();
+//        goPrinting();
     }
 
     public void reprint(ChemicalFiberLabel label, ChemicalFiberProductDTO productDTO) {
-        addGoPrintingCommand();
-        gobalSender.send();
-
+//        addGoPrintingCommand();
+//        gobalSender.send();
+        printType = 1;
         SimpleDateFormat myFmt = new SimpleDateFormat("yyyy.MM.dd");
         String ym = myFmt.format(label.getPrintTime());
 
@@ -298,10 +300,10 @@ public class Terminal extends SendCommand {
                 "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + label.getLabelNumber() + "\"\r\n" +
                 "PRINT 1\r\n";
         String command = CoderUtils.stringToHexStr(printCommand);
-        gobalSender.sendDeloy(command,800);
+        gobalSender.send(command);
 //        checkPrintStatus(command);
-        ReprintPage reprintPage = new ReprintPage();
-        reprintPage.back(ip);
+//        ReprintPage reprintPage = new ReprintPage();
+//        reprintPage.back(ip);
     }
 
     public boolean checkLoginStatus(String screenId,String tipId){

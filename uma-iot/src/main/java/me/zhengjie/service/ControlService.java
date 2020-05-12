@@ -204,6 +204,7 @@ public class ControlService {
          * todo 打印操作
          */
         log.info("before print");
+//        terminal.goPrinting();
         terminal.print(labelDto.getLabelNumber());
         terminal.getReprintInfo().setLabelNumber(labelDto.getLabelNumber());
         terminal.getCancelInfo().setLabelNumber(labelDto.getLabelNumber());
@@ -269,6 +270,7 @@ public class ControlService {
         ChemicalFiberLabel label = reprintInfo.getChemicalFiberLabel();
         ChemicalFiberProductDTO product = reprintInfo.getChemicalFiberProductDTO();
 
+        terminal.goPrinting();
         terminal.reprint(label,product);
     }
 

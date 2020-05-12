@@ -93,10 +93,18 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
             Terminal terminal = NettyTcpServer.terminalMap.get(ip);
             terminal.setLossConnectCount(0);
             heartBeatConsumer.updateResponseTime(terminal.getHeartBeatDTO());
-        } else if(text.startsWith(rp)) {
+        } else if (text.startsWith(rp)) {
             log.info("revice print command event");
             Terminal terminal = NettyTcpServer.terminalMap.get(ip);
             terminal.setRp(true);
+            switch (terminal.getPrintType()) {
+                case 0:
+                    terminal.goControl();
+                    break;
+                case 1:
+                    terminal.goReprint();
+                    break;
+            }
 //            terminal.setLossConnectCount(0);
 //            heartBeatConsumer.updateResponseTime(terminal.getHeartBeatDTO());
 
@@ -199,12 +207,12 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
             String ip = getIPString(ctx);
             String port = getIPPort(ctx);
             Terminal terminal = NettyTcpServer.terminalMap.get(ip);
-            HeartBeatDTO heartBeatDTO = heartBeatConsumer.createHeartBeatRecord(ip,port);
+            HeartBeatDTO heartBeatDTO = heartBeatConsumer.createHeartBeatRecord(ip, port);
             ctx.writeAndFlush(CoderUtils.stringToHexStr(heartbeatConfig.getHeartbeatMsg()));
             heartBeatConsumer.updateSendTime(heartBeatDTO);
             terminal.setHeartBeatDTO(heartBeatDTO);
             Integer lcc = terminal.getLossConnectCount();
-            terminal.setLossConnectCount(lcc+1);
+            terminal.setLossConnectCount(lcc + 1);
             if (lcc > heartbeatConfig.getReconnectTimes()) {
                 System.out.println("关闭这个不活跃通道！");
                 ctx.channel().close();
