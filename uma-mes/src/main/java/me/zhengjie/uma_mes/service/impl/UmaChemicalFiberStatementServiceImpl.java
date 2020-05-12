@@ -201,7 +201,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
         chemicalFiberDeliveryDetailQueryCriteria.setScanNumbers(scanNumbers);
         Pageable pageable = PageRequest.of(statementDetailsListDto.getPageNumber(), statementDetailsListDto.getPageSize());
-        Map<String,Object> chemicalFiberDeliveryDetailMap = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria, pageable);
+        Map<String,Object> chemicalFiberDeliveryDetailMap = chemicalFiberDeliveryDetailService.queryStatementDetailsAll(chemicalFiberDeliveryDetailQueryCriteria, pageable);
         List<ChemicalFiberDeliveryDetailDTO> tempList = (List<ChemicalFiberDeliveryDetailDTO>)chemicalFiberDeliveryDetailMap.get("content");
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : tempList) {
             chemicalFiberDeliveryDetailDTO.setCreateDate(scanNumberTempMap.get(chemicalFiberDeliveryDetailDTO.getScanNumber()));
@@ -276,6 +276,8 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         BigDecimal totalSum = new BigDecimal(0);
         BigDecimal totalAdvanceCharge = new BigDecimal(0);
         BigDecimal totalAmountDeducted = new BigDecimal(0);
+        BigDecimal sumNetWeight = new BigDecimal(0);
+        int sumTotalBag = 0;
         for (int i = 0; i < umaChemicalFiberStatementDetailsDTOS.size(); i++) {
             Map<String, String> lm = new HashMap<String, String>();
             lm.put("index", (i + 1) + "");
@@ -293,6 +295,8 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             totalSum = totalSum.add(umaChemicalFiberStatementDetailsDTOS.get(i).getTotalPrice());
             totalAdvanceCharge = totalAdvanceCharge.add(umaChemicalFiberStatementDetailsDTOS.get(i).getAdvanceCharge());
             totalAmountDeducted = totalAmountDeducted.add(umaChemicalFiberStatementDetailsDTOS.get(i).getAmountDeducted());
+            sumNetWeight = sumNetWeight.add(umaChemicalFiberStatementDetailsDTOS.get(i).getNetWeight());
+            sumTotalBag = sumTotalBag + umaChemicalFiberStatementDetailsDTOS.get(i).getTotalBag();
         }
         Timestamp starDate = umaChemicalFiberStatementDetailsDTOS.get(0).getScanDate();
         Timestamp endDate = umaChemicalFiberStatementDetailsDTOS.get(umaChemicalFiberStatementDetailsDTOS.size() - 1).getScanDate();
@@ -313,6 +317,8 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         map.put("totalAdvanceCharge", compareToBigDecimal(totalAdvanceCharge));
         map.put("totalAmountDeducted", compareToBigDecimal(totalAmountDeducted));
         map.put("statementList", listMap);
+        map.put("sumTotalBag", sumTotalBag);
+        map.put("sumNetWeight", sumNetWeight);
         workbook = ExcelExportUtil.exportExcel(params, map);
         FileUtil.downLoadExcel("对账单导出.xlsx", response, workbook);
     }
