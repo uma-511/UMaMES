@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.terminal.command.SendCommand;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,9 @@ import java.util.Vector;
 public class GobalSender extends SendCommand {
     @Autowired
     ThreadPoolTaskExecutor threadPoolTaskExecutor;
+
+    @Value("${uma.commond.delay:100}")
+    long delay;
 
     Channel channel;
     StringBuilder commandBuffer;
@@ -41,14 +45,14 @@ public class GobalSender extends SendCommand {
     }
     
     public void send(String command){
-        sendDeloy(command,1500);
+        sendDelay(command,delay);
     }
 
     public void send(Vector<Byte> command){
-        sendDeloy(command,1500);
+        sendDelay(command,delay);
     }
 
-    public void sendDeloy(String command,long times){
+    public void sendDelay(String command, long times){
         try {
             Thread.sleep(times);
             channel.writeAndFlush(command);
@@ -70,7 +74,7 @@ public class GobalSender extends SendCommand {
 //        });
     }
 
-    public void sendDeloy(Vector<Byte> command,long times){
+    public void sendDelay(Vector<Byte> command, long times){
         try {
             Thread.sleep(times);
             channel.writeAndFlush(command);
@@ -101,7 +105,7 @@ public class GobalSender extends SendCommand {
     }
 
     public void send(long times){
-        sendDeloy(commandBuffer.toString(),times);
+        sendDelay(commandBuffer.toString(),times);
     }
     public void sendImmediate(){
         sendImmediate(commandBuffer.toString());

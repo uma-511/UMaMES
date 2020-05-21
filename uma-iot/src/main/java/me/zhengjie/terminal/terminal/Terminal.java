@@ -201,17 +201,17 @@ public class Terminal extends SendCommand {
 //        command.addInitializeTeminalPrinter(printProps.getWidth(),printProps.getHeight(),printProps.getGap_m(),printProps.getGap_n());
 //        command.addPrint();
 //        Vector<Byte> data =  command.getCommand();
-//        gobalSender.sendDeloy(data,2000);
+//        gobalSender.sendDelay(data,2000);
         String printCommand = "PT:\r\n" +
                 "SIZE 60 mm,40 mm\r\n" +
                 "GAP 2 mm,4 mm\r\n" +
                 "CLS\r\n" +
                 "DENSITY 7\r\n" +
                 "REFERENCE 0,0\r\n" +
-                "TEXT 70,6,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\" \r\n" +
-                "TEXT 70,8,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
-                "TEXT 69,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
-                "TEXT 71,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
+                "TEXT 70,6,\"TSS24.BF2\",0,3,2,\"优码智能科技\" \r\n" +
+                "TEXT 70,8,\"TSS24.BF2\",0,3,2,\"优码智能科技\"\r\n" +
+                "TEXT 69,7,\"TSS24.BF2\",0,3,2,\"优码智能科技\"\r\n" +
+                "TEXT 71,7,\"TSS24.BF2\",0,3,2,\"优码智能科技\"\r\n" +
                 "TEXT 45,67,\"TSS24.BF2\",0,2,2,\"色号：\" \r\n" +
                 "TEXT 175,66,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
                 "TEXT 175,68,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
@@ -236,7 +236,7 @@ public class Terminal extends SendCommand {
                 "1TEXT 430,240,\"2\",0,3,4,\"27.00\"\r\n" +
                 "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + labelNum + "\"\r\n" +
                 "PRINT 1\r\n";
-        gobalSender.send(CoderUtils.stringToHexStr(printCommand));
+        gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand));
 
 //        goPrinting();
     }
@@ -263,7 +263,7 @@ public class Terminal extends SendCommand {
 //        printProps.setHeight(40);
 //
 //        Vector<Byte> data = new SvgUtils().getTeminalPrintData("E:\\项目资料\\优码\\清远\\清远.svg",printProps,dataMap);
-//        gobalSender.sendDeloy(data,800);
+//        gobalSender.sendDelay(data,800);
 
         String printCommand = "PT:\r\n" +
                 "SIZE 60 mm,40 mm\r\n" +
@@ -271,10 +271,10 @@ public class Terminal extends SendCommand {
                 "CLS\r\n" +
                 "DENSITY 7\r\n" +
                 "REFERENCE 0,0\r\n" +
-                "TEXT 70,6,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\" \r\n" +
-                "TEXT 70,8,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
-                "TEXT 69,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
-                "TEXT 71,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
+                "TEXT 70,6,\"TSS24.BF2\",0,3,2,\"优码智能科技\" \r\n" +
+                "TEXT 70,8,\"TSS24.BF2\",0,3,2,\"优码智能科技\"\r\n" +
+                "TEXT 69,7,\"TSS24.BF2\",0,3,2,\"优码智能科技\"\r\n" +
+                "TEXT 71,7,\"TSS24.BF2\",0,3,2,\"优码智能科技\"\r\n" +
                 "TEXT 45,67,\"TSS24.BF2\",0,2,2,\"色号：\" \r\n" +
                 "TEXT 175,66,\"TSS24.BF2\",0,2,2,\"" + label.getColor() + "\"\r\n" +
                 "TEXT 175,68,\"TSS24.BF2\",0,2,2,\"" + label.getColor() + "\"\r\n" +
@@ -300,7 +300,7 @@ public class Terminal extends SendCommand {
                 "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + label.getLabelNumber() + "\"\r\n" +
                 "PRINT 1\r\n";
         String command = CoderUtils.stringToHexStr(printCommand);
-        gobalSender.send(command);
+        gobalSender.sendImmediate(command);
 //        checkPrintStatus(command);
 //        ReprintPage reprintPage = new ReprintPage();
 //        reprintPage.back(ip);

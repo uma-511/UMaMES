@@ -337,7 +337,7 @@ public class ControllerPage extends SendCommand {
         gobalSender.send(CoderUtils.stringToHexStr("YM02AABB"));
 
         if(!terminal.isPrint()){
-            gobalSender.sendDeloy(sendTip("", ip), 1000);
+            gobalSender.sendDelay(sendTip("", ip), 1000);
         }
     }
 

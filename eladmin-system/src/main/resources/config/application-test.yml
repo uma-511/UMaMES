@@ -93,3 +93,8 @@ uma:
     createByTerminal: true
   label:
     printedIsIn: true
+  commond:
+    delay: 100
+
+logging:
+  path: D:/UMa_Mes/log
