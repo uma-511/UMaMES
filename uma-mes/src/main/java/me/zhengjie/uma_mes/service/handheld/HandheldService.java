@@ -147,6 +147,7 @@ public class HandheldService {
                     // 标签信息
                     String checkLabelStatusStr = checkLabelStatus(chemicalFiberLabelDTO, uploadDataDto.getStatus());
                     if (!"".equals(checkLabelStatusStr)) {
+                        scanRecordService.delete(scanRecord.getId());
                         return Result.error(ResultEnum.NOT_SCHEDULED_ERROR.getCode(), checkLabelStatusStr);
                     }
                 }
@@ -283,7 +284,7 @@ public class HandheldService {
             scanNumber = type + year + month + "001";
         } else {
             ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(scanRecordDTOS.size() - 1);
-            String tempScanNumber = scanRecordDTO.getScanNumber().substring(8);
+            String tempScanNumber = scanRecordDTO.getScanNumber().substring(7);
             Integer number = Integer.parseInt(tempScanNumber) + 1;
             String tempNumberStr = String.format("%3d", number++).replace(" ", "0");
             scanNumber = type + year + month + tempNumberStr;
