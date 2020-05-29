@@ -116,7 +116,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(resources.getId()).orElseGet(ChemicalFiberDeliveryNote::new);
         ValidationUtil.isNull( chemicalFiberDeliveryNote.getId(),"ChemicalFiberDeliveryNote","id",resources.getId());
         chemicalFiberDeliveryNote.copy(resources);
-        chemicalFiberDeliveryNote.setCreateDate(new Timestamp(System.currentTimeMillis()));
         chemicalFiberDeliveryNote.setCreateUser(SecurityUtils.getUsername());
         chemicalFiberDeliveryNote.setCustomerId(customerDTO.getId());
         chemicalFiberDeliveryNote.setCustomerCode(customerDTO.getCode());
