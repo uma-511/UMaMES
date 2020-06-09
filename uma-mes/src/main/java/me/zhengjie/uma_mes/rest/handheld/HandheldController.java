@@ -25,6 +25,7 @@ public class HandheldController {
     @GetMapping(value = "/handheldInit")
     @AnonymousAccess()
     public Result init() {
+//        return Result.success(handheldService.getScanNumber(1));
         return Result.success("成功");
     }
 

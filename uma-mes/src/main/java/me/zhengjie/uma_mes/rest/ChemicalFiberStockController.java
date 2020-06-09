@@ -53,6 +53,10 @@ public class ChemicalFiberStockController {
     @PreAuthorize("@el.check('chemicalFiberStock:list')")
     public ResponseEntity getChemicalFiberStocks(ChemicalFiberStockQueryCriteria criteria, Pageable pageable){
         criteria.setTotalBag(1);
+//        criteria.setMax("null");
+//        criteria.setMin("null");
+//        criteria.setTempMax("0");
+//        criteria.setTempMin("0");
         chemicalFiberStockService.stockTask();
         return new ResponseEntity<>(chemicalFiberStockService.queryAll(criteria,pageable),HttpStatus.OK);
     }
