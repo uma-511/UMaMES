@@ -1,8 +1,9 @@
 package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
-import java.math.BigDecimal;
+
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 
 /**
@@ -28,6 +29,9 @@ public class ChemicalFiberStockDTO implements Serializable {
 
     // 产品纤度
     private String prodFineness;
+
+    //计量单位
+    private String prodUnit;
 
     // 总净重
     private BigDecimal totalNetWeight;
@@ -55,4 +59,7 @@ public class ChemicalFiberStockDTO implements Serializable {
 
     // 状态
     private Integer status;
+
+    //Label
+    private String lable;
 }

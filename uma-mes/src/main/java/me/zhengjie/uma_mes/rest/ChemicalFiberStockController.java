@@ -1,12 +1,12 @@
 package me.zhengjie.uma_mes.rest;
 
 import com.lgmn.common.result.Result;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
 import me.zhengjie.uma_mes.service.ChemicalFiberStockService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockQueryCriteria;
 import org.springframework.data.domain.Pageable;
@@ -15,13 +15,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.*;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletResponse;
 
 /**
 * @author Tan Jun Ming
@@ -52,9 +52,10 @@ public class ChemicalFiberStockController {
     @ApiOperation("查询ChemicalFiberStock")
     @PreAuthorize("@el.check('chemicalFiberStock:list')")
     public ResponseEntity getChemicalFiberStocks(ChemicalFiberStockQueryCriteria criteria, Pageable pageable){
-        criteria.setTotalBag(1);
+        //criteria.setTotalBag(1);
         chemicalFiberStockService.stockTask();
-        return new ResponseEntity<>(chemicalFiberStockService.queryAll(criteria,pageable),HttpStatus.OK);
+        ResponseEntity responseEntity= new ResponseEntity<>(chemicalFiberStockService.queryAll(criteria,pageable),HttpStatus.OK);
+        return responseEntity;
     }
 
     @PostMapping
@@ -62,7 +63,9 @@ public class ChemicalFiberStockController {
     @ApiOperation("新增ChemicalFiberStock")
     @PreAuthorize("@el.check('chemicalFiberStock:add')")
     public ResponseEntity create(@Validated @RequestBody ChemicalFiberStock resources){
-        return new ResponseEntity<>(chemicalFiberStockService.create(resources),HttpStatus.CREATED);
+        resources.setStatus(0);
+        ResponseEntity responseEntity=new ResponseEntity<>(chemicalFiberStockService.create(resources),HttpStatus.CREATED);
+        return responseEntity;
     }
 
     @PutMapping
@@ -81,6 +84,13 @@ public class ChemicalFiberStockController {
     public ResponseEntity delete(@PathVariable Integer id){
         chemicalFiberStockService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getSelectMap")
+    @ApiOperation("获取产品列表")
+    public ResponseEntity getSelectMap(ChemicalFiberStockQueryCriteria criteria){
+        List<ChemicalFiberStockDTO> chemicalFiberStockDTO = chemicalFiberStockService.querySelectList(criteria.getProdName());
+        return new ResponseEntity<>(chemicalFiberStockService.buildTree(chemicalFiberStockDTO),HttpStatus.OK);
     }
 
     @PostMapping("/getSummaryData")

@@ -1,29 +1,25 @@
 package me.zhengjie.uma_mes.service.impl;
 
 import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
-import me.zhengjie.utils.ValidationUtil;
-import me.zhengjie.utils.FileUtil;
 import me.zhengjie.uma_mes.repository.ChemicalFiberStockRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberStockService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberStockMapper;
+import me.zhengjie.utils.FileUtil;
+import me.zhengjie.utils.PageUtil;
+import me.zhengjie.utils.QueryHelp;
+import me.zhengjie.utils.ValidationUtil;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import me.zhengjie.utils.PageUtil;
-import me.zhengjie.utils.QueryHelp;
-import java.util.List;
-import java.util.Map;
-import java.io.IOException;
+
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.io.IOException;
+import java.util.*;
 
 /**
 * @author Tan Jun Ming
@@ -54,6 +50,11 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
 //    @Cacheable
     public List<ChemicalFiberStockDTO> queryAll(ChemicalFiberStockQueryCriteria criteria){
         return chemicalFiberStockMapper.toDto(chemicalFiberStockRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+    }
+
+    @Override
+    public List<ChemicalFiberStockDTO> querySelectList(String innerName) {
+        return chemicalFiberStockMapper.toDto(chemicalFiberStockRepository.querySelectList(innerName));
     }
 
     @Override
@@ -122,4 +123,23 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
     public ChemicalFiberStock findByColorAndFineness(String color, String fineness) {
         return chemicalFiberStockRepository.findByProdColorAndProdFineness(color,fineness);
     }
+
+    @Override
+    public Object buildTree(List<ChemicalFiberStockDTO> chemicalFiberStockDTOs) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (ChemicalFiberStockDTO chemicalFiberStockDto : chemicalFiberStockDTOs) {
+            Map<String,Object> map = new LinkedHashMap<>();
+            map.put("prodName",chemicalFiberStockDto.getProdName() );
+            map.put("prodModel",chemicalFiberStockDto.getProdModel() );
+            map.put("label",chemicalFiberStockDto.getProdName() );
+            list.add(map);
+        }
+        Integer totalElements = chemicalFiberStockDTOs.size();
+        Map<String,Object> fullMap = new HashMap<>();
+        fullMap.put("totalElements",totalElements);
+        fullMap.put("content", list);
+        return fullMap;
+    }
+
+
 }

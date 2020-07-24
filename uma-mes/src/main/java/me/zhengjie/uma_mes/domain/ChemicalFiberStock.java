@@ -3,6 +3,7 @@ package me.zhengjie.uma_mes.domain;
 import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.io.Serializable;
@@ -33,6 +34,10 @@ public class ChemicalFiberStock implements Serializable {
     // 产品名称
     @Column(name = "prod_name")
     private String prodName;
+
+    // 计量单位
+    @Column(name = "prod_unit")
+    private String prodUnit;
 
     // 产品色号
     @Column(name = "prod_color")

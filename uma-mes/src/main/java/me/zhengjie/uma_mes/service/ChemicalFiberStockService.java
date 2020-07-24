@@ -4,12 +4,11 @@ import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockQueryCriteria;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
 
-import java.util.Map;
-import java.util.List;
-import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author Tan Jun Ming
@@ -33,6 +32,12 @@ public interface ChemicalFiberStockService {
     List<ChemicalFiberStockDTO> queryAll(ChemicalFiberStockQueryCriteria criteria);
 
     /**
+     * 模糊查询型号和产品列表
+     * @return List<ChemicalFiberStockDTO>
+     */
+    List<ChemicalFiberStockDTO> querySelectList(String innerName);
+
+    /**
      * 根据ID查询
      * @param id ID
      * @return ChemicalFiberStockDTO
@@ -48,6 +53,8 @@ public interface ChemicalFiberStockService {
     void download(List<ChemicalFiberStockDTO> all, HttpServletResponse response) throws IOException;
 
     void stockTask();
+
+    Object buildTree(List<ChemicalFiberStockDTO> chemicalFiberStockDTO);
 
     ChemicalFiberStock findByColorAndFineness(String color, String fineness);
 }

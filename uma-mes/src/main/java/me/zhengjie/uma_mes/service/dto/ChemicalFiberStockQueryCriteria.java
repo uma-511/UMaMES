@@ -14,13 +14,16 @@ public class ChemicalFiberStockQueryCriteria{
     @Query
     private Integer prodId;
 
-    // 精确
-    @Query
+    // 模糊
+    @Query(type = Query.Type.INNER_LIKE)
     private String prodModel;
 
-    // 精确
-    @Query
+    // 模糊
+    @Query(type = Query.Type.INNER_LIKE)
     private String prodName;
+
+    @Query
+    private String prodUnit;
 
     // 精确
     @Query
