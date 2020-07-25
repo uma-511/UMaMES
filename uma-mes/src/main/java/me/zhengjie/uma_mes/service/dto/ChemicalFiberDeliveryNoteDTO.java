@@ -56,4 +56,25 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
 
     // 制单人
     private String createUser;
+
+    // 车牌号
+    private String carNumber;
+
+    // 交付日期
+    private String deliveryDate;
+
+    // 主司机
+    private String driverMain;
+
+    // 副司机
+    private String driverDeputy;
+
+    // 订单状态：0-销毁 1-待打印 2-待出库 3-待签收 4-回填 5-待结款 6-完结
+    private String state;
+
+    // 装卸员1
+    private String loaderOne;
+
+    // 装卸员2
+    private String loaderTwo;
 }

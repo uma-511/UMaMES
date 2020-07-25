@@ -17,6 +17,8 @@ public class LabelMsgDto {
     @ApiModelProperty("出仓单号")
     private String scanNumber;
 
+    private Boolean isAdd;
+
     @ApiModelProperty("是否检查标签")
     private Boolean isCheckLabel;
 

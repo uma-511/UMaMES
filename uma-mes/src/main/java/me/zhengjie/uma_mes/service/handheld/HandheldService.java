@@ -14,8 +14,8 @@ import me.zhengjie.uma_mes.service.dto.handheld.UploadDataDto;
 import me.zhengjie.uma_mes.vo.handheld.ChemicalFiberLabelInfoVo;
 import me.zhengjie.uma_mes.vo.handheld.ChemicalFiberProductionInfoVo;
 import me.zhengjie.uma_mes.vo.handheld.LabelMsgVo;
+import me.zhengjie.utils.StringUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -87,6 +87,21 @@ public class HandheldService {
             List<ScanRecordLabelDTO> scanRecordLabelDTOS = scanRecordLabelService.queryAll(scanRecordLabelQueryCriteria);
             if (scanRecordLabelDTOS.size() <= 0) {
                 return Result.serverError("此标签不存在于 [" + labelMsgDto.getScanNumber() + "] 出库号内");
+            }
+        }
+
+        if (!StringUtils.isEmpty(labelMsgDto.getScanNumber()) && labelMsgDto.getIsAdd()) {
+            ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
+            scanRecordQueryCriteria.setScanNumber(labelMsgDto.getScanNumber());
+            List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
+            ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(0);
+
+            ScanRecordLabelQueryCriteria scanRecordLabelQueryCriteria = new ScanRecordLabelQueryCriteria();
+            scanRecordLabelQueryCriteria.setScanRecordId(scanRecordDTO.getId());
+            scanRecordLabelQueryCriteria.setLabelId(chemicalFiberLabelDTO.getId());
+            List<ScanRecordLabelDTO> scanRecordLabelDTOS = scanRecordLabelService.queryAll(scanRecordLabelQueryCriteria);
+            if (scanRecordLabelDTOS.size() > 0) {
+                return Result.serverError("此标签已存在 [" + labelMsgDto.getScanNumber() + "] 出库号内");
             }
         }
 
@@ -267,7 +282,7 @@ public class HandheldService {
      * @param status 入库：RK 出库：SH 退库：TK 退货：TH
      * @return
      */
-    private String getScanNumber (Integer status) {
+    public String getScanNumber (Integer status) {
         String scanNumber;
         String type = getTypeStr(status);
         Map<String, Object> timeMap = monthTimeInMillis();
@@ -350,7 +365,7 @@ public class HandheldService {
                 checkLabelStatusStr =  chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已作废】";
                 break;
             case 4:
-                checkLabelStatusStr = status != 2 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已返仓】，请出仓" : "";
+                checkLabelStatusStr = status != 2 && status != 7 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已返仓】，请出仓" : "";
                 break;
             default:
                 checkLabelStatusStr = status != 1 && status != 3 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已退货】，请入仓或作废" : "";
@@ -376,7 +391,7 @@ public class HandheldService {
 
         Map<String, Object> map = new HashMap<>();
         map.put("time", time);
-        map.put("month", month);
+        map.put("month", month < 10 ? "0" + month : month);
         map.put("year", year);
         return map;
     }

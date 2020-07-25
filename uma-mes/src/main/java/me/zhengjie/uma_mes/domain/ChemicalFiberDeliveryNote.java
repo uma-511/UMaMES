@@ -80,6 +80,34 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "create_user")
     private String createUser;
 
+    // 车牌号
+    @Column(name = "car_number")
+    private String carNumber;
+
+    // 交付日期
+    @Column(name = "delivery_date")
+    private String deliveryDate;
+
+    // 主司机
+    @Column(name = "driver_main")
+    private String driverMain;
+
+    // 副司机
+    @Column(name = "driver_deputy")
+    private String driverDeputy;
+
+    // 订单状态：0-销毁 1-待打印 2-待出库 3-待签收 4-回填 5-待结款 6-完结
+    @Column(name = "state")
+    private String state;
+
+    // 装卸员1
+    @Column(name = "loader_one")
+    private String loaderOne;
+
+    // 装卸员2
+    @Column(name = "loader_two")
+    private String loaderTwo;
+
     @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;
 
