@@ -61,7 +61,7 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
     private String carNumber;
 
     // 交付日期
-    private String deliveryDate;
+    private Timestamp deliveryDate;
 
     // 主司机
     private String driverMain;
@@ -70,11 +70,12 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
     private String driverDeputy;
 
     // 订单状态：0-销毁 1-待打印 2-待出库 3-待签收 4-回填 5-待结款 6-完结
-    private String state;
+    private Integer noteStatus;
 
     // 装卸员1
     private String loaderOne;
 
     // 装卸员2
     private String loaderTwo;
+
 }

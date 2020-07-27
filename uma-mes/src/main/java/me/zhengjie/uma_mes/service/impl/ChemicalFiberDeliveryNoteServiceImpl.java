@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static cn.afterturn.easypoi.excel.ExcelExportUtil.SHEET_NAME;
@@ -53,6 +55,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     private final ScanRecordLabelService scanRecordLabelService;
 
     private final ChemicalFiberLabelService chemicalFiberLabelService;
+
+    public static final String str_yyyyMMddHHmmsssss = "yyyyMMddHHmmssSSS";
 
     public ChemicalFiberDeliveryNoteServiceImpl(ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository,
                                                 ChemicalFiberDeliveryNoteMapper chemicalFiberDeliveryNoteMapper,
@@ -99,8 +103,29 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 //    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberDeliveryNoteDTO create(ChemicalFiberDeliveryNote resources) {
+        if(null == resources.getNoteStatus()){
+            resources.setNoteStatus(1);
+        }
+        CustomerDTO customerDTO = customerService.findById(resources.getCustomerId());
+        resources.setCustomerName(customerDTO.getName());
+        resources.setCustomerAddress(customerDTO.getAddress());
+        resources.setCustomerCode(customerDTO.getCode());
+        resources.setContacts(customerDTO.getContacts());
+        resources.setContactPhone(customerDTO.getContactPhone());
+        resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        resources.setCreateUser(SecurityUtils.getUsername());
+        resources.setScanNumber(getScanNumber());
         return chemicalFiberDeliveryNoteMapper.toDto(chemicalFiberDeliveryNoteRepository.save(resources));
     }
+
+    public String getScanNumber () {
+        String scanNumber;
+        String type = "SH";
+        DateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        scanNumber=type+sdf.format(new Date());
+        return scanNumber;
+    }
+
 
     @Override
 //    @CacheEvict(allEntries = true)

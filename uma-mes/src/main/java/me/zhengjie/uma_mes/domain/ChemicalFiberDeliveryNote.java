@@ -86,7 +86,7 @@ public class ChemicalFiberDeliveryNote implements Serializable {
 
     // 交付日期
     @Column(name = "delivery_date")
-    private String deliveryDate;
+    private Timestamp deliveryDate;
 
     // 主司机
     @Column(name = "driver_main")
@@ -97,8 +97,8 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     private String driverDeputy;
 
     // 订单状态：0-销毁 1-待打印 2-待出库 3-待签收 4-回填 5-待结款 6-完结
-    @Column(name = "state")
-    private String state;
+    @Column(name = "note_status")
+    private Integer noteStatus;
 
     // 装卸员1
     @Column(name = "loader_one")
