@@ -27,8 +27,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static cn.afterturn.easypoi.excel.ExcelExportUtil.SHEET_NAME;
@@ -121,11 +119,45 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     public String getScanNumber () {
         String scanNumber;
         String type = "SH";
-        DateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        scanNumber=type+sdf.format(new Date());
+        Map<String, Object> timeMap = monthTimeInMillis();
+        String year = timeMap.get("year").toString();
+        String month = timeMap.get("month").toString();
+
+        ChemicalFiberDeliveryNoteQueryCriteria chemicalFiberDeliveryNoteQueryCriteria = new ChemicalFiberDeliveryNoteQueryCriteria();
+        chemicalFiberDeliveryNoteQueryCriteria.setStartTime(new Timestamp(Long.parseLong(timeMap.get("time").toString())));
+        chemicalFiberDeliveryNoteQueryCriteria.setEndTime(new Timestamp(System.currentTimeMillis()));
+        List<ChemicalFiberDeliveryNoteDTO> chemicalFiberDeliveryNoteDTOS = queryAll(chemicalFiberDeliveryNoteQueryCriteria);
+
+        if (chemicalFiberDeliveryNoteDTOS.size() == 0) {
+            scanNumber = type + year + month + "001";
+        } else {
+            ChemicalFiberDeliveryNoteDTO chemicalFiberDeliveryNoteDTO = chemicalFiberDeliveryNoteDTOS.get(chemicalFiberDeliveryNoteDTOS.size() - 1);
+            String tempScanNumber = chemicalFiberDeliveryNoteDTO.getScanNumber().substring(7);
+            Integer number = Integer.parseInt(tempScanNumber) + 1;
+            String tempNumberStr = String.format("%3d", number++).replace(" ", "0");
+            scanNumber = type + year + month + tempNumberStr;
+        }
         return scanNumber;
     }
 
+    public Map monthTimeInMillis() {
+        Calendar calendar = Calendar.getInstance();// 获取当前日期
+        calendar.add(Calendar.YEAR, 0);
+        calendar.add(Calendar.MONTH, 0);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Long time = calendar.getTimeInMillis();
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int year = calendar.get(Calendar.YEAR);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("time", time);
+        map.put("month", month < 10 ? "0" + month : month);
+        map.put("year", year);
+        return map;
+    }
 
     @Override
 //    @CacheEvict(allEntries = true)
@@ -153,6 +185,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         chemicalFiberDeliveryNoteRepository.deleteById(id);
     }
 
+    public void sendOut(Integer id) {
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+        chemicalFiberDeliveryNote.setNoteStatus(3);
+        update(chemicalFiberDeliveryNote);
+    }
 
     @Override
     public void download(List<ChemicalFiberDeliveryNoteDTO> all, HttpServletResponse response) throws IOException {
@@ -203,6 +240,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("createDate", chemicalFiberDeliveryNote.getCreateDate());
         map.put("total", chemicalFiberDeliveryNote.getTotalPrice());
         map.put("capitalizationTotal", NumberToCN.number2CNMontrayUnit(chemicalFiberDeliveryNote.getTotalPrice()));
+        map.put("driverMain",chemicalFiberDeliveryNote.getDriverMain());
+        map.put("driverDeputy",chemicalFiberDeliveryNote.getDriverDeputy());
+        map.put("loaderOne",chemicalFiberDeliveryNote.getLoaderOne());
+        map.put("loaderTwo",chemicalFiberDeliveryNote.getLoaderTwo());
+        map.put("carNumber",chemicalFiberDeliveryNote.getCarNumber());
         List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
             Map<String, String> lm = new HashMap<String, String>();
@@ -218,6 +260,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("deliveryList", listMap);
         workbook = ExcelExportUtil.exportExcel(params, map);
         FileUtil.downLoadExcel("生产单导出.xlsx", response, workbook);
+        chemicalFiberDeliveryNote.setNoteStatus(2);
+        update(chemicalFiberDeliveryNote);
     }
 
     @Override

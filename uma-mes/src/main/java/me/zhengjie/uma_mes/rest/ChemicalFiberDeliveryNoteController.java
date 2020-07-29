@@ -106,6 +106,15 @@ public class ChemicalFiberDeliveryNoteController {
         chemicalFiberDeliveryNoteService.downloadDeliveryNote(id, response);
     }
 
+    @Log("发货")
+    @ApiOperation("发货")
+    @GetMapping(value = "/sendOut/{id}")
+    @AnonymousAccess()
+    public ResponseEntity sendOut(@PathVariable Integer id) {
+        chemicalFiberDeliveryNoteService.sendOut(id);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @Log("导出磅码单")
     @ApiOperation("导出磅码单")
     @PostMapping(value = "/exportPoundExcel")

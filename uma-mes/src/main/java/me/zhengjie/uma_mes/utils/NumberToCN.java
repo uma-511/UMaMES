@@ -43,6 +43,9 @@ public class NumberToCN {
         StringBuffer sb = new StringBuffer();
         // -1, 0, or 1 as the value of this BigDecimal is negative, zero, or
         // positive.
+        if(null == numberOfMoney || numberOfMoney.equals(null)) {
+            return "";
+        }
         int signum = numberOfMoney.signum();
         // 零元整的情况
         if (signum == 0) {

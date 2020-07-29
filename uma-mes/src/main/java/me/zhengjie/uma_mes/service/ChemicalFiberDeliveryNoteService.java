@@ -2,12 +2,15 @@ package me.zhengjie.uma_mes.service;
 
 import com.lgmn.common.result.Result;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
-import me.zhengjie.uma_mes.service.dto.*;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteDTO;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteExportPoundExcelDto;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNoteQueryCriteria;
 import org.springframework.data.domain.Pageable;
-import java.util.Map;
-import java.util.List;
-import java.io.IOException;
+
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author Tan Jun Ming
@@ -54,4 +57,6 @@ public interface ChemicalFiberDeliveryNoteService {
     Map<String,Object> getSalesReport(ChemicalFiberDeliveryNoteQueryCriteria criteria, Pageable pageable);
 
     Result getSalesReportSummaries(ChemicalFiberDeliveryNoteQueryCriteria criteria);
+
+    void sendOut(Integer id);
 }

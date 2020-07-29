@@ -78,4 +78,10 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
     // 装卸员2
     private String loaderTwo;
 
+    // 当前欠款
+    private BigDecimal balance;
+
+    // 付款方式
+    private String payment;
+
 }

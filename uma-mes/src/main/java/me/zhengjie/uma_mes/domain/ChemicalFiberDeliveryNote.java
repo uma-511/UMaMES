@@ -108,6 +108,14 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "loader_two")
     private String loaderTwo;
 
+    // 当前欠款
+    @Column(name = "balance")
+    private BigDecimal balance;
+
+    // 付款方式
+    @Column(name = "payment")
+    private String payment;
+
     @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;
 

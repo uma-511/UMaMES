@@ -2,7 +2,6 @@ package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
 import me.zhengjie.annotation.Query;
-import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 
 import java.sql.Timestamp;
 
@@ -54,4 +53,6 @@ public class ChemicalFiberDeliveryNoteQueryCriteria{
 
     // 临时结束时间
     private Long tempEndTime;
+
+    private Integer id;
 }
