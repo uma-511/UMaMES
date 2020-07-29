@@ -2,9 +2,8 @@ package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
 
-import javax.persistence.Column;
-import java.math.BigDecimal;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 
@@ -67,4 +66,13 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     private Timestamp createDate;
 
     private String customerName;
+
+    // 仓位
+    private String warehouse;
+
+    // 实收数量
+    private Integer realQuantity;
+
+    // 实收金额
+    private BigDecimal realPrice;
 }

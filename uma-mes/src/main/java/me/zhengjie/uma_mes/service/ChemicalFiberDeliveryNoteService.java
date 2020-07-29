@@ -59,4 +59,6 @@ public interface ChemicalFiberDeliveryNoteService {
     Result getSalesReportSummaries(ChemicalFiberDeliveryNoteQueryCriteria criteria);
 
     void sendOut(Integer id);
+
+    void recived(Integer id);
 }

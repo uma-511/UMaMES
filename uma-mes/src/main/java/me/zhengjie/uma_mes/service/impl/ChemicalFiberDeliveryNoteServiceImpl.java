@@ -11,7 +11,9 @@ import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
 import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.dto.*;
+import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryDetailMapper;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryNoteMapper;
+import me.zhengjie.uma_mes.service.mapper.ChemicalFiberStockMapper;
 import me.zhengjie.uma_mes.utils.NumberToCN;
 import me.zhengjie.utils.*;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -54,7 +56,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     private final ChemicalFiberLabelService chemicalFiberLabelService;
 
-    public static final String str_yyyyMMddHHmmsssss = "yyyyMMddHHmmssSSS";
+    private final ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper;
+
+    private final ChemicalFiberStockService chemicalFiberStockService;
+
+    private final ChemicalFiberStockMapper chemicalFiberStockMapper;
 
     public ChemicalFiberDeliveryNoteServiceImpl(ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository,
                                                 ChemicalFiberDeliveryNoteMapper chemicalFiberDeliveryNoteMapper,
@@ -62,7 +68,10 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                                                 ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService,
                                                 ScanRecordService scanRecordService,
                                                 ScanRecordLabelService scanRecordLabelService,
-                                                ChemicalFiberLabelService chemicalFiberLabelService) {
+                                                ChemicalFiberLabelService chemicalFiberLabelService,
+                                                ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper,
+                                                ChemicalFiberStockService chemicalFiberStockService,
+                                                ChemicalFiberStockMapper chemicalFiberStockMapper) {
         this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
         this.chemicalFiberDeliveryNoteMapper = chemicalFiberDeliveryNoteMapper;
         this.customerService = customerService;
@@ -70,6 +79,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         this.scanRecordService = scanRecordService;
         this.scanRecordLabelService = scanRecordLabelService;
         this.chemicalFiberLabelService = chemicalFiberLabelService;
+        this.chemicalFiberDeliveryDetailMapper = chemicalFiberDeliveryDetailMapper;
+        this.chemicalFiberStockService = chemicalFiberStockService;
+        this.chemicalFiberStockMapper = chemicalFiberStockMapper;
     }
 
     @Override
@@ -185,9 +197,44 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         chemicalFiberDeliveryNoteRepository.deleteById(id);
     }
 
+    @Override
     public void sendOut(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         chemicalFiberDeliveryNote.setNoteStatus(3);
+        update(chemicalFiberDeliveryNote);
+    }
+
+    @Override
+    public void recived(Integer id) {
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+        ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
+        chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
+        ChemicalFiberStockQueryCriteria chemicalFiberStockQueryCriteria;
+        BigDecimal detailPrise;
+        BigDecimal realTotalPrise = new BigDecimal(0);
+        for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
+            if(null == chemicalFiberDeliveryDetailDTO.getRealQuantity() || chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)){
+                chemicalFiberDeliveryDetailDTO.setRealQuantity(chemicalFiberDeliveryDetailDTO.getTotalNumber());
+                detailPrise = new BigDecimal(0);
+                detailPrise = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(BigDecimal.valueOf((int)chemicalFiberDeliveryDetailDTO.getRealQuantity()));
+                realTotalPrise = realTotalPrise.add(detailPrise);
+                chemicalFiberDeliveryDetailDTO.setRealPrice(detailPrise);
+                chemicalFiberDeliveryDetailService.update(chemicalFiberDeliveryDetailMapper.toEntity(chemicalFiberDeliveryDetailDTO));
+                //处理库存
+                chemicalFiberStockQueryCriteria = new ChemicalFiberStockQueryCriteria();
+                chemicalFiberStockQueryCriteria.setProdName(chemicalFiberDeliveryDetailDTO.getProdName());
+                chemicalFiberStockQueryCriteria.setProdId(chemicalFiberDeliveryDetailDTO.getProdId());
+                chemicalFiberStockQueryCriteria.setProdUnit(chemicalFiberDeliveryDetailDTO.getUnit());
+                List<ChemicalFiberStockDTO> chemicalFiberStockDTOs = chemicalFiberStockService.queryAll(chemicalFiberStockQueryCriteria);
+                for (ChemicalFiberStockDTO chemicalFiberStockDTO : chemicalFiberStockDTOs){
+                    chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber()-chemicalFiberDeliveryDetailDTO.getTotalNumber());
+                    chemicalFiberStockService.update(chemicalFiberStockMapper.toEntity(chemicalFiberStockDTO));
+                }
+            }
+        }
+        chemicalFiberDeliveryNote.setNoteStatus(4);
+        chemicalFiberDeliveryNote.setBalance(realTotalPrise);
         update(chemicalFiberDeliveryNote);
     }
 
@@ -250,7 +297,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             Map<String, String> lm = new HashMap<String, String>();
             lm.put("prodName", chemicalFiberDeliveryDetailDTO.getProdName());
             lm.put("totalBag", chemicalFiberDeliveryDetailDTO.getTotalBag() + "");
-            lm.put("totalNumber", "个".equals(chemicalFiberDeliveryDetailDTO.getUnit()) ? chemicalFiberDeliveryDetailDTO.getTotalNumber() + "" : chemicalFiberDeliveryDetailDTO.getTotalWeight() + "");
+            lm.put("totalNumber", chemicalFiberDeliveryDetailDTO.getTotalNumber() + "");
             lm.put("unit", chemicalFiberDeliveryDetailDTO.getUnit());
             lm.put("sellingPrice", chemicalFiberDeliveryDetailDTO.getSellingPrice() + "");
             lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");

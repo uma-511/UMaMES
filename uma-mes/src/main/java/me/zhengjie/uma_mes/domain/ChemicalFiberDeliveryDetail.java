@@ -94,6 +94,18 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
     @Column(name = "customer_name")
     private String customerName;
 
+    // 仓位
+    @Column(name = "warehouse")
+    private String warehouse;
+
+    // 实收数量
+    @Column(name = "real_quantity")
+    private Integer realQuantity;
+
+    // 实收金额
+    @Column(name = "real_price")
+    private BigDecimal realPrice;
+
     public void copy(ChemicalFiberDeliveryDetail source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

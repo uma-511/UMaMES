@@ -106,12 +106,21 @@ public class ChemicalFiberDeliveryNoteController {
         chemicalFiberDeliveryNoteService.downloadDeliveryNote(id, response);
     }
 
-    @Log("发货")
-    @ApiOperation("发货")
+    @Log("订单发货")
+    @ApiOperation("订单发货")
     @GetMapping(value = "/sendOut/{id}")
     @AnonymousAccess()
     public ResponseEntity sendOut(@PathVariable Integer id) {
         chemicalFiberDeliveryNoteService.sendOut(id);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Log("订单签收")
+    @ApiOperation("订单签收")
+    @GetMapping(value = "/recived/{id}")
+    @AnonymousAccess()
+    public ResponseEntity recived(@PathVariable Integer id) {
+        chemicalFiberDeliveryNoteService.recived(id);
         return new ResponseEntity(HttpStatus.OK);
     }
 
