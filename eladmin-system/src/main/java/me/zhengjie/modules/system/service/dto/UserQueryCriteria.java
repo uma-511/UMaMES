@@ -23,9 +23,13 @@ public class UserQueryCriteria implements Serializable {
     @Query(blurry = "email,username")
     private String blurry;
 
+    @Query(propName = "username", type = Query.Type.IN)
+    private String username;
+
     @Query
     private Boolean enabled;
 
+    @Query
     private Long deptId;
 
     @Query(type = Query.Type.GREATER_THAN,propName = "createTime")

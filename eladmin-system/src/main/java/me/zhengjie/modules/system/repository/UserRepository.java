@@ -5,7 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Zheng Jie
@@ -24,4 +26,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Modifying
     @Query(value = "update user set email = ?2 where username = ?1",nativeQuery = true)
     void updateEmail(String username, String email);
+
+    @Query(value = "select * from user where dept_id = :id and username like %:username% ",nativeQuery = true)
+    List<User> getUserList(Long id, String username);
 }

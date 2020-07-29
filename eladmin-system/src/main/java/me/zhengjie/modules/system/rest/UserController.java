@@ -11,6 +11,7 @@ import me.zhengjie.modules.system.domain.vo.UserPassVo;
 import me.zhengjie.modules.system.service.DeptService;
 import me.zhengjie.modules.system.service.RoleService;
 import me.zhengjie.modules.system.service.dto.RoleSmallDTO;
+import me.zhengjie.modules.system.service.dto.UserDTO;
 import me.zhengjie.modules.system.service.dto.UserQueryCriteria;
 import me.zhengjie.service.VerificationCodeService;
 import me.zhengjie.utils.*;
@@ -179,5 +180,12 @@ public class UserController {
         if (currentLevel > optLevel) {
             throw new BadRequestException("角色权限不足");
         }
+    }
+
+    @GetMapping(value = "/getUserListByDeptId")
+    @ApiOperation("获取用户列表")
+    public ResponseEntity getUserListByDeptId(UserQueryCriteria criteria){
+        List<UserDTO> userDTOS = userService.getUserList(criteria.getDeptId(),criteria.getUsername());
+        return new ResponseEntity<>(userDTOS,HttpStatus.OK);
     }
 }
