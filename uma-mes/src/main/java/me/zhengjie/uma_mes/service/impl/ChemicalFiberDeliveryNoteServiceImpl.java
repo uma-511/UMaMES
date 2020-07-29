@@ -214,12 +214,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         BigDecimal detailPrise;
         BigDecimal realTotalPrise = new BigDecimal(0);
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
-            if(null == chemicalFiberDeliveryDetailDTO.getRealQuantity() || chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)){
+            if(null == chemicalFiberDeliveryDetailDTO.getRealQuantity() || chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)) {
                 chemicalFiberDeliveryDetailDTO.setRealQuantity(chemicalFiberDeliveryDetailDTO.getTotalNumber());
                 detailPrise = new BigDecimal(0);
-                detailPrise = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(BigDecimal.valueOf((int)chemicalFiberDeliveryDetailDTO.getRealQuantity()));
+                detailPrise = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(BigDecimal.valueOf((int) chemicalFiberDeliveryDetailDTO.getRealQuantity()));
                 realTotalPrise = realTotalPrise.add(detailPrise);
                 chemicalFiberDeliveryDetailDTO.setRealPrice(detailPrise);
+            }
                 chemicalFiberDeliveryDetailService.update(chemicalFiberDeliveryDetailMapper.toEntity(chemicalFiberDeliveryDetailDTO));
                 //处理库存
                 chemicalFiberStockQueryCriteria = new ChemicalFiberStockQueryCriteria();
@@ -231,7 +232,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                     chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber()-chemicalFiberDeliveryDetailDTO.getTotalNumber());
                     chemicalFiberStockService.update(chemicalFiberStockMapper.toEntity(chemicalFiberStockDTO));
                 }
-            }
         }
         chemicalFiberDeliveryNote.setNoteStatus(4);
         chemicalFiberDeliveryNote.setBalance(realTotalPrise);
