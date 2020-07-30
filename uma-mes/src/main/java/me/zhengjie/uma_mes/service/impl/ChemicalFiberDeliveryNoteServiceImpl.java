@@ -130,7 +130,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     public String getScanNumber () {
         String scanNumber;
-        String type = "SH";
+        String type = "XQ";
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
