@@ -130,7 +130,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     public String getScanNumber () {
         String scanNumber;
-        String type = "XQ";
+        String type = "YQ";
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
@@ -215,6 +215,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         BigDecimal realTotalPrise = new BigDecimal(0);
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
             if(null == chemicalFiberDeliveryDetailDTO.getRealQuantity() || chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)) {
+                //若实收数量为空则自动填入计划数
                 chemicalFiberDeliveryDetailDTO.setRealQuantity(chemicalFiberDeliveryDetailDTO.getTotalNumber());
                 detailPrise = new BigDecimal(0);
                 detailPrise = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(BigDecimal.valueOf((int) chemicalFiberDeliveryDetailDTO.getRealQuantity()));
@@ -229,6 +230,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 chemicalFiberStockQueryCriteria.setProdUnit(chemicalFiberDeliveryDetailDTO.getUnit());
                 List<ChemicalFiberStockDTO> chemicalFiberStockDTOs = chemicalFiberStockService.queryAll(chemicalFiberStockQueryCriteria);
                 for (ChemicalFiberStockDTO chemicalFiberStockDTO : chemicalFiberStockDTOs){
+                    if(null == chemicalFiberStockDTO.getTotalNumber()){
+                        chemicalFiberStockDTO.setTotalNumber(0);
+                    }
                     chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber()-chemicalFiberDeliveryDetailDTO.getTotalNumber());
                     chemicalFiberStockService.update(chemicalFiberStockMapper.toEntity(chemicalFiberStockDTO));
                 }

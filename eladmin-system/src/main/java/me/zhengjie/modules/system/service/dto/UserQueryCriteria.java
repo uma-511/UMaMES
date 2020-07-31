@@ -20,11 +20,14 @@ public class UserQueryCriteria implements Serializable {
     private Set<Long> deptIds;
 
     // 多字段模糊
-    @Query(blurry = "email,username")
+    @Query(blurry = "email,realname")
     private String blurry;
 
     @Query(propName = "username", type = Query.Type.IN)
     private String username;
+
+    @Query(propName = "realname", type = Query.Type.IN)
+    private String realname;
 
     @Query
     private Boolean enabled;

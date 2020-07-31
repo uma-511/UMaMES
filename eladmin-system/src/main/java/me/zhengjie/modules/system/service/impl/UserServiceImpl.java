@@ -64,8 +64,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> getUserList(Long deptId,String username){
-        List<User> users = userRepository.getUserList(deptId,username);
+    public List<UserDTO> getUserList(Long deptId,String realname){
+        List<User> users = userRepository.getUserList(deptId,realname);
         return userMapper.toDto(users);
     }
 
@@ -93,6 +93,10 @@ public class UserServiceImpl implements UserService {
             throw new EntityExistException(User.class,"username",resources.getUsername());
         }
 
+        if(userRepository.findByRealname(resources.getRealname())!=null){
+            throw new EntityExistException(User.class,"真实姓名",resources.getRealname());
+        }
+
         if(userRepository.findByEmail(resources.getEmail())!=null){
             throw new EntityExistException(User.class,"email",resources.getEmail());
         }
@@ -110,6 +114,7 @@ public class UserServiceImpl implements UserService {
         ValidationUtil.isNull(user.getId(),"User","id",resources.getId());
         User user1 = userRepository.findByUsername(user.getUsername());
         User user2 = userRepository.findByEmail(user.getEmail());
+        User user3 = userRepository.findByRealname(user.getRealname());
 
         if(user1 !=null&&!user.getId().equals(user1.getId())){
             throw new EntityExistException(User.class,"username",resources.getUsername());
@@ -117,6 +122,10 @@ public class UserServiceImpl implements UserService {
 
         if(user2!=null&&!user.getId().equals(user2.getId())){
             throw new EntityExistException(User.class,"email",resources.getEmail());
+        }
+
+        if(user3!=null&&!user.getId().equals(user3.getId())){
+            throw new EntityExistException(User.class,"真实姓名",resources.getRealname());
         }
 
         // 如果用户的角色改变了，需要手动清理下缓存
@@ -134,6 +143,7 @@ public class UserServiceImpl implements UserService {
         user.setDept(resources.getDept());
         user.setJob(resources.getJob());
         user.setPhone(resources.getPhone());
+        user.setRealname(resources.getRealname());
         userRepository.save(user);
     }
 

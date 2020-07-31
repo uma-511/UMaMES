@@ -17,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     User findByUsername(String username);
 
+    User findByRealname(String realname);
+
     User findByEmail(String email);
 
     @Modifying
@@ -27,6 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Query(value = "update user set email = ?2 where username = ?1",nativeQuery = true)
     void updateEmail(String username, String email);
 
-    @Query(value = "select * from user where dept_id = :id and username like %:username% ",nativeQuery = true)
-    List<User> getUserList(Long id, String username);
+    @Query(value = "select * from user where dept_id = :id and realname like %:realname% ",nativeQuery = true)
+    List<User> getUserList(Long id, String realname);
 }

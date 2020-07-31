@@ -185,7 +185,7 @@ public class UserController {
     @GetMapping(value = "/getUserListByDeptId")
     @ApiOperation("获取用户列表")
     public ResponseEntity getUserListByDeptId(UserQueryCriteria criteria){
-        List<UserDTO> userDTOS = userService.getUserList(criteria.getDeptId(),criteria.getUsername());
+        List<UserDTO> userDTOS = userService.getUserList(criteria.getDeptId(),criteria.getRealname());
         return new ResponseEntity<>(userDTOS,HttpStatus.OK);
     }
 }
