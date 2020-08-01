@@ -22,4 +22,7 @@ public interface ChemicalFiberStockRepository extends JpaRepository<ChemicalFibe
 
     @Query(value = "select * from uma_chemical_fiber_stock where prod_model like  %:innerName% or prod_name like  %:innerName% ",nativeQuery = true)
     List<ChemicalFiberStock> querySelectList(@Param("innerName") String innerName);
+
+    @Query(value = "select * from uma_chemical_fiber_stock where prod_name =:prodName ",nativeQuery = true)
+    ChemicalFiberStock findByProdName(@Param("prodName") String prodName);
 }

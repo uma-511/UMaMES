@@ -123,29 +123,24 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         resources.setContacts(customerDTO.getContacts());
         resources.setContactPhone(customerDTO.getContactPhone());
         resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-        resources.setCreateUser(SecurityUtils.getUsername());
+        resources.setCreateUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
         resources.setScanNumber(getScanNumber());
         return chemicalFiberDeliveryNoteMapper.toDto(chemicalFiberDeliveryNoteRepository.save(resources));
     }
 
     public String getScanNumber () {
         String scanNumber;
-        String type = "YQ";
+        String type = "XQ";
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
 
-        ChemicalFiberDeliveryNoteQueryCriteria chemicalFiberDeliveryNoteQueryCriteria = new ChemicalFiberDeliveryNoteQueryCriteria();
-        chemicalFiberDeliveryNoteQueryCriteria.setStartTime(new Timestamp(Long.parseLong(timeMap.get("time").toString())));
-        chemicalFiberDeliveryNoteQueryCriteria.setEndTime(new Timestamp(System.currentTimeMillis()));
-        List<ChemicalFiberDeliveryNoteDTO> chemicalFiberDeliveryNoteDTOS = queryAll(chemicalFiberDeliveryNoteQueryCriteria);
+        Integer currenCount=chemicalFiberDeliveryNoteRepository.getCurrenNoteCount(year+"-"+month);
 
-        if (chemicalFiberDeliveryNoteDTOS.size() == 0) {
+        if (currenCount == 0) {
             scanNumber = type + year + month + "001";
         } else {
-            ChemicalFiberDeliveryNoteDTO chemicalFiberDeliveryNoteDTO = chemicalFiberDeliveryNoteDTOS.get(chemicalFiberDeliveryNoteDTOS.size() - 1);
-            String tempScanNumber = chemicalFiberDeliveryNoteDTO.getScanNumber().substring(7);
-            Integer number = Integer.parseInt(tempScanNumber) + 1;
+            Integer number = currenCount+ 1;
             String tempNumberStr = String.format("%3d", number++).replace(" ", "0");
             scanNumber = type + year + month + tempNumberStr;
         }

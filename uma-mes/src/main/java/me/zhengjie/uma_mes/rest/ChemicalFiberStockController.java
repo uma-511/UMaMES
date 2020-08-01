@@ -90,8 +90,17 @@ public class ChemicalFiberStockController {
     @ApiOperation("获取产品列表")
     public ResponseEntity getSelectMap(ChemicalFiberStockQueryCriteria criteria){
         List<ChemicalFiberStockDTO> chemicalFiberStockDTO = chemicalFiberStockService.querySelectList(criteria.getProdName());
-        return new ResponseEntity<>(chemicalFiberStockService.buildTree(chemicalFiberStockDTO),HttpStatus.OK);
+        return new ResponseEntity<>(chemicalFiberStockDTO,HttpStatus.OK);
     }
+
+    @GetMapping(value = "/getByProdName")
+    @ApiOperation("获取产品列表")
+    public ResponseEntity getByProdName(ChemicalFiberStockQueryCriteria criteria){
+        List<ChemicalFiberStockDTO> chemicalFiberStockDTO = chemicalFiberStockService.querySelectList(criteria.getProdName());
+        return new ResponseEntity<>(chemicalFiberStockDTO,HttpStatus.OK);
+    }
+
+
 
     @PostMapping("/getSummaryData")
     @Log("查询ChemicalFiberLabel")

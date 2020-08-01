@@ -66,6 +66,12 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
     }
 
     @Override
+    public ChemicalFiberStockDTO findByProdName(String prodName) {
+        ChemicalFiberStock chemicalFiberStock = chemicalFiberStockRepository.findByProdName(prodName);
+        return chemicalFiberStockMapper.toDto(chemicalFiberStock);
+    }
+
+    @Override
 //    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberStockDTO create(ChemicalFiberStock resources) {
