@@ -4,31 +4,31 @@ import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduct;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
-import me.zhengjie.uma_mes.service.ChemicalFiberStockService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockQueryCriteria;
-import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductService;
+import me.zhengjie.uma_mes.service.ChemicalFiberStockService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockDTO;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberProductMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import me.zhengjie.utils.*;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author Tan Jun Ming
@@ -87,7 +87,15 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
         List<ChemicalFiberProductDTO> chemicalFiberProductDTOS = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, chemicalFiberProductQueryCriteria, criteriaBuilder)));
         if (chemicalFiberProductDTOS.size() > 0) {
             throw new BadRequestException("请确保产品型号唯一");
-        } else {
+        }
+        ChemicalFiberProductQueryCriteria chemicalFiberProductQueryCriteria2 = new ChemicalFiberProductQueryCriteria();
+        chemicalFiberProductQueryCriteria2.setNameAccurate(resources.getName());
+        chemicalFiberProductQueryCriteria2.setDelFlag(0);
+        List<ChemicalFiberProductDTO> chemicalFiberProductDTOS2 = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, chemicalFiberProductQueryCriteria2, criteriaBuilder)));
+        if (chemicalFiberProductDTOS2.size() > 0) {
+            throw new BadRequestException("请确保产品名称唯一");
+        }
+        else {
 
             resources.setCreateUser(SecurityUtils.getUsername());
             resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
@@ -152,8 +160,16 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         ChemicalFiberProduct chemicalFiberProduct = chemicalFiberProductRepository.findById(id).orElseGet(ChemicalFiberProduct::new);
-        chemicalFiberProduct.setDelFlag(1);
-        chemicalFiberProductRepository.save(chemicalFiberProduct);
+        int countTotalStock = 0;
+        if(null != chemicalFiberProductRepository.countStock(chemicalFiberProduct.getModel())){
+            countTotalStock = Integer.parseInt(chemicalFiberProductRepository.countStock(chemicalFiberProduct.getModel()));
+        }
+        if (countTotalStock == 0){
+            chemicalFiberProduct.setDelFlag(1);
+            chemicalFiberProductRepository.save(chemicalFiberProduct);
+        }else{
+            throw new BadRequestException("当前产品库存数量不为0，无法删除");
+        }
     }
 
 

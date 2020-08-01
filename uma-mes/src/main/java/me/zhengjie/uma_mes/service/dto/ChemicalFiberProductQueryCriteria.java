@@ -14,6 +14,10 @@ public class ChemicalFiberProductQueryCriteria{
     @Query(propName = "model")
     private String modelAccurate;
 
+    // 产品名称，精准查询
+    @Query(propName = "name")
+    private String nameAccurate;
+
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String model;
