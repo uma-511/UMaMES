@@ -42,6 +42,9 @@ public class ChemicalFiberDeliveryDetailQueryCriteria{
     @Query(type = Query.Type.IN, propName = "scanNumber")
     private List<String> scanNumbers;
 
+    @Query(propName = "detail_number")
+    private Integer detailNumber;
+
     // 大于等于
     @Query(type = Query.Type.GREATER_THAN, propName = "createDate")
     private Timestamp startTime;

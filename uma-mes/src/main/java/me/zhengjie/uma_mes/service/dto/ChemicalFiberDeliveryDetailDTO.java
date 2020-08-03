@@ -75,4 +75,7 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
 
     // 实收金额
     private BigDecimal realPrice;
+
+    // 产品列表编号
+    private Integer detailNumber;
 }

@@ -6,6 +6,7 @@ import cn.afterturn.easypoi.excel.entity.enmus.ExcelStyleType;
 import cn.hutool.extra.template.TemplateConfig;
 import com.lgmn.common.result.Result;
 import com.lgmn.common.utils.ObjectTransfer;
+import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
@@ -201,22 +202,23 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     @Override
     public void recived(Integer id) {
-        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
-        ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
-        chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
-        List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
-        ChemicalFiberStockQueryCriteria chemicalFiberStockQueryCriteria;
-        BigDecimal detailPrise;
-        BigDecimal realTotalPrise = new BigDecimal(0);
-        for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
-            if(null == chemicalFiberDeliveryDetailDTO.getRealQuantity() || chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)) {
-                //若实收数量为空则自动填入计划数
-                chemicalFiberDeliveryDetailDTO.setRealQuantity(chemicalFiberDeliveryDetailDTO.getTotalNumber());
-                detailPrise = new BigDecimal(0);
-                detailPrise = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(BigDecimal.valueOf((int) chemicalFiberDeliveryDetailDTO.getRealQuantity()));
-                realTotalPrise = realTotalPrise.add(detailPrise);
-                chemicalFiberDeliveryDetailDTO.setRealPrice(detailPrise);
-            }
+        try{
+            ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+            ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
+            chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+            List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
+            ChemicalFiberStockQueryCriteria chemicalFiberStockQueryCriteria;
+            BigDecimal detailPrise;
+            BigDecimal realTotalPrise = new BigDecimal(0);
+            for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
+                if(null == chemicalFiberDeliveryDetailDTO.getRealQuantity() || chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)) {
+                    //若实收数量为空则自动填入计划数
+                    chemicalFiberDeliveryDetailDTO.setRealQuantity(chemicalFiberDeliveryDetailDTO.getTotalNumber());
+                    detailPrise = new BigDecimal(0);
+                    detailPrise = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(BigDecimal.valueOf((int) chemicalFiberDeliveryDetailDTO.getRealQuantity()));
+                    realTotalPrise = realTotalPrise.add(detailPrise);
+                    chemicalFiberDeliveryDetailDTO.setRealPrice(detailPrise);
+                }
                 chemicalFiberDeliveryDetailService.update(chemicalFiberDeliveryDetailMapper.toEntity(chemicalFiberDeliveryDetailDTO));
                 //处理库存
                 chemicalFiberStockQueryCriteria = new ChemicalFiberStockQueryCriteria();
@@ -231,10 +233,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                     chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber()-chemicalFiberDeliveryDetailDTO.getTotalNumber());
                     chemicalFiberStockService.update(chemicalFiberStockMapper.toEntity(chemicalFiberStockDTO));
                 }
+            }
+            chemicalFiberDeliveryNote.setNoteStatus(4);
+            chemicalFiberDeliveryNote.setBalance(realTotalPrise);
+            update(chemicalFiberDeliveryNote);
+        }catch (Exception e){
+            throw new BadRequestException("签收失败，请校验订单数据");
         }
-        chemicalFiberDeliveryNote.setNoteStatus(4);
-        chemicalFiberDeliveryNote.setBalance(realTotalPrise);
-        update(chemicalFiberDeliveryNote);
     }
 
     @Override
@@ -284,6 +289,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("contactPhone", chemicalFiberDeliveryNote.getContactPhone());
         map.put("scanNumber", chemicalFiberDeliveryNote.getScanNumber());
         map.put("createDate", chemicalFiberDeliveryNote.getCreateDate());
+        map.put("createUser", chemicalFiberDeliveryNote.getCreateUser());
         map.put("total", chemicalFiberDeliveryNote.getTotalPrice());
         map.put("capitalizationTotal", NumberToCN.number2CNMontrayUnit(chemicalFiberDeliveryNote.getTotalPrice()));
         map.put("driverMain",chemicalFiberDeliveryNote.getDriverMain());
@@ -295,10 +301,16 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
             Map<String, String> lm = new HashMap<String, String>();
             lm.put("prodName", chemicalFiberDeliveryDetailDTO.getProdName());
+            lm.put("detailNumber", chemicalFiberDeliveryDetailDTO.getDetailNumber()+"");
             lm.put("totalBag", chemicalFiberDeliveryDetailDTO.getTotalBag() + "");
             lm.put("totalNumber", chemicalFiberDeliveryDetailDTO.getTotalNumber() + "");
             lm.put("unit", chemicalFiberDeliveryDetailDTO.getUnit());
             lm.put("sellingPrice", chemicalFiberDeliveryDetailDTO.getSellingPrice() + "");
+            lm.put("realQuantity", chemicalFiberDeliveryDetailDTO.getRealQuantity() + "");
+            if(null != chemicalFiberDeliveryDetailDTO.getRealQuantity() && !chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)){
+                BigDecimal detailTotalPrice = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(new BigDecimal( Integer.parseInt ( chemicalFiberDeliveryDetailDTO.getRealQuantity().toString() ) ));
+                chemicalFiberDeliveryDetailDTO.setTotalPrice(detailTotalPrice);
+            }
             lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");
             lm.put("remark", chemicalFiberDeliveryDetailDTO.getRemark());
             listMap.add(lm);

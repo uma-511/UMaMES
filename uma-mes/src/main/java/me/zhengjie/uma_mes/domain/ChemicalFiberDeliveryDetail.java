@@ -106,6 +106,10 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
     @Column(name = "real_price")
     private BigDecimal realPrice;
 
+    // 产品列表编号
+    @Column(name = "detail_number")
+    private Integer detailNumber;
+
     public void copy(ChemicalFiberDeliveryDetail source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }
