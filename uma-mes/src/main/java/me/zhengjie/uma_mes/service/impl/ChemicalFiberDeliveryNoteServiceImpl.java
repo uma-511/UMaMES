@@ -297,6 +297,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("loaderOne",chemicalFiberDeliveryNote.getLoaderOne());
         map.put("loaderTwo",chemicalFiberDeliveryNote.getLoaderTwo());
         map.put("carNumber",chemicalFiberDeliveryNote.getCarNumber());
+        map.put("seller",chemicalFiberDeliveryNote.getSeller());
         List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
             Map<String, String> lm = new HashMap<String, String>();
@@ -313,11 +314,12 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             }
             lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");
             lm.put("remark", chemicalFiberDeliveryDetailDTO.getRemark());
+            lm.put("detailNumber", chemicalFiberDeliveryDetailDTO.getDetailNumber()+"");
             listMap.add(lm);
         }
         map.put("deliveryList", listMap);
         workbook = ExcelExportUtil.exportExcel(params, map);
-        FileUtil.downLoadExcel("生产单导出.xlsx", response, workbook);
+        FileUtil.downLoadExcel("送货单导出.xlsx", response, workbook);
         chemicalFiberDeliveryNote.setNoteStatus(2);
         update(chemicalFiberDeliveryNote);
     }
