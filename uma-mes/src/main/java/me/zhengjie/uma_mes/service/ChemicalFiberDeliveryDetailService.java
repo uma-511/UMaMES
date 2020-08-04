@@ -43,6 +43,8 @@ public interface ChemicalFiberDeliveryDetailService {
 
     void update(ChemicalFiberDeliveryDetail resources);
 
+    void updateList(List<ChemicalFiberDeliveryDetail> resources);
+
     void delete(Integer id);
 
     void download(List<ChemicalFiberDeliveryDetailDTO> all, HttpServletResponse response) throws IOException;

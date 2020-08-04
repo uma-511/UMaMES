@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -91,4 +92,14 @@ public class ChemicalFiberDeliveryDetailController {
     public Result getSalesReportSummaries(@RequestBody ChemicalFiberDeliveryDetailQueryCriteria criteria) {
         return chemicalFiberDeliveryDetailService.getSalesReportSummaries(criteria);
     }
+
+    @PutMapping(value = "/setChemicalFiberDeliveryDetailsList")
+    @Log("新增多条列表数据")
+    @ApiOperation("新增多条列表数据")
+    @PreAuthorize("@el.check('chemicalFiberDeliveryDetail:edit')")
+    public ResponseEntity createList(@Validated @RequestBody List<ChemicalFiberDeliveryDetail> resources) {
+        chemicalFiberDeliveryDetailService.updateList(resources);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
 }

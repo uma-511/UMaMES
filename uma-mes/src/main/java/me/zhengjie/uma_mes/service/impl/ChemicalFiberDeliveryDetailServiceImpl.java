@@ -221,4 +221,35 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
         Page<ChemicalFiberDeliveryDetail> page = chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberDeliveryDetailMapper::toDto));
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateList(List<ChemicalFiberDeliveryDetail> resources) {
+        for (ChemicalFiberDeliveryDetail Detail : resources) {
+            ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail = chemicalFiberDeliveryDetailRepository.findById(Detail.getId()).orElseGet(ChemicalFiberDeliveryDetail::new);
+            ValidationUtil.isNull( chemicalFiberDeliveryDetail.getId(),"ChemicalFiberDeliveryDetail","id",Detail.getId());
+            chemicalFiberDeliveryDetail.copy(Detail);
+            chemicalFiberDeliveryDetailRepository.save(chemicalFiberDeliveryDetail);
+
+            // 修改出货单成本，总金额
+            ChemicalFiberDeliveryNoteQueryCriteria chemicalFiberDeliveryNoteQueryCriteria = new ChemicalFiberDeliveryNoteQueryCriteria();
+            chemicalFiberDeliveryNoteQueryCriteria.setScanNumber(chemicalFiberDeliveryDetail.getScanNumber());
+            List<ChemicalFiberDeliveryNote> chemicalFiberDeliveryNotes = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,chemicalFiberDeliveryNoteQueryCriteria,criteriaBuilder));
+            ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNotes.get(0);
+
+            BigDecimal tempTotalCost = new BigDecimal(0.0);
+            BigDecimal tempTotalPrice = new BigDecimal(0.0);
+            ChemicalFiberDeliveryDetailQueryCriteria criteria = new ChemicalFiberDeliveryDetailQueryCriteria();
+            criteria.setScanNumber(chemicalFiberDeliveryDetail.getScanNumber());
+            List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailMapper.toDto(chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+            for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
+                tempTotalCost = tempTotalCost.add(chemicalFiberDeliveryDetailDTO.getTotalCost() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetailDTO.getTotalCost());
+                tempTotalPrice = tempTotalPrice.add(chemicalFiberDeliveryDetailDTO.getTotalPrice() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetailDTO.getTotalPrice());
+            }
+            chemicalFiberDeliveryNote.setTotalCost(tempTotalCost);
+            chemicalFiberDeliveryNote.setTotalPrice(tempTotalPrice);
+            chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
+        }
+
+    }
 }
