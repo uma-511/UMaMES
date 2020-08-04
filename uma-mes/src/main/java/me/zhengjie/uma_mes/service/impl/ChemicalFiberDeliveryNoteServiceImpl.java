@@ -236,6 +236,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             }
             chemicalFiberDeliveryNote.setNoteStatus(4);
             chemicalFiberDeliveryNote.setBalance(realTotalPrise);
+            chemicalFiberDeliveryNote.setTotalPrice(realTotalPrise);
             update(chemicalFiberDeliveryNote);
         }catch (Exception e){
             throw new BadRequestException("签收失败，请校验订单数据");
@@ -272,6 +273,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void downloadDeliveryNote(Integer id, HttpServletResponse response) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
@@ -299,6 +301,12 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
         BigDecimal totalPriceWhitRealQuantity = new BigDecimal(0);
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
+            if (null == chemicalFiberDeliveryDetailDTO.getTotalNumber() || chemicalFiberDeliveryDetailDTO.getTotalNumber() == 0 ) {
+                throw new BadRequestException("请补充计划数量");
+            }
+            if (null == chemicalFiberDeliveryDetailDTO.getSellingPrice() || chemicalFiberDeliveryDetailDTO.getSellingPrice().compareTo(BigDecimal.ZERO) == 0) {
+                throw new BadRequestException("请补充单价");
+            }
             Map<String, String> lm = new HashMap<String, String>();
             lm.put("prodName", chemicalFiberDeliveryDetailDTO.getProdName());
             lm.put("detailNumber", chemicalFiberDeliveryDetailDTO.getDetailNumber()+"");
@@ -322,7 +330,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         }
         if(totalPriceWhitRealQuantity.compareTo(BigDecimal.ZERO) == 0){
             map.put("total", "");
-            map.put("capitalizationTotal","零元");
+            map.put("capitalizationTotal","");
         }else {
             map.put("total",totalPriceWhitRealQuantity + "");
             map.put("capitalizationTotal", NumberToCN.number2CNMontrayUnit(totalPriceWhitRealQuantity));
