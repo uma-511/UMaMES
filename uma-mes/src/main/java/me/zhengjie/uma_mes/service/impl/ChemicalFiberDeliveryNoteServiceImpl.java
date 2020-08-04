@@ -307,13 +307,14 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             lm.put("totalNumber", chemicalFiberDeliveryDetailDTO.getTotalNumber() + "");
             lm.put("unit", chemicalFiberDeliveryDetailDTO.getUnit());
             lm.put("sellingPrice", chemicalFiberDeliveryDetailDTO.getSellingPrice() + "");
-            lm.put("realQuantity", chemicalFiberDeliveryDetailDTO.getRealQuantity() + "");
             if(null != chemicalFiberDeliveryDetailDTO.getRealQuantity() && !chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)){
                 BigDecimal detailTotalPrice = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(new BigDecimal( Integer.parseInt ( chemicalFiberDeliveryDetailDTO.getRealQuantity().toString() ) ));
                 chemicalFiberDeliveryDetailDTO.setTotalPrice(detailTotalPrice);
                 totalPriceWhitRealQuantity = totalPriceWhitRealQuantity.add(detailTotalPrice);
                 lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");
+                lm.put("realQuantity", chemicalFiberDeliveryDetailDTO.getRealQuantity() + "");
             }else{
+                lm.put("realQuantity","");
                 lm.put("totalPrice","");
             }
             lm.put("remark", chemicalFiberDeliveryDetailDTO.getRemark());
