@@ -1,30 +1,27 @@
 package me.zhengjie.uma_mes.service.impl;
 
 import me.zhengjie.exception.BadRequestException;
-import me.zhengjie.uma_mes.domain.ChemicalFiberProduct;
 import me.zhengjie.uma_mes.domain.Customer;
-import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.CustomerRepository;
 import me.zhengjie.uma_mes.service.CustomerService;
 import me.zhengjie.uma_mes.service.dto.CustomerDTO;
 import me.zhengjie.uma_mes.service.dto.CustomerQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.CustomerMapper;
+import me.zhengjie.utils.*;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author Tan Jun Ming
@@ -73,8 +70,15 @@ public class CustomerServiceImpl implements CustomerService {
         criteria.setCodeAccurate(resources.getCode());
         criteria.setDelFlag(0);
         List<CustomerDTO> customerDTOs = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria,criteriaBuilder)));
+        CustomerQueryCriteria criteria2 = new CustomerQueryCriteria();
+        criteria2.setNameAccurate(resources.getName());
+        criteria2.setDelFlag(0);
+        List<CustomerDTO> customerDTOs2 = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria2,criteriaBuilder)));
         if (customerDTOs.size() > 0 && customerDTOs.get(0).getCode().equals(resources.getCode()) && resources.getId() != customerDTOs.get(0).getId()) {
             throw new BadRequestException("请确保客户编号唯一");
+        }
+        if (customerDTOs2.size() > 0 && customerDTOs2.get(0).getName().equals(resources.getName()) && resources.getId() != customerDTOs2.get(0).getId()) {
+            throw new BadRequestException("请确保客户名称唯一");
         } else {
             resources.setCreateUser(SecurityUtils.getUsername());
             resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
@@ -93,6 +97,13 @@ public class CustomerServiceImpl implements CustomerService {
         List<CustomerDTO> customerDTOs = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria,criteriaBuilder)));
         if (customerDTOs.size() > 0 && customerDTOs.get(0).getCode().equals(resources.getCode()) && resources.getId() != customerDTOs.get(0).getId()) {
             throw new BadRequestException("请确保客户编号唯一");
+        }
+        CustomerQueryCriteria criteria2 = new CustomerQueryCriteria();
+        criteria2.setNameAccurate(resources.getName());
+        criteria2.setDelFlag(0);
+        List<CustomerDTO> customerDTOs2 = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria2,criteriaBuilder)));
+        if (customerDTOs2.size() > 0 && customerDTOs2.get(0).getName().equals(resources.getName()) && resources.getId() != customerDTOs2.get(0).getId()) {
+            throw new BadRequestException("请确保客户名称唯一");
         } else {
             Customer customer = customerRepository.findById(resources.getId()).orElseGet(Customer::new);
             resources.setCreateUser(SecurityUtils.getUsername());

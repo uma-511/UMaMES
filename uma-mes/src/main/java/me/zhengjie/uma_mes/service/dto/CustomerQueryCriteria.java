@@ -22,6 +22,10 @@ public class CustomerQueryCriteria{
     @Query(propName = "code")
     private String codeAccurate;
 
+    // 客户名称，精准查询
+    @Query(propName = "name")
+    private String nameAccurate;
+
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String address;

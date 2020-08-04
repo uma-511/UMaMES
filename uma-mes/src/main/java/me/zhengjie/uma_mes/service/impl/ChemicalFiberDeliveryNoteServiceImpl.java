@@ -290,7 +290,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("scanNumber", chemicalFiberDeliveryNote.getScanNumber());
         map.put("createDate", chemicalFiberDeliveryNote.getCreateDate());
         map.put("createUser", chemicalFiberDeliveryNote.getCreateUser());
-        map.put("capitalizationTotal", NumberToCN.number2CNMontrayUnit(chemicalFiberDeliveryNote.getTotalPrice()));
         map.put("driverMain",chemicalFiberDeliveryNote.getDriverMain());
         map.put("driverDeputy",chemicalFiberDeliveryNote.getDriverDeputy());
         map.put("loaderOne",chemicalFiberDeliveryNote.getLoaderOne());
@@ -321,12 +320,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             lm.put("detailNumber", chemicalFiberDeliveryDetailDTO.getDetailNumber()+"");
             listMap.add(lm);
         }
-        if(totalPriceWhitRealQuantity.equals(0)){
+        if(totalPriceWhitRealQuantity.compareTo(BigDecimal.ZERO) == 0){
             map.put("total", "");
+            map.put("capitalizationTotal","零元");
         }else {
             map.put("total",totalPriceWhitRealQuantity + "");
+            map.put("capitalizationTotal", NumberToCN.number2CNMontrayUnit(totalPriceWhitRealQuantity));
         }
-
         map.put("deliveryList", listMap);
         workbook = ExcelExportUtil.exportExcel(params, map);
         FileUtil.downLoadExcel(chemicalFiberDeliveryNote.getScanNumber()+"-送货单导出.xlsx", response, workbook);
