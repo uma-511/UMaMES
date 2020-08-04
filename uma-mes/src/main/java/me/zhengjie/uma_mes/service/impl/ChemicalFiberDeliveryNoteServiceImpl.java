@@ -290,14 +290,15 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("scanNumber", chemicalFiberDeliveryNote.getScanNumber());
         map.put("createDate", chemicalFiberDeliveryNote.getCreateDate());
         map.put("createUser", chemicalFiberDeliveryNote.getCreateUser());
-        map.put("total", chemicalFiberDeliveryNote.getTotalPrice());
         map.put("capitalizationTotal", NumberToCN.number2CNMontrayUnit(chemicalFiberDeliveryNote.getTotalPrice()));
         map.put("driverMain",chemicalFiberDeliveryNote.getDriverMain());
         map.put("driverDeputy",chemicalFiberDeliveryNote.getDriverDeputy());
         map.put("loaderOne",chemicalFiberDeliveryNote.getLoaderOne());
         map.put("loaderTwo",chemicalFiberDeliveryNote.getLoaderTwo());
         map.put("carNumber",chemicalFiberDeliveryNote.getCarNumber());
+        map.put("seller",chemicalFiberDeliveryNote.getSeller());
         List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
+        BigDecimal totalPriceWhitRealQuantity = new BigDecimal(0);
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
             Map<String, String> lm = new HashMap<String, String>();
             lm.put("prodName", chemicalFiberDeliveryDetailDTO.getProdName());
@@ -310,14 +311,24 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             if(null != chemicalFiberDeliveryDetailDTO.getRealQuantity() && !chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)){
                 BigDecimal detailTotalPrice = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(new BigDecimal( Integer.parseInt ( chemicalFiberDeliveryDetailDTO.getRealQuantity().toString() ) ));
                 chemicalFiberDeliveryDetailDTO.setTotalPrice(detailTotalPrice);
+                totalPriceWhitRealQuantity = totalPriceWhitRealQuantity.add(detailTotalPrice);
+                lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");
+            }else{
+                lm.put("totalPrice","");
             }
-            lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");
             lm.put("remark", chemicalFiberDeliveryDetailDTO.getRemark());
+            lm.put("detailNumber", chemicalFiberDeliveryDetailDTO.getDetailNumber()+"");
             listMap.add(lm);
         }
+        if(totalPriceWhitRealQuantity.equals(0)){
+            map.put("total", "");
+        }else {
+            map.put("total",totalPriceWhitRealQuantity + "");
+        }
+
         map.put("deliveryList", listMap);
         workbook = ExcelExportUtil.exportExcel(params, map);
-        FileUtil.downLoadExcel("生产单导出.xlsx", response, workbook);
+        FileUtil.downLoadExcel(chemicalFiberDeliveryNote.getScanNumber()+"-送货单导出.xlsx", response, workbook);
         chemicalFiberDeliveryNote.setNoteStatus(2);
         update(chemicalFiberDeliveryNote);
     }
