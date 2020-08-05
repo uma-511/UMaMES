@@ -219,7 +219,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                     realTotalPrise = realTotalPrise.add(detailPrise);
                     chemicalFiberDeliveryDetailDTO.setRealPrice(detailPrise);
                 }else{
-                    realTotalPrise=chemicalFiberDeliveryNote.getTotalPrice();
+                    realTotalPrise=realTotalPrise.add(chemicalFiberDeliveryDetailDTO.getRealPrice());
                 }
                 chemicalFiberDeliveryDetailService.update(chemicalFiberDeliveryDetailMapper.toEntity(chemicalFiberDeliveryDetailDTO));
                 //处理库存
