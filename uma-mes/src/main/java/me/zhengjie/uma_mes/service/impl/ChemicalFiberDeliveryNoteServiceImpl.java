@@ -300,6 +300,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("loaderTwo",chemicalFiberDeliveryNote.getLoaderTwo());
         map.put("carNumber",chemicalFiberDeliveryNote.getCarNumber());
         map.put("seller",chemicalFiberDeliveryNote.getSeller());
+        map.put("remark",chemicalFiberDeliveryNote.getRemark());
         List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
         BigDecimal totalPriceWhitRealQuantity = new BigDecimal(0);
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
