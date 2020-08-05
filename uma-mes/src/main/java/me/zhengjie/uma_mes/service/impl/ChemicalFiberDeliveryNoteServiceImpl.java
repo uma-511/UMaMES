@@ -176,7 +176,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         ValidationUtil.isNull( chemicalFiberDeliveryNote.getId(),"ChemicalFiberDeliveryNote","id",resources.getId());
         chemicalFiberDeliveryNote.copy(resources);
 //        chemicalFiberDeliveryNote.setCreateDate(new Timestamp(System.currentTimeMillis()));
-        chemicalFiberDeliveryNote.setCreateUser(SecurityUtils.getUsername());
+        chemicalFiberDeliveryNote.setCreateUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
         chemicalFiberDeliveryNote.setCustomerId(customerDTO.getId());
         chemicalFiberDeliveryNote.setCustomerCode(customerDTO.getCode());
         chemicalFiberDeliveryNote.setCustomerName(customerDTO.getName());
@@ -218,6 +218,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                     detailPrise = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(BigDecimal.valueOf((int) chemicalFiberDeliveryDetailDTO.getRealQuantity()));
                     realTotalPrise = realTotalPrise.add(detailPrise);
                     chemicalFiberDeliveryDetailDTO.setRealPrice(detailPrise);
+                }else{
+                    realTotalPrise=chemicalFiberDeliveryNote.getTotalPrice();
                 }
                 chemicalFiberDeliveryDetailService.update(chemicalFiberDeliveryDetailMapper.toEntity(chemicalFiberDeliveryDetailDTO));
                 //处理库存
