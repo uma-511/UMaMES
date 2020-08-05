@@ -139,11 +139,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         Integer currenCount=chemicalFiberDeliveryNoteRepository.getCurrenNoteCount(year+"-"+month);
 
         if (currenCount == 0) {
-            scanNumber = type + year + month + "001";
+            scanNumber = type + year.substring(2,4) + month + "00001";
         } else {
             Integer number = currenCount+ 1;
-            String tempNumberStr = String.format("%3d", number++).replace(" ", "0");
-            scanNumber = type + year + month + tempNumberStr;
+            String tempNumberStr = String.format("%5d", number++).replace(" ", "0");
+            scanNumber = type + year.substring(2,4) + month + tempNumberStr;
         }
         return scanNumber;
     }
