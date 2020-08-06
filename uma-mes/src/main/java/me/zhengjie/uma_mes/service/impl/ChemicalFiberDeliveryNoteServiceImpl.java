@@ -257,6 +257,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     public void doInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         chemicalFiberDeliveryNote.setInvalid(1);
+        chemicalFiberDeliveryNote.setBackNoteStatus(chemicalFiberDeliveryNote.getNoteStatus());
+        chemicalFiberDeliveryNote.setNoteStatus(0);
         update(chemicalFiberDeliveryNote);
     }
 
@@ -264,6 +266,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     public void unInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         chemicalFiberDeliveryNote.setInvalid(0);
+        chemicalFiberDeliveryNote.setNoteStatus(chemicalFiberDeliveryNote.getBackNoteStatus());
         update(chemicalFiberDeliveryNote);
     }
 

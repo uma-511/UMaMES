@@ -86,4 +86,7 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
 
     //失效状态
     private Integer invalid;
+
+    //失效状态
+    private Integer backNoteStatus;
 }

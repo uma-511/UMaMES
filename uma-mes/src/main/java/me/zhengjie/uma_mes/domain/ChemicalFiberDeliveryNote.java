@@ -120,6 +120,10 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "invalid")
     private Integer invalid;
 
+    // 状态备份
+    @Column(name = "back_note_status")
+    private Integer backNoteStatus;
+
     @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;
 
