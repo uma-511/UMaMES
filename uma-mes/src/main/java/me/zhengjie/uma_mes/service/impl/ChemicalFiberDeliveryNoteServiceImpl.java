@@ -92,6 +92,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
         }
+        List<Integer> invalidList = new ArrayList<>();
+        invalidList.add(0);
+        if (null != criteria.getQueryWithInvalid() && criteria.getQueryWithInvalid())
+        {
+            invalidList.add(1);
+        }
+        criteria.setInvalidList(invalidList);
         Page<ChemicalFiberDeliveryNote> page = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberDeliveryNoteMapper::toDto));
     }
@@ -126,12 +133,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         resources.setCreateUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
         resources.setScanNumber(getScanNumber());
+        resources.setInvalid(0);
         return chemicalFiberDeliveryNoteMapper.toDto(chemicalFiberDeliveryNoteRepository.save(resources));
     }
 
     public String getScanNumber () {
         String scanNumber;
-        String type = "XQ";
+        String type = "YQ";
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
@@ -243,6 +251,20 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         }catch (Exception e){
             throw new BadRequestException("签收失败，请校验订单数据");
         }
+    }
+
+    @Override
+    public void doInvalid(Integer id) {
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+        chemicalFiberDeliveryNote.setInvalid(1);
+        update(chemicalFiberDeliveryNote);
+    }
+
+    @Override
+    public void unInvalid(Integer id) {
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+        chemicalFiberDeliveryNote.setInvalid(0);
+        update(chemicalFiberDeliveryNote);
     }
 
     @Override

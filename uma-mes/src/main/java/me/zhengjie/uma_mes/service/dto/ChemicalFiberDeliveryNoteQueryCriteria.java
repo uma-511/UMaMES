@@ -4,6 +4,7 @@ import lombok.Data;
 import me.zhengjie.annotation.Query;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
 * @author Tan Jun Ming
@@ -55,4 +56,9 @@ public class ChemicalFiberDeliveryNoteQueryCriteria{
     private Long tempEndTime;
 
     private Integer id;
+
+    private Boolean queryWithInvalid;
+
+    @Query(type = Query.Type.IN,propName = "invalid")
+    private List<Integer> invalidList;
 }

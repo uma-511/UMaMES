@@ -84,4 +84,6 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
     // 付款方式
     private String payment;
 
+    //失效状态
+    private Integer invalid;
 }

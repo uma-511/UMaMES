@@ -124,6 +124,24 @@ public class ChemicalFiberDeliveryNoteController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @Log("订单失效")
+    @ApiOperation("订单失效")
+    @GetMapping(value = "/doInvalid/{id}")
+    @AnonymousAccess()
+    public ResponseEntity doInvalid(@PathVariable Integer id) {
+        chemicalFiberDeliveryNoteService.doInvalid(id);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @Log("订单恢复生效")
+    @ApiOperation("订单恢复生效")
+    @GetMapping(value = "/unInvalid/{id}")
+    @AnonymousAccess()
+    public ResponseEntity unInvalid(@PathVariable Integer id) {
+        chemicalFiberDeliveryNoteService.unInvalid(id);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @Log("导出磅码单")
     @ApiOperation("导出磅码单")
     @PostMapping(value = "/exportPoundExcel")

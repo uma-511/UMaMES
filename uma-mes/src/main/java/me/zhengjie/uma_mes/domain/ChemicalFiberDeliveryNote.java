@@ -116,6 +116,10 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "payment")
     private String payment;
 
+    // 失效
+    @Column(name = "invalid")
+    private Integer invalid;
+
     @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;
 
