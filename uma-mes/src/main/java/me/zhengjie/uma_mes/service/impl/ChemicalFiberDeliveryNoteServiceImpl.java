@@ -139,7 +139,10 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     public String getScanNumber () {
         String scanNumber;
-        String type = "YQ";
+        //高明
+        //String type = "YQ";
+        //罗村
+        String type = "XQ";
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
@@ -311,6 +314,10 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         TemplateExportParams params = new TemplateExportParams(templatePath);
         // 生成workbook 并导出
         Workbook workbook = null;
+        if (null == chemicalFiberDeliveryNote.getDeliveryDate() || chemicalFiberDeliveryNote.getDeliveryDate().equals("")) {
+            chemicalFiberDeliveryNote.setDeliveryDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+            update(chemicalFiberDeliveryNote);
+        }
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("customerName", chemicalFiberDeliveryNote.getCustomerName());
         map.put("customerAddress", chemicalFiberDeliveryNote.getCustomerAddress());
@@ -318,6 +325,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("contactPhone", chemicalFiberDeliveryNote.getContactPhone());
         map.put("scanNumber", chemicalFiberDeliveryNote.getScanNumber());
         map.put("createDate", chemicalFiberDeliveryNote.getCreateDate());
+        map.put("deliveryDate", chemicalFiberDeliveryNote.getDeliveryDate());
         map.put("createUser", chemicalFiberDeliveryNote.getCreateUser());
         map.put("driverMain",chemicalFiberDeliveryNote.getDriverMain());
         map.put("driverDeputy",chemicalFiberDeliveryNote.getDriverDeputy());

@@ -49,6 +49,10 @@ public class Customer implements Serializable {
     @Column(name = "create_date")
     private Timestamp createDate;
 
+    // 客户全称
+    @Column(name = "full_name")
+    private String fullName;
+
     // 创建人
     @Column(name = "create_user")
     private String createUser;
