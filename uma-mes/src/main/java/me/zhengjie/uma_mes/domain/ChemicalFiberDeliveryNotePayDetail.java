@@ -5,11 +5,12 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.math.BigDecimal;
 import java.io.Serializable;
 
 /**
 * @author Xie Ji Biao
-* @date 2020-07-29
+* @date 2020-08-08
 */
 @Entity
 @Data
@@ -29,10 +30,6 @@ public class ChemicalFiberDeliveryNotePayDetail implements Serializable {
     @Column(name = "customer_name")
     private String customerName;
 
-    // 付款方式
-    @Column(name = "payment")
-    private String payment;
-
     // 创建日期
     @Column(name = "create_date",nullable = false)
     private Timestamp createDate;
@@ -48,6 +45,10 @@ public class ChemicalFiberDeliveryNotePayDetail implements Serializable {
     // 订单号
     @Column(name = "scan_number")
     private String scanNumber;
+
+    // 本次结账金额
+    @Column(name = "amount")
+    private BigDecimal amount;
 
     public void copy(ChemicalFiberDeliveryNotePayDetail source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

@@ -4,6 +4,7 @@ import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.io.Serializable;
 
@@ -52,6 +53,10 @@ public class Customer implements Serializable {
     // 客户全称
     @Column(name = "full_name")
     private String fullName;
+
+    // 客户账号金额
+    @Column(name = "account")
+    private BigDecimal account;
 
     // 创建人
     @Column(name = "create_user")

@@ -4,10 +4,11 @@ import me.zhengjie.uma_mes.domain.Customer;
 import me.zhengjie.uma_mes.service.dto.CustomerDTO;
 import me.zhengjie.uma_mes.service.dto.CustomerQueryCriteria;
 import org.springframework.data.domain.Pageable;
-import java.util.Map;
-import java.util.List;
-import java.io.IOException;
+
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author Tan Jun Ming
@@ -40,6 +41,8 @@ public interface CustomerService {
     CustomerDTO create(Customer resources);
 
     void update(Customer resources);
+
+    void updateAccount(Customer customer);
 
     void delete(Integer id);
 

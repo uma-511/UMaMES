@@ -8,7 +8,7 @@ import org.mapstruct.ReportingPolicy;
 
 /**
 * @author Xie Ji Biao
-* @date 2020-07-29
+* @date 2020-08-08
 */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ChemicalFiberDeliveryNotePayDetailMapper extends BaseMapper<ChemicalFiberDeliveryNotePayDetailDTO, ChemicalFiberDeliveryNotePayDetail> {

@@ -40,6 +40,8 @@ public interface ChemicalFiberDeliveryNoteService {
      */
     ChemicalFiberDeliveryNoteDTO findById(Integer id);
 
+    ChemicalFiberDeliveryNoteDTO findByScanNumber(String scanNumber);
+
     ChemicalFiberDeliveryNoteDTO create(ChemicalFiberDeliveryNote resources);
 
     void update(ChemicalFiberDeliveryNote resources);
@@ -65,4 +67,6 @@ public interface ChemicalFiberDeliveryNoteService {
     void doInvalid(Integer id);
 
     void unInvalid(Integer id);
+
+    void updateBalance(ChemicalFiberDeliveryNote chemicalFiberDeliveryNote);
 }

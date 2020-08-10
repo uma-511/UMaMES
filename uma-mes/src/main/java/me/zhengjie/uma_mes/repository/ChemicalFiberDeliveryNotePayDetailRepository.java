@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
 * @author Xie Ji Biao
-* @date 2020-07-29
+* @date 2020-08-08
 */
 public interface ChemicalFiberDeliveryNotePayDetailRepository extends JpaRepository<ChemicalFiberDeliveryNotePayDetail, Integer>, JpaSpecificationExecutor<ChemicalFiberDeliveryNotePayDetail> {
 }

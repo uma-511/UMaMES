@@ -123,6 +123,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public void updateAccount(Customer customer) {
+        customerRepository.save(customer);
+    }
+
+    @Override
 //    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {

@@ -112,6 +112,10 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "balance")
     private BigDecimal balance;
 
+    // 结款后余数
+    @Column(name = "remainder")
+    private BigDecimal remainder;
+
     // 付款方式
     @Column(name = "payment")
     private String payment;

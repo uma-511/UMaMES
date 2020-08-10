@@ -81,6 +81,9 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
     // 当前欠款
     private BigDecimal balance;
 
+    // 结款后余数
+    private BigDecimal remainder;
+
     // 付款方式
     private String payment;
 

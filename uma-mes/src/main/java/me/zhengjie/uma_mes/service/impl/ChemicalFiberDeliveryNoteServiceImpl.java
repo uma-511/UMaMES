@@ -118,6 +118,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     }
 
     @Override
+    public ChemicalFiberDeliveryNoteDTO findByScanNumber(String scanNumber) {
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.getByScanNumber(scanNumber);
+        ValidationUtil.isNull(chemicalFiberDeliveryNote.getScanNumber(),"ChemicalFiberDeliveryNote","scanNumber",scanNumber);
+        return chemicalFiberDeliveryNoteMapper.toDto(chemicalFiberDeliveryNote);
+    }
+
+    @Override
 //    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberDeliveryNoteDTO create(ChemicalFiberDeliveryNote resources) {
@@ -271,6 +278,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         chemicalFiberDeliveryNote.setInvalid(0);
         chemicalFiberDeliveryNote.setNoteStatus(chemicalFiberDeliveryNote.getBackNoteStatus());
         update(chemicalFiberDeliveryNote);
+    }
+
+    @Override
+    public void updateBalance(ChemicalFiberDeliveryNote chemicalFiberDeliveryNote) {
+        chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
     }
 
     @Override
