@@ -47,6 +47,13 @@ public class ChemicalFiberDeliveryNotePayDetailController {
         return new ResponseEntity<>(chemicalFiberDeliveryNotePayDetailService.queryAll(criteria,pageable),HttpStatus.OK);
     }
 
+    @PostMapping(value = "/getPayDetailList")
+    @Log("getPayDetailList")
+    @ApiOperation("getPayDetailList")
+    public ResponseEntity getPayDetailList(@Validated @RequestBody ChemicalFiberDeliveryNotePayDetail resources){
+        return new ResponseEntity<>(chemicalFiberDeliveryNotePayDetailService.findListByScanNumber(resources.getScanNumber()),HttpStatus.OK);
+    }
+
     /*@PostMapping
     @Log("新增ChemicalFiberDeliveryNotePayDetail")
     @ApiOperation("新增ChemicalFiberDeliveryNotePayDetail")
@@ -61,6 +68,14 @@ public class ChemicalFiberDeliveryNotePayDetailController {
     @PreAuthorize("@el.check('chemicalFiberDeliveryNotePayDetail:doPay')")
     public ResponseEntity doPay(@Validated @RequestBody ChemicalFiberDeliveryNotePayDetail resources){
         return new ResponseEntity<>(chemicalFiberDeliveryNotePayDetailService.doPay(resources),HttpStatus.CREATED);
+    }
+
+    @PostMapping(value = "/finalPay")
+    @Log("结账操作")
+    @ApiOperation("结账操作")
+    @PreAuthorize("@el.check('chemicalFiberDeliveryNotePayDetail:finalPay')")
+    public ResponseEntity finalPay(@Validated @RequestBody ChemicalFiberDeliveryNotePayDetail resources){
+        return new ResponseEntity<>(chemicalFiberDeliveryNotePayDetailService.finalPay(resources),HttpStatus.CREATED);
     }
 
     @PutMapping

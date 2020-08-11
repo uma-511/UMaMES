@@ -38,9 +38,13 @@ public interface ChemicalFiberDeliveryNotePayDetailService {
      */
     ChemicalFiberDeliveryNotePayDetailDTO findById(Integer id);
 
+    List<ChemicalFiberDeliveryNotePayDetailDTO> findListByScanNumber(String scanNumber);
+
     ChemicalFiberDeliveryNotePayDetailDTO create(ChemicalFiberDeliveryNotePayDetail resources);
 
     ChemicalFiberDeliveryNotePayDetailDTO doPay(ChemicalFiberDeliveryNotePayDetail resources);
+
+    ChemicalFiberDeliveryNotePayDetailDTO finalPay(ChemicalFiberDeliveryNotePayDetail resources);
 
     void update(ChemicalFiberDeliveryNotePayDetail resources);
 

@@ -1,6 +1,7 @@
 package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
+import me.zhengjie.annotation.Query;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -30,6 +31,7 @@ public class ChemicalFiberDeliveryNotePayDetailQueryCriteria  implements Seriali
     private String inputUser;
 
     // 订单号
+    @Query(propName = "scan_number")
     private String scanNumber;
 
     // 本次结账金额
