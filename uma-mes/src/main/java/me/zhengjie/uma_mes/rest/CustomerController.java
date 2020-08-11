@@ -1,10 +1,11 @@
 package me.zhengjie.uma_mes.rest;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.Customer;
 import me.zhengjie.uma_mes.service.CustomerService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.CustomerQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -12,9 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.*;
-import java.io.IOException;
+
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
 * @author Tan Jun Ming
@@ -80,5 +81,14 @@ public class CustomerController {
     @AnonymousAccess()
     public ResponseEntity getCustomerList(@RequestBody CustomerQueryCriteria criteria) {
         return new ResponseEntity<>(customerService.queryAll(criteria),HttpStatus.OK);
+    }
+
+    @Log("获取客户byId")
+    @ApiOperation("获取客户byId")
+    @PostMapping(value = "/getCustomerById")
+//    @PreAuthorize("@el.check('chemicalFiberProduct:getList')")
+    @AnonymousAccess()
+    public ResponseEntity getCustomerById(@RequestBody CustomerQueryCriteria criteria) {
+        return new ResponseEntity<>(customerService.findById(criteria.getId()),HttpStatus.OK);
     }
 }
