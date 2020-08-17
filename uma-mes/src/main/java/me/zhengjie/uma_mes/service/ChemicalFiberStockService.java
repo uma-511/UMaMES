@@ -46,7 +46,7 @@ public interface ChemicalFiberStockService {
 
     ChemicalFiberStockDTO findByProdName(String prodName);
 
-    ChemicalFiberStockDTO create(ChemicalFiberStock resources);
+    void create(ChemicalFiberStock resources);
 
     void update(ChemicalFiberStock resources);
 

@@ -34,4 +34,10 @@ public class ChemicalFiberProductDTO implements Serializable {
 
     // 删除标识
     private Integer delFlag;
+
+    private Integer menusId;
+
+    private String menus;
+
+
 }

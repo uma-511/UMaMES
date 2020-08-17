@@ -4,14 +4,13 @@ import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduct;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
+import me.zhengjie.uma_mes.repository.ChemicalFiberProductMenuRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductService;
 import me.zhengjie.uma_mes.service.ChemicalFiberStockService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductQueryCriteria;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberProductMapper;
+import me.zhengjie.uma_mes.service.mapper.ChemicalFiberProductMenuMapper;
 import me.zhengjie.utils.*;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
@@ -25,10 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
 * @author Tan Jun Ming
@@ -45,10 +41,14 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
 
     private final ChemicalFiberStockService chemicalFiberStockService;
 
+
+
     public ChemicalFiberProductServiceImpl(
             ChemicalFiberProductRepository chemicalFiberProductRepository,
             ChemicalFiberProductMapper chemicalFiberProductMapper,
-            ChemicalFiberStockService chemicalFiberStockService) {
+            ChemicalFiberStockService chemicalFiberStockService,
+            ChemicalFiberProductMenuMapper chemicalFiberProductMenuMapper,
+            ChemicalFiberProductMenuRepository chemicalFiberProductMenuRepository) {
         this.chemicalFiberProductRepository = chemicalFiberProductRepository;
         this.chemicalFiberProductMapper = chemicalFiberProductMapper;
         this.chemicalFiberStockService = chemicalFiberStockService;
@@ -66,7 +66,8 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
 //    @Cacheable
     public List<ChemicalFiberProductDTO> queryAll(ChemicalFiberProductQueryCriteria criteria){
         criteria.setDelFlag(0);
-        return chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+        List<ChemicalFiberProductDTO> product = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+        return product;
     }
 
     @Override
@@ -88,21 +89,22 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
         if (chemicalFiberProductDTOS.size() > 0) {
             throw new BadRequestException("请确保产品型号唯一");
         }
-        ChemicalFiberProductQueryCriteria chemicalFiberProductQueryCriteria2 = new ChemicalFiberProductQueryCriteria();
+        /*ChemicalFiberProductQueryCriteria chemicalFiberProductQueryCriteria2 = new ChemicalFiberProductQueryCriteria();
         chemicalFiberProductQueryCriteria2.setNameAccurate(resources.getName());
         chemicalFiberProductQueryCriteria2.setDelFlag(0);
         List<ChemicalFiberProductDTO> chemicalFiberProductDTOS2 = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, chemicalFiberProductQueryCriteria2, criteriaBuilder)));
         if (chemicalFiberProductDTOS2.size() > 0) {
             throw new BadRequestException("请确保产品名称唯一");
         }
-        else {
+        else {*/
 
-            resources.setCreateUser(SecurityUtils.getUsername());
-            resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
-            resources.setDelFlag(0);
-            ChemicalFiberProductDTO chemicalFiberProductDTO = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.save(resources));
+        resources.setCreateUser(SecurityUtils.getUsername());
+        resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        resources.setDelFlag(0);
+        ChemicalFiberProductDTO chemicalFiberProductDTO = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.save(resources));
+        return chemicalFiberProductDTO;
 
-            // 添加库存
+            /*// 添加库存
             ChemicalFiberStock chemicalFiberStock = new ChemicalFiberStock();
             chemicalFiberStock.setProdId(chemicalFiberProductDTO.getId());
             chemicalFiberStock.setProdModel(chemicalFiberProductDTO.getModel());
@@ -110,9 +112,8 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
             chemicalFiberStock.setProdColor(chemicalFiberProductDTO.getColor());
             chemicalFiberStock.setProdFineness(chemicalFiberProductDTO.getFineness());
             chemicalFiberStockService.create(chemicalFiberStock);
-            chemicalFiberStockService.stockTask();
-            return chemicalFiberProductDTO;
-        }
+            chemicalFiberStockService.stockTask();*/
+        /*}*/
     }
 
     @Override

@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
 import me.zhengjie.uma_mes.repository.ChemicalFiberStockRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberStockService;
@@ -74,8 +75,15 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
     @Override
 //    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public ChemicalFiberStockDTO create(ChemicalFiberStock resources) {
-        return chemicalFiberStockMapper.toDto(chemicalFiberStockRepository.save(resources));
+    public void create(ChemicalFiberStock resources) {
+        ChemicalFiberStockQueryCriteria criteria = new ChemicalFiberStockQueryCriteria();
+        criteria.setProdId(resources.getProdId());
+        criteria.setProdUnit(resources.getProdUnit());
+        List<ChemicalFiberStockDTO> stock = chemicalFiberStockMapper.toDto(chemicalFiberStockRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+        if (stock.size() > 0 ) {
+            throw new BadRequestException("请确保产品的唯一");
+        }
+        chemicalFiberStockMapper.toDto(chemicalFiberStockRepository.save(resources));
     }
 
     @Override
@@ -138,6 +146,7 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
             map.put("prodName",chemicalFiberStockDto.getProdName() );
             map.put("prodModel",chemicalFiberStockDto.getProdModel() );
             map.put("label",chemicalFiberStockDto.getProdName() );
+            map.put("prodId", chemicalFiberStockDto.getProdId());
             list.add(map);
         }
         Integer totalElements = chemicalFiberStockDTOs.size();

@@ -14,15 +14,18 @@ import java.util.List;
 * @date 2019-11-20
 */
 public interface ChemicalFiberStockRepository extends JpaRepository<ChemicalFiberStock, Integer>, JpaSpecificationExecutor<ChemicalFiberStock> {
+
     @Procedure(procedureName = "proc_update_stock")
     void stockTask();
 
-
     ChemicalFiberStock findByProdColorAndProdFineness(String color,String fineness);
 
-    @Query(value = "select * from uma_chemical_fiber_stock where prod_model like  %:innerName% or prod_name like  %:innerName% ",nativeQuery = true)
+    @Query(value = "select * from uma_chemical_fiber_stock where prod_model like  %:innerName% or prod_name like  %:innerName% GROUP BY prod_name",nativeQuery = true)
     List<ChemicalFiberStock> querySelectList(@Param("innerName") String innerName);
 
     @Query(value = "select * from uma_chemical_fiber_stock where prod_name =:prodName ",nativeQuery = true)
     ChemicalFiberStock findByProdName(@Param("prodName") String prodName);
+
+    @Query(value = "select * from uma_chemical_fiber_stock where prod_id =:prodId and prod_unit=:prodUnit",nativeQuery = true)
+    ChemicalFiberStock findByProdId(@Param("prodId") Integer prodId, @Param("prodUnit") String prodUnit);
 }
