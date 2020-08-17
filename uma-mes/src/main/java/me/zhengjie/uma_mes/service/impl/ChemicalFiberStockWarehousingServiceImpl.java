@@ -52,8 +52,13 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
 
 
     public Map<String, Object> queryAll(ChemicalFiberStockWarehousingQueryCriteria criteria, Pageable pageable) {
-
-        Page<ChemicalFiberStockWarehousing> page = chemicalFiberStockWarehousingRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        String name = criteria.getDriverMain();
+        if (name != null) {
+            criteria.setDriverDeputy(name);
+            criteria.setEscortOne(name);
+            criteria.setEscortTwo(name);
+        }
+        Page<ChemicalFiberStockWarehousing> page = chemicalFiberStockWarehousingRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicateOr(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberStockWarehousingMapper::toDto));
     }
 
@@ -181,10 +186,9 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         ChemicalFiberStockWarehousing Warehousing = chemicalFiberStockWarehousingRepository.findById(id).orElseGet(ChemicalFiberStockWarehousing::new);;
         if (chemicalFiberStockWarehousingDetail.size() > 0) {
             for (ChemicalFiberStockWarehousingDetail Detail : chemicalFiberStockWarehousingDetail) {
-                ChemicalFiberStock chemicalFiberStock = chemicalFiberStockRepository.findById(Detail.getStockId()).orElseGet(ChemicalFiberStock::new);
-                ValidationUtil.isNull( chemicalFiberStock.getId(),"chemicalFiberStock","id",Detail.getStockId());
-                String unit = Detail.getUnit();
                 if (Warehousing.getWarehousingStatus() == 2) {
+                    ChemicalFiberStock chemicalFiberStock = chemicalFiberStockRepository.findById(Detail.getStockId()).orElseGet(ChemicalFiberStock::new);
+                    ValidationUtil.isNull( chemicalFiberStock.getId(),"chemicalFiberStock","id",Detail.getStockId());
                     int number = 0;
                     int number1 = 0;
                     if (chemicalFiberStock.getTotalNumber() != null) {

@@ -63,5 +63,14 @@ public class ChemicalFiberStockLnventoryDetailController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PostMapping(value = "/balance")
+    @Log("平衡库存")
+    @ApiOperation("平衡库存")
+    @PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:List')")
+    public ResponseEntity balance(@Validated @RequestBody List<ChemicalFiberStockLnventoryDetail> resources) {
+        chemicalFiberStockLnventoryDetailService.balance(resources);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 
 }

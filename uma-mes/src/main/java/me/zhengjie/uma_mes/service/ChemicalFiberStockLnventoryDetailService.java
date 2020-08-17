@@ -16,4 +16,6 @@ public interface ChemicalFiberStockLnventoryDetailService {
 
     void update(List<ChemicalFiberStockLnventoryDetail> resources);
 
+    void balance(List<ChemicalFiberStockLnventoryDetail> resources);
+
 }
