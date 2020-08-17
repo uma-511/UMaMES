@@ -38,6 +38,9 @@ public class CustomerDTO implements Serializable {
     // 创建人
     private String createUser;
 
+    // 客户全称
+    private String fullName;
+
     // 删除标识
     private Integer delFlag;
 }
