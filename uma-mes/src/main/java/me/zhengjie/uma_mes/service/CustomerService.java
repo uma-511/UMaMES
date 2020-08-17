@@ -47,4 +47,6 @@ public interface CustomerService {
     void delete(Integer id);
 
     void download(List<CustomerDTO> all, HttpServletResponse response) throws IOException;
+
+    void save(Customer customer);
 }

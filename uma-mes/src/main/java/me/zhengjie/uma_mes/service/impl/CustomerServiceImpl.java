@@ -155,4 +155,9 @@ public class CustomerServiceImpl implements CustomerService {
         }
         FileUtil.downloadExcel(list, response);
     }
+
+    @Override
+    public void save(Customer customer) {
+        customerRepository.save(customer);
+    }
 }

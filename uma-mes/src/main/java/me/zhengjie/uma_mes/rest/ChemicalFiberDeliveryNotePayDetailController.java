@@ -65,7 +65,7 @@ public class ChemicalFiberDeliveryNotePayDetailController {
     @PostMapping(value = "/doPay")
     @Log("结账操作")
     @ApiOperation("结账操作")
-    @PreAuthorize("@el.check('chemicalFiberDeliveryNotePayDetail:doPay')")
+    //@PreAuthorize("@el.check('chemicalFiberDeliveryNotePayDetail:doPay')")
     public ResponseEntity doPay(@Validated @RequestBody ChemicalFiberDeliveryNotePayDetail resources){
         return new ResponseEntity<>(chemicalFiberDeliveryNotePayDetailService.doPay(resources),HttpStatus.CREATED);
     }
@@ -73,7 +73,7 @@ public class ChemicalFiberDeliveryNotePayDetailController {
     @PostMapping(value = "/finalPay")
     @Log("结账操作")
     @ApiOperation("结账操作")
-    @PreAuthorize("@el.check('chemicalFiberDeliveryNotePayDetail:finalPay')")
+   //@PreAuthorize("@el.check('chemicalFiberDeliveryNotePayDetail:finalPay')")
     public ResponseEntity finalPay(@Validated @RequestBody ChemicalFiberDeliveryNotePayDetail resources){
         return new ResponseEntity<>(chemicalFiberDeliveryNotePayDetailService.finalPay(resources),HttpStatus.CREATED);
     }
@@ -81,7 +81,7 @@ public class ChemicalFiberDeliveryNotePayDetailController {
     @PutMapping
     @Log("修改ChemicalFiberDeliveryNotePayDetail")
     @ApiOperation("修改ChemicalFiberDeliveryNotePayDetail")
-    @PreAuthorize("@el.check('chemicalFiberDeliveryNotePayDetail:edit')")
+    //@PreAuthorize("@el.check('chemicalFiberDeliveryNotePayDetail:edit')")
     public ResponseEntity update(@Validated @RequestBody ChemicalFiberDeliveryNotePayDetail resources){
         chemicalFiberDeliveryNotePayDetailService.update(resources);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -90,7 +90,7 @@ public class ChemicalFiberDeliveryNotePayDetailController {
     @DeleteMapping(value = "/{id}")
     @Log("删除ChemicalFiberDeliveryNotePayDetail")
     @ApiOperation("删除ChemicalFiberDeliveryNotePayDetail")
-    @PreAuthorize("@el.check('chemicalFiberDeliveryNotePayDetail:del')")
+    //@PreAuthorize("@el.check('chemicalFiberDeliveryNotePayDetail:del')")
     public ResponseEntity delete(@PathVariable Integer id){
         chemicalFiberDeliveryNotePayDetailService.delete(id);
         return new ResponseEntity(HttpStatus.OK);

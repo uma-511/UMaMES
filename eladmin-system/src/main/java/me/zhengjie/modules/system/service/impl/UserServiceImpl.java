@@ -70,6 +70,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserDTO> getUserListByDept(List<Long> deptIdList,String realname){
+        List<User> users = userRepository.getUserListByDept(deptIdList,realname);
+        return userMapper.toDto(users);
+    }
+
+    @Override
     @Cacheable
     public List<UserDTO> queryAll(UserQueryCriteria criteria) {
         List<User> users = userRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));

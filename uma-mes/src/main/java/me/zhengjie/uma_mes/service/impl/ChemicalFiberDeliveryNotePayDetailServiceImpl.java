@@ -105,8 +105,10 @@ public class ChemicalFiberDeliveryNotePayDetailServiceImpl implements ChemicalFi
     public ChemicalFiberDeliveryNotePayDetailDTO doPay(ChemicalFiberDeliveryNotePayDetail resources) {
         CustomerDTO customerDTO = customerService.findById(resources.getCustomerId());
         ChemicalFiberDeliveryNoteDTO chemicalFiberDeliveryNoteDTO = chemicalFiberDeliveryNoteService.findByScanNumber(resources.getScanNumber());
-        if(null != customerDTO && customerDTO.getAccount().compareTo(resources.getAmount()) == -1 ) {
-            throw new BadRequestException("客户账号余额不足，无法结款");
+        if(null != customerDTO.getAccount() ) {
+           if(customerDTO.getAccount().compareTo(resources.getAmount()) == -1) {
+               throw new BadRequestException("客户账号余额不足，无法结款");
+           }
         }else{
             customerDTO.setAccount(customerDTO.getAccount().subtract(resources.getAmount()));
             customerService.updateAccount(customerMapper.toEntity(customerDTO));
@@ -136,8 +138,10 @@ public class ChemicalFiberDeliveryNotePayDetailServiceImpl implements ChemicalFi
     public ChemicalFiberDeliveryNotePayDetailDTO finalPay(ChemicalFiberDeliveryNotePayDetail resources) {
         CustomerDTO customerDTO = customerService.findById(resources.getCustomerId());
         ChemicalFiberDeliveryNoteDTO chemicalFiberDeliveryNoteDTO = chemicalFiberDeliveryNoteService.findByScanNumber(resources.getScanNumber());
-        if(null != customerDTO && customerDTO.getAccount().compareTo(resources.getAmount()) == -1 ) {
-            throw new BadRequestException("客户账号余额不足，无法结款");
+        if(null != customerDTO.getAccount() ) {
+            if(customerDTO.getAccount().compareTo(resources.getAmount()) == -1) {
+                throw new BadRequestException("客户账号余额不足，无法结款");
+            }
         }else{
             customerDTO.setAccount(customerDTO.getAccount().subtract(resources.getAmount()));
             customerService.updateAccount(customerMapper.toEntity(customerDTO));

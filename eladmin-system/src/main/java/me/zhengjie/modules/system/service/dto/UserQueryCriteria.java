@@ -4,6 +4,7 @@ import lombok.Data;
 import me.zhengjie.annotation.Query;
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -18,6 +19,10 @@ public class UserQueryCriteria implements Serializable {
 
     @Query(propName = "id", type = Query.Type.IN, joinName = "dept")
     private Set<Long> deptIds;
+
+
+    @Query(propName = "id", type = Query.Type.IN, joinName = "dept")
+    private List<Long> deptIdList;
 
     // 多字段模糊
     @Query(blurry = "email,realname")

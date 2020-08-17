@@ -1,6 +1,8 @@
 package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
+
+import javax.persistence.Column;
 import java.sql.Timestamp;
 import java.math.BigDecimal;
 import java.io.Serializable;
@@ -92,5 +94,8 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
 
     //失效状态
     private Integer backNoteStatus;
+
+    // 发票类型
+    private String invoiceType;
 
 }

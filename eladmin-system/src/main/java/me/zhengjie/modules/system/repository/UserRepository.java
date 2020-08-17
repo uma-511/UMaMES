@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Zheng Jie
@@ -31,4 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     @Query(value = "select * from user where dept_id = :id and realname like %:realname% ",nativeQuery = true)
     List<User> getUserList(Long id, String realname);
+
+    @Query(value = "select * from user where dept_id in (:ids) and realname like %:realname% ",nativeQuery = true)
+    List<User> getUserListByDept(List<Long> ids, String realname);
 }
