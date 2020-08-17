@@ -83,6 +83,8 @@ public class ChemicalFiberStock implements Serializable {
     @Column(name = "status")
     private Integer status;
 
+
+
     public void copy(ChemicalFiberStock source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

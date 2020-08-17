@@ -49,6 +49,16 @@ public class ChemicalFiberProduct implements Serializable {
     @Column(name = "del_flag")
     private Integer delFlag;
 
+    // 产品目录标识
+    @Column(name = "menus_id")
+    private Integer menusId;
+
+    // 产品目录标识
+    @Column(name = "menus")
+    private String menus;
+
+
+
     public void copy(ChemicalFiberProduct source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

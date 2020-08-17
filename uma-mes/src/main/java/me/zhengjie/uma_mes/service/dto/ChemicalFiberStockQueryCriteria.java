@@ -12,6 +12,10 @@ public class ChemicalFiberStockQueryCriteria{
 
     // 产品id
     @Query
+    private Integer id;
+
+    // 产品id
+    @Query
     private Integer prodId;
 
     // 模糊

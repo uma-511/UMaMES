@@ -64,7 +64,8 @@ public class ChemicalFiberStockController {
     @PreAuthorize("@el.check('chemicalFiberStock:add')")
     public ResponseEntity create(@Validated @RequestBody ChemicalFiberStock resources){
         resources.setStatus(0);
-        ResponseEntity responseEntity=new ResponseEntity<>(chemicalFiberStockService.create(resources),HttpStatus.CREATED);
+        chemicalFiberStockService.create(resources);
+        ResponseEntity responseEntity=new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return responseEntity;
     }
 
@@ -89,6 +90,13 @@ public class ChemicalFiberStockController {
     @GetMapping(value = "/getSelectMap")
     @ApiOperation("获取产品列表")
     public ResponseEntity getSelectMap(ChemicalFiberStockQueryCriteria criteria){
+        List<ChemicalFiberStockDTO> chemicalFiberStockDTO = chemicalFiberStockService.querySelectList(criteria.getProdName());
+        return new ResponseEntity<>(chemicalFiberStockService.buildTree(chemicalFiberStockDTO),HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getSelectMaps")
+    @ApiOperation("获取产品列表")
+    public ResponseEntity getSelectMaps(ChemicalFiberStockQueryCriteria criteria){
         List<ChemicalFiberStockDTO> chemicalFiberStockDTO = chemicalFiberStockService.querySelectList(criteria.getProdName());
         return new ResponseEntity<>(chemicalFiberStockDTO,HttpStatus.OK);
     }

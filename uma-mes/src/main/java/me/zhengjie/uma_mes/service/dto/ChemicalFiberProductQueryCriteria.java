@@ -36,4 +36,7 @@ public class ChemicalFiberProductQueryCriteria{
 
     @Query
     private Integer delFlag;
+
+    @Query
+    private Integer menusId;
 }
