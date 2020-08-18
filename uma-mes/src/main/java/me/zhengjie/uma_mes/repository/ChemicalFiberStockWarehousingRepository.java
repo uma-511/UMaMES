@@ -16,4 +16,6 @@ public interface ChemicalFiberStockWarehousingRepository extends JpaRepository<C
 
     @Query(value = "select max(scan_number) FROM uma_chemical_fiber_stock_warehousing",nativeQuery = true)
     String getScanNumberMax();
+
+
 }

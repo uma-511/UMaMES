@@ -5,6 +5,7 @@ import me.zhengjie.annotation.Query;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 public class ChemicalFiberStockWarehousingQueryCriteria {
@@ -60,5 +61,25 @@ public class ChemicalFiberStockWarehousingQueryCriteria {
     // 副司机
     @Query(type = Query.Type.INNER_LIKE)
     private String carNumber;
+
+    private Boolean queryWithInvalid;
+
+    @Query(type = Query.Type.IN,propName = "invalid")
+    private List<Integer> invalidList;
+
+
+    // 大于等于
+    @Query(type = Query.Type.GREATER_THAN, propName = "createDate")
+    private Timestamp startTime;
+
+    // 小于等于
+    @Query(type = Query.Type.LESS_THAN, propName = "createDate")
+    private Timestamp endTime;
+
+    // 临时开始时间
+    private Long tempStartTime;
+
+    // 临时结束时间
+    private Long tempEndTime;
 
 }

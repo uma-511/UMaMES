@@ -30,7 +30,7 @@ public class ChemicalFiberStockLnventoryController {
     @GetMapping
     @Log("查询ChemicalFiberStockLnventory")
     @ApiOperation("查询ChemicalFiberStockLnventory")
-    @PreAuthorize("@el.check('ChemicalFiberStockLnventory:list')")
+    //@PreAuthorize("@el.check('chemicalFiberStockLnventory:list')")
     public ResponseEntity queryAll(ChemicalFiberStockLnventoryQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(chemicalFiberStockLnventoryService.queryAll(criteria,pageable), HttpStatus.OK);
     }
@@ -38,7 +38,7 @@ public class ChemicalFiberStockLnventoryController {
     @PostMapping
     @Log("新增ChemicalFiberStockLnventory")
     @ApiOperation("新增ChemicalFiberStockLnventory")
-    @PreAuthorize("@el.check('ChemicalFiberStockLnventory:add')")
+    //@PreAuthorize("@el.check('chemicalFiberStockLnventory:add')")
     public ResponseEntity create(){
         return new ResponseEntity<>(chemicalFiberStockLnventoryService.create(), HttpStatus.CREATED);
     }

@@ -21,10 +21,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @CacheConfig(cacheNames = "chemicalFiberStockWarehousing")
@@ -52,13 +49,25 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
 
 
     public Map<String, Object> queryAll(ChemicalFiberStockWarehousingQueryCriteria criteria, Pageable pageable) {
-        String name = criteria.getDriverMain();
-        if (name != null) {
+        //String name = criteria.getDriverMain();
+        /*if (name != null) {
             criteria.setDriverDeputy(name);
             criteria.setEscortOne(name);
             criteria.setEscortTwo(name);
+            Page<ChemicalFiberStockWarehousing> page = chemicalFiberStockWarehousingRepository.
+        }*/
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
         }
-        Page<ChemicalFiberStockWarehousing> page = chemicalFiberStockWarehousingRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicateOr(root,criteria,criteriaBuilder),pageable);
+        List<Integer> invalidList = new ArrayList<>();
+        invalidList.add(0);
+        if (null != criteria.getQueryWithInvalid() && criteria.getQueryWithInvalid())
+        {
+            invalidList.add(1);
+        }
+        criteria.setInvalidList(invalidList);
+        Page<ChemicalFiberStockWarehousing> page = chemicalFiberStockWarehousingRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberStockWarehousingMapper::toDto));
     }
 
@@ -68,9 +77,13 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberStockWarehousingDTO create(ChemicalFiberStockWarehousing resources) {
         resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        if (resources.getWarehousingDate() == null) {
+            resources.setWarehousingDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        }
         resources.setCreateUser(chemicalFiberStockWarehousingRepository.getRealNameByUserName(SecurityUtils.getUsername()));
         resources.setWarehousingStatus(1);
         resources.setScanNumber(getScanNumber());
+        resources.setInvalid(0);
         return chemicalFiberStockWarehousingMapper.toDto(chemicalFiberStockWarehousingRepository.save(resources));
     }
 
@@ -228,11 +241,13 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
                         chemicalFiberStockRepository.save(chemicalFiberStock);
                     }*/
                 }
-                chemicalFiberStockWarehousingDetailRepository.deleteById(Detail.getId());
+                //chemicalFiberStockWarehousingDetailRepository.deleteById(Detail.getId());
             }
-            chemicalFiberStockWarehousingRepository.deleteById(id);
+            Warehousing.setInvalid(1);
+            chemicalFiberStockWarehousingRepository.save(Warehousing);
         } else {
-            chemicalFiberStockWarehousingRepository.deleteById(id);
+            Warehousing.setInvalid(1);
+            chemicalFiberStockWarehousingRepository.save(Warehousing);
         }
     }
 }

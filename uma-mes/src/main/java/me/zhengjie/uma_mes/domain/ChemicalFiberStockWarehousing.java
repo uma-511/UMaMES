@@ -75,6 +75,10 @@ public class ChemicalFiberStockWarehousing implements Serializable {
     @Column(name = "car_number")
     private String carNumber;
 
+    // 失效
+    @Column(name = "invalid")
+    private Integer invalid;
+
 
 
     public void copy(ChemicalFiberStockWarehousing source){
