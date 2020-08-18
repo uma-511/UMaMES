@@ -13,4 +13,7 @@ public interface ChemicalFiberStockLnventoryRepository extends JpaRepository<Che
 
     @Query(value = "select max(lnventory_number) FROM uma_chemical_fiber_stock_lnventory",nativeQuery = true)
     String getScanNumberMax();
+
+    @Query(value = "select user.realname from user where user.username=:username limit 1",nativeQuery = true)
+    String getRealNameByUserName(@Param("username") String username);
 }

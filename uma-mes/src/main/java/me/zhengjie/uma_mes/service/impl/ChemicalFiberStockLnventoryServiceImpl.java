@@ -8,6 +8,7 @@ import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockLnventoryQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberStockLnventoryMapper;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
+import me.zhengjie.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
@@ -37,15 +38,21 @@ public class ChemicalFiberStockLnventoryServiceImpl implements ChemicalFiberStoc
     }
 
     public Map<String, Object> queryAll(ChemicalFiberStockLnventoryQueryCriteria criteria, Pageable pageable) {
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+        }
         Page<ChemicalFiberStockLnventory> page = chemicalFiberStockLnventoryRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberStockLnventoryMapper::toDto));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberStockLnventoryDTO create() {
         ChemicalFiberStockLnventory resources = new ChemicalFiberStockLnventory();
         resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         resources.setLnventoryNumber(getLnventoryNumber());
         resources.setLnventoryName(getLnventoryName());
+        resources.setLnventoryUser(chemicalFiberStockLnventoryRepository.getRealNameByUserName(SecurityUtils.getUsername()));
         resources.setLnventoryStatus(1);
         return chemicalFiberStockLnventoryMapper.toDto(chemicalFiberStockLnventoryRepository.save(resources));
     }

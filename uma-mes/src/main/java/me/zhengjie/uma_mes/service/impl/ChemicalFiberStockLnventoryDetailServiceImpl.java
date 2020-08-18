@@ -15,6 +15,8 @@ import me.zhengjie.uma_mes.service.mapper.ChemicalFiberStockMapper;
 import me.zhengjie.utils.QueryHelp;
 import me.zhengjie.utils.ValidationUtil;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +55,6 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
     }
 
     public List<ChemicalFiberStockLnventoryDetailDTO> queryAll() {
-
         List<ChemicalFiberStockLnventoryDetailDTO> DetailDTO = new ArrayList<>();
         List<ChemicalFiberStockDTO> stock = chemicalFiberStockMapper.toDto(chemicalFiberStockRepository.findAll());
 
@@ -69,6 +70,7 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
         return DetailDTO;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public List<ChemicalFiberStockLnventoryDetailDTO> create(List<ChemicalFiberStockLnventoryDetail> resources) {
         /*List<ChemicalFiberStockLnventoryDetail> lnventory = resources.get(0);
         Integer lnventoryId = resources.get(1);
@@ -105,6 +107,7 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
 
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void update(List<ChemicalFiberStockLnventoryDetail> resources) {
         /*Map<Integer, List<ChemicalFiberStockLnventoryDetail>> a = new HashMap<>();
 
@@ -122,10 +125,14 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
         for (ChemicalFiberStockLnventoryDetail dto : resources) {
             Integer a = 0;
             Integer b = 0;
-            a =  dto.getLnventorySurplus();
-            b = dto.getLnventoryLoss();
-            lnventorySurplus += a;
-            lnventoryLoss += b;
+            if (dto.getLnventorySurplus() != null) {
+                a =  dto.getLnventorySurplus();
+                lnventorySurplus += a;
+            }
+            if (dto.getLnventoryLoss() != null) {
+                b = dto.getLnventoryLoss();
+                lnventoryLoss += b;
+            }
         }
         ChemicalFiberStockLnventory Stock = chemicalFiberStockLnventoryRepository.findById(resources.get(0).getLnventoryId()).orElseGet(ChemicalFiberStockLnventory::new);
         ValidationUtil.isNull( Stock.getId(),"chemicalFiberStockWarehousingDetail","id",resources.get(0).getLnventoryId());
@@ -134,6 +141,7 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
         chemicalFiberStockLnventoryDetailRepository.saveAll(resources);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void balance(List<ChemicalFiberStockLnventoryDetail> resources) {
         for (ChemicalFiberStockLnventoryDetail dto : resources) {
             ChemicalFiberStock stock = chemicalFiberStockRepository.findById(dto.getStockId()).orElseGet(ChemicalFiberStock::new);

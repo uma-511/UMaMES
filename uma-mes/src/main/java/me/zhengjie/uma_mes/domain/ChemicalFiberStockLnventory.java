@@ -41,5 +41,9 @@ public class ChemicalFiberStockLnventory implements Serializable {
     @Column(name = "lnventory_status")
     private Integer lnventoryStatus;
 
+    // 状态
+    @Column(name = "lnventory_user")
+    private String lnventoryUser;
+
 
 }
