@@ -132,6 +132,10 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "back_note_status")
     private Integer backNoteStatus;
 
+    // 是否可用
+    @Column(name = "enable")
+    private Boolean enable;
+
     @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;
 

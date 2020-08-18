@@ -65,10 +65,9 @@ public class ReceiptController {
     @PutMapping
     @Log("修改Receipt")
     @ApiOperation("修改Receipt")
-    @PreAuthorize("@el.check('receipt:edit')")
     public ResponseEntity update(@Validated @RequestBody Receipt resources){
         receiptService.update(resources);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{id}")

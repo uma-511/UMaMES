@@ -96,13 +96,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
         }
-        List<Integer> invalidList = new ArrayList<>();
-        invalidList.add(0);
-        if (null != criteria.getQueryWithInvalid() && criteria.getQueryWithInvalid())
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
+        if (null != criteria.getShowUnEnable() && criteria.getShowUnEnable())
         {
-            invalidList.add(1);
+            booleanList.add(Boolean.FALSE);
         }
-        criteria.setInvalidList(invalidList);
+        criteria.setEnableList(booleanList);
         Page<ChemicalFiberDeliveryNote> page = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberDeliveryNoteMapper::toDto));
     }
@@ -145,6 +145,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         resources.setCreateUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
         resources.setScanNumber(getScanNumberWithMaxNumber());
         resources.setInvalid(0);
+        resources.setEnable(Boolean.TRUE);
         return chemicalFiberDeliveryNoteMapper.toDto(chemicalFiberDeliveryNoteRepository.save(resources));
     }
 
@@ -288,6 +289,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     public void doInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         chemicalFiberDeliveryNote.setInvalid(1);
+        chemicalFiberDeliveryNote.setEnable(Boolean.FALSE);
         chemicalFiberDeliveryNote.setBackNoteStatus(chemicalFiberDeliveryNote.getNoteStatus());
         chemicalFiberDeliveryNote.setNoteStatus(0);
         update(chemicalFiberDeliveryNote);
@@ -297,6 +299,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     public void unInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         chemicalFiberDeliveryNote.setInvalid(0);
+        chemicalFiberDeliveryNote.setEnable(Boolean.TRUE);
         chemicalFiberDeliveryNote.setNoteStatus(chemicalFiberDeliveryNote.getBackNoteStatus());
         update(chemicalFiberDeliveryNote);
     }
@@ -407,7 +410,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("deliveryList", listMap);
         workbook = ExcelExportUtil.exportExcel(params, map);
         FileUtil.downLoadExcel(chemicalFiberDeliveryNote.getScanNumber()+"-送货单导出.xlsx", response, workbook);
-        chemicalFiberDeliveryNote.setNoteStatus(2);
+        if(null != chemicalFiberDeliveryNote.getNoteStatus() && chemicalFiberDeliveryNote.getNoteStatus().equals(1)) {
+            chemicalFiberDeliveryNote.setNoteStatus(2);
+        }
         update(chemicalFiberDeliveryNote);
     }
 

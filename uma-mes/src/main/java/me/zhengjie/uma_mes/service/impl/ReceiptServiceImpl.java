@@ -158,7 +158,9 @@ public class ReceiptServiceImpl implements ReceiptService {
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
-        receiptRepository.deleteById(id);
+        Receipt receipt = receiptRepository.findById(id).orElseGet(Receipt::new);
+        receipt.setStatus(0);
+        receiptRepository.save(receipt);
     }
 
 
