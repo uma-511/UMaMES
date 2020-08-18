@@ -31,7 +31,7 @@ public class ChemicalFiberStockLnventoryDetailController {
     @GetMapping
     @Log("查询chemicalFiberStockLnventoryDetail")
     @ApiOperation("查询chemicalFiberStockLnventoryDetail")
-    @PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:list')")
+    //@PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:list')")
     public ResponseEntity queryAll(){
         return new ResponseEntity<>(chemicalFiberStockLnventoryDetailService.queryAll(), HttpStatus.OK);
     }
@@ -39,7 +39,7 @@ public class ChemicalFiberStockLnventoryDetailController {
     @PostMapping
     @Log("新增chemicalFiberStockLnventoryDetail")
     @ApiOperation("新增chemicalFiberStockLnventoryDetail")
-    @PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:add')")
+    //@PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:add')")
     public ResponseEntity create(@Validated @RequestBody List<ChemicalFiberStockLnventoryDetail> resources){
 
         return new ResponseEntity<>(chemicalFiberStockLnventoryDetailService.create(resources), HttpStatus.CREATED);
@@ -48,7 +48,7 @@ public class ChemicalFiberStockLnventoryDetailController {
     @PostMapping(value = "/List")
     @Log("查询chemicalFiberStockLnventoryDetailList")
     @ApiOperation("查询chemicalFiberStockLnventoryDetailList")
-    @PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:List')")
+    //@PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:list')")
     public ResponseEntity queryAllList(@Validated @RequestBody ChemicalFiberStockLnventory resources){
 
         return new ResponseEntity<>(chemicalFiberStockLnventoryDetailService.queryAllList(resources), HttpStatus.CREATED);
@@ -57,7 +57,7 @@ public class ChemicalFiberStockLnventoryDetailController {
     @PostMapping(value = "/addList")
     @Log("查询chemicalFiberStockLnventoryDetailList")
     @ApiOperation("查询chemicalFiberStockLnventoryDetailList")
-    @PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:List')")
+    //@PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:list')")
     public ResponseEntity update(@Validated @RequestBody List<ChemicalFiberStockLnventoryDetail> resources) {
         chemicalFiberStockLnventoryDetailService.update(resources);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -66,7 +66,7 @@ public class ChemicalFiberStockLnventoryDetailController {
     @PostMapping(value = "/balance")
     @Log("平衡库存")
     @ApiOperation("平衡库存")
-    @PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:List')")
+    //@PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:edit')")
     public ResponseEntity balance(@Validated @RequestBody List<ChemicalFiberStockLnventoryDetail> resources) {
         chemicalFiberStockLnventoryDetailService.balance(resources);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

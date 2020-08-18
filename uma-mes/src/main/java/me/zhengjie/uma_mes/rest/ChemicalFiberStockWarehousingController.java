@@ -31,7 +31,7 @@ public class ChemicalFiberStockWarehousingController {
     @GetMapping
     @Log("查询ChemicalFiberStockWarehousing")
     @ApiOperation("查询ChemicalFiberStockWarehousing")
-    @PreAuthorize("@el.check('chemicalFiberStockWarehousing:list')")
+    //@PreAuthorize("@el.check('chemicalFiberStockWarehousing:list')")
     public ResponseEntity queryAll(ChemicalFiberStockWarehousingQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(chemicalFiberStockWarehousingService.queryAll(criteria,pageable), HttpStatus.OK);
     }
@@ -39,7 +39,7 @@ public class ChemicalFiberStockWarehousingController {
     @PostMapping
     @Log("新增ChemicalFiberStockWarehousing")
     @ApiOperation("新增ChemicalFiberStockWarehousing")
-    @PreAuthorize("@el.check('chemicalFiberStockWarehousing:add')")
+    //@PreAuthorize("@el.check('chemicalFiberStockWarehousing:add')")
     public ResponseEntity create(@Validated @RequestBody ChemicalFiberStockWarehousing resources){
         return new ResponseEntity<>(chemicalFiberStockWarehousingService.create(resources), HttpStatus.CREATED);
     }
@@ -47,7 +47,7 @@ public class ChemicalFiberStockWarehousingController {
     @PutMapping
     @Log("修改ChemicalFiberStockWarehousing")
     @ApiOperation("修改ChemicalFiberStockWarehousing")
-    @PreAuthorize("@el.check('chemicalFiberStockWarehousing:edit')")
+    //@PreAuthorize("@el.check('chemicalFiberStockWarehousing:edit')")
     public ResponseEntity update(@Validated @RequestBody ChemicalFiberStockWarehousing resources){
         chemicalFiberStockWarehousingService.update(resources);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -56,7 +56,7 @@ public class ChemicalFiberStockWarehousingController {
     @PutMapping(value = "/warehousing")
     @Log("入库")
     @ApiOperation("入库")
-    @PreAuthorize("@el.check('chemicalFiberStockWarehousing:edit')")
+    //@PreAuthorize("@el.check('chemicalFiberStockWarehousing:edit')")
     public ResponseEntity warehousing(@Validated @RequestBody List<ChemicalFiberStockWarehousingDetail> resources){
         chemicalFiberStockWarehousingService.warehousing(resources);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -65,7 +65,7 @@ public class ChemicalFiberStockWarehousingController {
     @DeleteMapping(value = "/{id}")
     @Log("删除ChemicalFiberStockWarehousing")
     @ApiOperation("删除ChemicalFiberStockWarehousing")
-    @PreAuthorize("@el.check('ChemicalFiberStockWarehousing:del')")
+    //@PreAuthorize("@el.check('chemicalFiberStockWarehousing:del')")
     public ResponseEntity delete(@PathVariable Integer id){
         chemicalFiberStockWarehousingService.delete(id);
         return new ResponseEntity(HttpStatus.OK);

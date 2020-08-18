@@ -30,7 +30,7 @@ public class ChemicalFiberStockWarehousingDetailController {
     @PostMapping(value = "/chemicalFiberStockWarehousingDetailList")
     @Log("查询ChemicalFiberStockWarehousingDetail")
     @ApiOperation("查询ChemicalFiberStockWarehousingDetail")
-    @PreAuthorize("@el.check('ChemicalFiberStockWarehousingDetail:list')")
+    //@PreAuthorize("@el.check('chemicalFiberStockWarehousingDetail:list')")
     public ResponseEntity queryAll(@RequestBody ChemicalFiberStockWarehousingDetailQueryCriteria criteria){
         return new ResponseEntity<>(chemicalFiberStockWarehousingDetailService.queryAll(criteria), HttpStatus.OK);
     }
@@ -38,7 +38,7 @@ public class ChemicalFiberStockWarehousingDetailController {
     @PostMapping
     @Log("新增ChemicalFiberStockWarehousingDetail")
     @ApiOperation("新增ChemicalFiberStockWarehousingDetail")
-    @PreAuthorize("@el.check('ChemicalFiberStockWarehousingDetail:add')")
+    //@PreAuthorize("@el.check('chemicalFiberStockWarehousingDetail:add')")
     public ResponseEntity create(@Validated @RequestBody ChemicalFiberStockWarehousingDetail resources){
         return new ResponseEntity<>(chemicalFiberStockWarehousingDetailService.create(resources), HttpStatus.CREATED);
     }
@@ -47,7 +47,7 @@ public class ChemicalFiberStockWarehousingDetailController {
     @PutMapping
     @Log("修改ChemicalFiberStockWarehousingDetail")
     @ApiOperation("修改ChemicalFiberStockWarehousingDetail")
-    @PreAuthorize("@el.check('ChemicalFiberStockWarehousingDetail:edit')")
+    //@PreAuthorize("@el.check('chemicalFiberStockWarehousingDetail:edit')")
     public ResponseEntity update(@Validated @RequestBody List<ChemicalFiberStockWarehousingDetail> resources){
         chemicalFiberStockWarehousingDetailService.update(resources);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -56,7 +56,7 @@ public class ChemicalFiberStockWarehousingDetailController {
     @DeleteMapping(value = "/{id}")
     @Log("删除ChemicalFiberStockWarehousingDetail")
     @ApiOperation("删除ChemicalFiberStockWarehousingDetail")
-    @PreAuthorize("@el.check('ChemicalFiberStockWarehousingDetail:del')")
+    //@PreAuthorize("@el.check('chemicalFiberStockWarehousingDetail:del')")
     public ResponseEntity delete(@PathVariable Integer id){
         chemicalFiberStockWarehousingDetailService.delete(id);
         return new ResponseEntity(HttpStatus.OK);

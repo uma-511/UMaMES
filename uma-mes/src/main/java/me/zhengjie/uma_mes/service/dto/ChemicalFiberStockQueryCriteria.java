@@ -41,6 +41,10 @@ public class ChemicalFiberStockQueryCriteria{
     @Query(type = Query.Type.GREATER_THAN)
     private Integer totalBag;
 
+    // 总个数
+    @Query(type = Query.Type.GREATER_THAN, propName = "totalNumber")
+    private Integer number;
+
 //    @Query(type = Query.Type.NOT_EQUAL)
 //    private String max;
 //

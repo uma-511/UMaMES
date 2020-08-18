@@ -26,4 +26,8 @@ public class ChemicalFiberStockLnventoryDTO implements Serializable {
     // 状态
     private Integer lnventoryStatus;
 
+    // 制单人名字
+    private String lnventoryUser;
+    ;
+
 }

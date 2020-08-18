@@ -54,4 +54,7 @@ public class ChemicalFiberStockWarehousingDTO implements Serializable {
     // 副司机
     private String carNumber;
 
+    // 副司机
+    private Integer invalid;
+
 }

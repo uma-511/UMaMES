@@ -115,20 +115,22 @@ public class ChemicalFiberStockController {
     @ApiOperation("查询ChemicalFiberLabel")
     @PreAuthorize("@el.check('chemicalFiberStock:list')")
     public Result getSummaryData(@RequestBody ChemicalFiberStockQueryCriteria criteria) {
-        criteria.setTotalBag(1);
-        BigDecimal sumNetWeight = new BigDecimal(0);
+        Integer sumNetWeight = 0;
         Integer sumFactPerBagNumber = 0;
-        BigDecimal sumGrossWeight = new BigDecimal(0);
         List<ChemicalFiberStockDTO> chemicalFiberStockDTOList = chemicalFiberStockService.queryAll(criteria);
         for (ChemicalFiberStockDTO chemicalFiberStockDTO : chemicalFiberStockDTOList) {
-            sumFactPerBagNumber = sumFactPerBagNumber + chemicalFiberStockDTO.getTotalNumber();
-            sumNetWeight = sumNetWeight.add(chemicalFiberStockDTO.getTotalNetWeight());
-            sumGrossWeight = sumGrossWeight.add(chemicalFiberStockDTO.getTotalGrossWeight());
+            String unit = chemicalFiberStockDTO.getProdUnit();
+            if (unit.equals("吨")) {
+                sumNetWeight = sumNetWeight + chemicalFiberStockDTO.getTotalNumber();
+            }
+            if (unit.equals("支")) {
+                sumFactPerBagNumber = sumFactPerBagNumber + chemicalFiberStockDTO.getTotalNumber();
+            }
         }
+        sumNetWeight =  sumNetWeight * 1000;
         Map<String, Object> map = new HashMap<>();
         map.put("sumFactPerBagNumber", sumFactPerBagNumber);
         map.put("sumNetWeight", sumNetWeight);
-        map.put("sumGrossWeight", sumGrossWeight);
         return Result.success(map);
     }
 }
