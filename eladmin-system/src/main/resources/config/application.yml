@@ -48,3 +48,8 @@ uma:
   heartbeat:
     all-idle-time: 50
     time-unit: seconds
+
+#罗村
+globalCompanyName: XQ
+#高明
+#globalCompanyName: YQ

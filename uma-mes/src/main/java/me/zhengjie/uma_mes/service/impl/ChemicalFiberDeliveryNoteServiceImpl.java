@@ -18,6 +18,7 @@ import me.zhengjie.uma_mes.service.mapper.ChemicalFiberStockMapper;
 import me.zhengjie.uma_mes.utils.NumberToCN;
 import me.zhengjie.utils.*;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -63,6 +64,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     private final ChemicalFiberStockMapper chemicalFiberStockMapper;
 
+    @Value("${globalCompanyName}")
+    private String globalCompanyName;
+
     public ChemicalFiberDeliveryNoteServiceImpl(ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository,
                                                 ChemicalFiberDeliveryNoteMapper chemicalFiberDeliveryNoteMapper,
                                                 CustomerService customerService,
@@ -92,13 +96,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
         }
-        List<Integer> invalidList = new ArrayList<>();
-        invalidList.add(0);
-        if (null != criteria.getQueryWithInvalid() && criteria.getQueryWithInvalid())
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
+        if (null != criteria.getShowUnEnable() && criteria.getShowUnEnable())
         {
-            invalidList.add(1);
+            booleanList.add(Boolean.FALSE);
         }
-        criteria.setInvalidList(invalidList);
+        criteria.setEnableList(booleanList);
         Page<ChemicalFiberDeliveryNote> page = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberDeliveryNoteMapper::toDto));
     }
@@ -118,6 +122,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     }
 
     @Override
+    public ChemicalFiberDeliveryNoteDTO findByScanNumber(String scanNumber) {
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.getByScanNumber(scanNumber);
+        ValidationUtil.isNull(chemicalFiberDeliveryNote.getScanNumber(),"ChemicalFiberDeliveryNote","scanNumber",scanNumber);
+        return chemicalFiberDeliveryNoteMapper.toDto(chemicalFiberDeliveryNote);
+    }
+
+    @Override
 //    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberDeliveryNoteDTO create(ChemicalFiberDeliveryNote resources) {
@@ -132,17 +143,15 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         resources.setContactPhone(customerDTO.getContactPhone());
         resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         resources.setCreateUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
-        resources.setScanNumber(getScanNumber());
+        resources.setScanNumber(getScanNumberWithMaxNumber());
         resources.setInvalid(0);
+        resources.setEnable(Boolean.TRUE);
         return chemicalFiberDeliveryNoteMapper.toDto(chemicalFiberDeliveryNoteRepository.save(resources));
     }
 
     public String getScanNumber () {
         String scanNumber;
-        //高明
-        //String type = "YQ";
-        //罗村
-        String type = "XQ";
+        String type = globalCompanyName;
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
@@ -153,6 +162,26 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             scanNumber = type + year.substring(2,4) + month + "00001";
         } else {
             Integer number = currenCount+ 1;
+            String tempNumberStr = String.format("%5d", number++).replace(" ", "0");
+            scanNumber = type + year.substring(2,4) + month + tempNumberStr;
+        }
+        return scanNumber;
+    }
+
+    public String getScanNumberWithMaxNumber () {
+        String scanNumber;
+        String type = globalCompanyName;
+        Map<String, Object> timeMap = monthTimeInMillis();
+        String year = timeMap.get("year").toString();
+        String month = timeMap.get("month").toString();
+
+        String currenNumber=chemicalFiberDeliveryNoteRepository.getCurrenNoteCountWithMaxNumber(year+"-"+month);
+
+        if (null == currenNumber && currenNumber.equals("")) {
+            scanNumber = type + year.substring(2,4) + month + "00001";
+        } else {
+            Integer lastNumber = Integer.parseInt(currenNumber.substring(currenNumber.length()-5,currenNumber.length()));
+            Integer number = lastNumber+ 1;
             String tempNumberStr = String.format("%5d", number++).replace(" ", "0");
             scanNumber = type + year.substring(2,4) + month + tempNumberStr;
         }
@@ -260,6 +289,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     public void doInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         chemicalFiberDeliveryNote.setInvalid(1);
+        chemicalFiberDeliveryNote.setEnable(Boolean.FALSE);
         chemicalFiberDeliveryNote.setBackNoteStatus(chemicalFiberDeliveryNote.getNoteStatus());
         chemicalFiberDeliveryNote.setNoteStatus(0);
         update(chemicalFiberDeliveryNote);
@@ -269,8 +299,14 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     public void unInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         chemicalFiberDeliveryNote.setInvalid(0);
+        chemicalFiberDeliveryNote.setEnable(Boolean.TRUE);
         chemicalFiberDeliveryNote.setNoteStatus(chemicalFiberDeliveryNote.getBackNoteStatus());
         update(chemicalFiberDeliveryNote);
+    }
+
+    @Override
+    public void updateBalance(ChemicalFiberDeliveryNote chemicalFiberDeliveryNote) {
+        chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
     }
 
     @Override
@@ -374,7 +410,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("deliveryList", listMap);
         workbook = ExcelExportUtil.exportExcel(params, map);
         FileUtil.downLoadExcel(chemicalFiberDeliveryNote.getScanNumber()+"-送货单导出.xlsx", response, workbook);
-        chemicalFiberDeliveryNote.setNoteStatus(2);
+        if(null != chemicalFiberDeliveryNote.getNoteStatus() && chemicalFiberDeliveryNote.getNoteStatus().equals(1)) {
+            chemicalFiberDeliveryNote.setNoteStatus(2);
+        }
         update(chemicalFiberDeliveryNote);
     }
 

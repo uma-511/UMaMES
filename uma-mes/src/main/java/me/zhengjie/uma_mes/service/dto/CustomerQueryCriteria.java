@@ -9,6 +9,8 @@ import me.zhengjie.annotation.Query;
 */
 @Data
 public class CustomerQueryCriteria{
+    @Query(propName = "id")
+    private Integer id;
 
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)

@@ -1,8 +1,12 @@
 package me.zhengjie.uma_mes.service.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
-import java.sql.Timestamp;
+import me.zhengjie.uma_mes.utils.CustomerBigDecimalSerialize;
+
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 
 /**
@@ -40,6 +44,10 @@ public class CustomerDTO implements Serializable {
 
     // 客户全称
     private String fullName;
+
+    // 客户账号金额
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal account;
 
     // 删除标识
     private Integer delFlag;

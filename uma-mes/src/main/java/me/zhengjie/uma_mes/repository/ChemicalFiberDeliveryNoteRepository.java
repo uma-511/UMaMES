@@ -20,4 +20,10 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
 
     @Query(value = "select COUNT(id) FROM uma_chemical_fiber_delivery_note WHERE create_date like %:currenDate%",nativeQuery = true)
     Integer getCurrenNoteCount(@Param("currenDate") String currenDate);
+
+    @Query(value = "select MAX(scan_number) FROM uma_chemical_fiber_delivery_note WHERE create_date like %:currenDate%",nativeQuery = true)
+    String getCurrenNoteCountWithMaxNumber(@Param("currenDate") String currenDate);
+
+    @Query(value = "select * FROM uma_chemical_fiber_delivery_note where scan_number = :scanNumber",nativeQuery = true)
+    ChemicalFiberDeliveryNote getByScanNumber(@Param("scanNumber") String scanNumber);
 }
