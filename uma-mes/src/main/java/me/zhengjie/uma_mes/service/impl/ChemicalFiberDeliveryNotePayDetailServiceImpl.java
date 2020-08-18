@@ -108,24 +108,24 @@ public class ChemicalFiberDeliveryNotePayDetailServiceImpl implements ChemicalFi
         if(null != customerDTO.getAccount() ) {
            if(customerDTO.getAccount().compareTo(resources.getAmount()) == -1) {
                throw new BadRequestException("客户账号余额不足，无法结款");
+           }else{
+               if(null != chemicalFiberDeliveryNoteDTO && chemicalFiberDeliveryNoteDTO.getBalance().compareTo(resources.getAmount()) == -1) {
+                   throw new BadRequestException("支付金额超过待付金额，无法结款");
+               }else {
+                   customerDTO.setAccount(customerDTO.getAccount().subtract(resources.getAmount()));
+                   customerService.updateAccount(customerMapper.toEntity(customerDTO));
+                   if(null != chemicalFiberDeliveryNoteDTO && chemicalFiberDeliveryNoteDTO.getBalance().compareTo(resources.getAmount()) == 0) {
+                       //完结
+                       chemicalFiberDeliveryNoteDTO.setNoteStatus(6);
+                   }else
+                   {
+                       //结款中
+                       chemicalFiberDeliveryNoteDTO.setNoteStatus(5);
+                   }
+                   chemicalFiberDeliveryNoteDTO.setBalance(chemicalFiberDeliveryNoteDTO.getBalance().subtract(resources.getAmount()));
+                   chemicalFiberDeliveryNoteService.updateBalance(chemicalFiberDeliveryNoteMapper.toEntity(chemicalFiberDeliveryNoteDTO));
+               }
            }
-        }else{
-            customerDTO.setAccount(customerDTO.getAccount().subtract(resources.getAmount()));
-            customerService.updateAccount(customerMapper.toEntity(customerDTO));
-        }
-        if(null != chemicalFiberDeliveryNoteDTO && chemicalFiberDeliveryNoteDTO.getBalance().compareTo(resources.getAmount()) == -1) {
-            throw new BadRequestException("支付金额超过待付金额，无法结款");
-        }else {
-            if(null != chemicalFiberDeliveryNoteDTO && chemicalFiberDeliveryNoteDTO.getBalance().compareTo(resources.getAmount()) == 0) {
-                //完结
-                chemicalFiberDeliveryNoteDTO.setNoteStatus(6);
-            }else
-            {
-                //结款中
-                chemicalFiberDeliveryNoteDTO.setNoteStatus(5);
-            }
-            chemicalFiberDeliveryNoteDTO.setBalance(chemicalFiberDeliveryNoteDTO.getBalance().subtract(resources.getAmount()));
-            chemicalFiberDeliveryNoteService.updateBalance(chemicalFiberDeliveryNoteMapper.toEntity(chemicalFiberDeliveryNoteDTO));
         }
         resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         resources.setInputUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
@@ -141,19 +141,19 @@ public class ChemicalFiberDeliveryNotePayDetailServiceImpl implements ChemicalFi
         if(null != customerDTO.getAccount() ) {
             if(customerDTO.getAccount().compareTo(resources.getAmount()) == -1) {
                 throw new BadRequestException("客户账号余额不足，无法结款");
+            }else{
+                if(null != chemicalFiberDeliveryNoteDTO && chemicalFiberDeliveryNoteDTO.getBalance().compareTo(resources.getAmount()) == -1) {
+                    throw new BadRequestException("支付金额超过待付金额，无法结款");
+                }else {
+                    customerDTO.setAccount(customerDTO.getAccount().subtract(resources.getAmount()));
+                    customerService.updateAccount(customerMapper.toEntity(customerDTO));
+                    chemicalFiberDeliveryNoteDTO.setNoteStatus(6);
+                    //计算余数并赋值
+                    chemicalFiberDeliveryNoteDTO.setRemainder(chemicalFiberDeliveryNoteDTO.getBalance().subtract(resources.getAmount()));
+                    chemicalFiberDeliveryNoteDTO.setBalance(new BigDecimal(0));
+                    chemicalFiberDeliveryNoteService.updateBalance(chemicalFiberDeliveryNoteMapper.toEntity(chemicalFiberDeliveryNoteDTO));
+                }
             }
-        }else{
-            customerDTO.setAccount(customerDTO.getAccount().subtract(resources.getAmount()));
-            customerService.updateAccount(customerMapper.toEntity(customerDTO));
-        }
-        if(null != chemicalFiberDeliveryNoteDTO && chemicalFiberDeliveryNoteDTO.getBalance().compareTo(resources.getAmount()) == -1) {
-            throw new BadRequestException("支付金额超过待付金额，无法结款");
-        }else {
-            chemicalFiberDeliveryNoteDTO.setNoteStatus(6);
-            //计算余数并赋值
-            chemicalFiberDeliveryNoteDTO.setRemainder(chemicalFiberDeliveryNoteDTO.getBalance().subtract(resources.getAmount()));
-            chemicalFiberDeliveryNoteDTO.setBalance(new BigDecimal(0));
-            chemicalFiberDeliveryNoteService.updateBalance(chemicalFiberDeliveryNoteMapper.toEntity(chemicalFiberDeliveryNoteDTO));
         }
         resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         resources.setInputUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
