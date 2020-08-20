@@ -15,6 +15,6 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Integer>, JpaS
     @Query(value = "select COUNT(id) FROM uma_receipt WHERE create_date like %:currenDate%",nativeQuery = true)
     Integer getCurrenReceiptCount(@Param("currenDate") String currenDate);
 
-    @Query(value = "select MAX(receipt_number) FROM uma_receipt WHERE create_date like %:currenDate%",nativeQuery = true)
+    @Query(value = "select receipt_number FROM uma_receipt WHERE create_date like %:currenDate% ORDER BY create_date desc  LIMIT 1 ",nativeQuery = true)
     String getCurrenReceiptCountWithMaxNumber(@Param("currenDate") String currenDate);
 }

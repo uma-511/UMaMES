@@ -97,6 +97,9 @@ public class ChemicalFiberStockController {
     @GetMapping(value = "/getSelectMaps")
     @ApiOperation("获取产品列表")
     public ResponseEntity getSelectMaps(ChemicalFiberStockQueryCriteria criteria){
+        if( null == criteria.getProdName() || criteria.getProdName().equals("")) {
+            criteria.setProdName("");
+        }
         List<ChemicalFiberStockDTO> chemicalFiberStockDTO = chemicalFiberStockService.querySelectList(criteria.getProdName());
         return new ResponseEntity<>(chemicalFiberStockDTO,HttpStatus.OK);
     }
