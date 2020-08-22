@@ -1,9 +1,13 @@
 package me.zhengjie.uma_mes.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import me.zhengjie.uma_mes.utils.CustomerBigDecimalSerialize;
+
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.io.Serializable;
 
@@ -48,6 +52,15 @@ public class Customer implements Serializable {
     // 创建日期
     @Column(name = "create_date")
     private Timestamp createDate;
+
+    // 客户全称
+    @Column(name = "full_name")
+    private String fullName;
+
+    // 客户账号金额
+    @Column(name = "account")
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal account;
 
     // 创建人
     @Column(name = "create_user")

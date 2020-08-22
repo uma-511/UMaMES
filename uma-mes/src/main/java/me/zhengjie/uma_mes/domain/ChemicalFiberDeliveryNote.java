@@ -112,6 +112,10 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "balance")
     private BigDecimal balance;
 
+    // 结款后余数
+    @Column(name = "remainder")
+    private BigDecimal remainder;
+
     // 付款方式
     @Column(name = "payment")
     private String payment;
@@ -120,9 +124,17 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "invalid")
     private Integer invalid;
 
+    // 发票类型
+    @Column(name = "invoice_type")
+    private String invoiceType;
+
     // 状态备份
     @Column(name = "back_note_status")
     private Integer backNoteStatus;
+
+    // 是否可用
+    @Column(name = "enable")
+    private Boolean enable;
 
     @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;

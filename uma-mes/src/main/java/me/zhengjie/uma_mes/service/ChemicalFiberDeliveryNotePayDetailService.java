@@ -4,14 +4,15 @@ import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNotePayDetail;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNotePayDetailDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberDeliveryNotePayDetailQueryCriteria;
 import org.springframework.data.domain.Pageable;
-import java.util.Map;
-import java.util.List;
-import java.io.IOException;
+
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
 * @author Xie Ji Biao
-* @date 2020-07-29
+* @date 2020-08-08
 */
 public interface ChemicalFiberDeliveryNotePayDetailService {
 
@@ -37,7 +38,13 @@ public interface ChemicalFiberDeliveryNotePayDetailService {
      */
     ChemicalFiberDeliveryNotePayDetailDTO findById(Integer id);
 
+    List<ChemicalFiberDeliveryNotePayDetailDTO> findListByScanNumber(String scanNumber);
+
     ChemicalFiberDeliveryNotePayDetailDTO create(ChemicalFiberDeliveryNotePayDetail resources);
+
+    ChemicalFiberDeliveryNotePayDetailDTO doPay(ChemicalFiberDeliveryNotePayDetail resources);
+
+    ChemicalFiberDeliveryNotePayDetailDTO finalPay(ChemicalFiberDeliveryNotePayDetail resources);
 
     void update(ChemicalFiberDeliveryNotePayDetail resources);
 

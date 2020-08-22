@@ -20,10 +20,12 @@ import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryDetailMapper;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryNoteMapper;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberStockMapper;
+import me.zhengjie.uma_mes.service.mapper.CustomerMapper;
 import me.zhengjie.uma_mes.utils.NumberToCN;
 import me.zhengjie.utils.*;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -69,6 +71,14 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     private final ChemicalFiberStockMapper chemicalFiberStockMapper;
 
+    private final CustomerMapper customerMapper;
+
+    @Autowired
+    ChemicalFiberDeliveryNotePayDetailService chemicalFiberDeliveryNotePayDetailService;
+
+    @Value("${globalCompanyName}")
+    private String globalCompanyName;
+
     @Autowired
     private UmaChemicalFiberStatementRepository umaChemicalFiberStatementRepository;
 
@@ -86,9 +96,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                                                 ScanRecordService scanRecordService,
                                                 ScanRecordLabelService scanRecordLabelService,
                                                 ChemicalFiberLabelService chemicalFiberLabelService,
-                                                ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper,
+                                                 ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper,
                                                 ChemicalFiberStockService chemicalFiberStockService,
-                                                ChemicalFiberStockMapper chemicalFiberStockMapper){
+                                                ChemicalFiberStockMapper chemicalFiberStockMapper,
+                                                CustomerMapper customerMapper) {
+                                                {
         this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
         this.chemicalFiberDeliveryNoteMapper = chemicalFiberDeliveryNoteMapper;
         this.customerService = customerService;
@@ -99,6 +111,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         this.chemicalFiberDeliveryDetailMapper = chemicalFiberDeliveryDetailMapper;
         this.chemicalFiberStockService = chemicalFiberStockService;
         this.chemicalFiberStockMapper = chemicalFiberStockMapper;
+        this.customerMapper = customerMapper;
     }
 
     @Override
@@ -108,13 +121,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
         }
-        List<Integer> invalidList = new ArrayList<>();
-        invalidList.add(0);
-        if (null != criteria.getQueryWithInvalid() && criteria.getQueryWithInvalid())
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
+        if (null != criteria.getShowUnEnable() && criteria.getShowUnEnable())
         {
-            invalidList.add(1);
+            booleanList.add(Boolean.FALSE);
         }
-        criteria.setInvalidList(invalidList);
+        criteria.setEnableList(booleanList);
         Page<ChemicalFiberDeliveryNote> page = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberDeliveryNoteMapper::toDto));
     }
@@ -134,6 +147,13 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     }
 
     @Override
+    public ChemicalFiberDeliveryNoteDTO findByScanNumber(String scanNumber) {
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.getByScanNumber(scanNumber);
+        ValidationUtil.isNull(chemicalFiberDeliveryNote.getScanNumber(),"ChemicalFiberDeliveryNote","scanNumber",scanNumber);
+        return chemicalFiberDeliveryNoteMapper.toDto(chemicalFiberDeliveryNote);
+    }
+
+    @Override
 //    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberDeliveryNoteDTO create(ChemicalFiberDeliveryNote resources) {
@@ -148,14 +168,15 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         resources.setContactPhone(customerDTO.getContactPhone());
         resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         resources.setCreateUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
-        String type = "YQ";
-        resources.setScanNumber(getScanNumber(type));
+        resources.setScanNumber(getScanNumberWithMaxNumber());
         resources.setInvalid(0);
+        resources.setEnable(Boolean.TRUE);
         return chemicalFiberDeliveryNoteMapper.toDto(chemicalFiberDeliveryNoteRepository.save(resources));
     }
 
-    public String getScanNumber (String type) {
+    public String getScanNumber () {
         String scanNumber;
+        String type = globalCompanyName;
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
@@ -185,6 +206,26 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             scanNumber = type + year.substring(2,4) + month + "00001";
         } else {
             Integer number = currenCount+ 1;
+            String tempNumberStr = String.format("%5d", number++).replace(" ", "0");
+            scanNumber = type + year.substring(2,4) + month + tempNumberStr;
+        }
+        return scanNumber;
+    }
+
+    public String getScanNumberWithMaxNumber () {
+        String scanNumber;
+        String type = globalCompanyName;
+        Map<String, Object> timeMap = monthTimeInMillis();
+        String year = timeMap.get("year").toString();
+        String month = timeMap.get("month").toString();
+
+        String currenNumber=chemicalFiberDeliveryNoteRepository.getCurrenNoteCountWithMaxNumber(year+"-"+month);
+
+        if (null == currenNumber && currenNumber.equals("")) {
+            scanNumber = type + year.substring(2,4) + month + "00001";
+        } else {
+            Integer lastNumber = Integer.parseInt(currenNumber.substring(currenNumber.length()-5,currenNumber.length()));
+            Integer number = lastNumber+ 1;
             String tempNumberStr = String.format("%5d", number++).replace(" ", "0");
             scanNumber = type + year.substring(2,4) + month + tempNumberStr;
         }
@@ -366,18 +407,32 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     @Override
     public void doInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
-        chemicalFiberDeliveryNote.setInvalid(1);
-        chemicalFiberDeliveryNote.setBackNoteStatus(chemicalFiberDeliveryNote.getNoteStatus());
-        chemicalFiberDeliveryNote.setNoteStatus(0);
+        List<ChemicalFiberDeliveryNotePayDetailDTO> payDetailList
+                =chemicalFiberDeliveryNotePayDetailService.findListByScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        BigDecimal payedMoney = new BigDecimal(0);
+        for(ChemicalFiberDeliveryNotePayDetailDTO payDetail:payDetailList){
+            payedMoney = payedMoney.add(payDetail.getAmount());
+            chemicalFiberDeliveryNotePayDetailService.delete(payDetail.getId());
+        }
+        CustomerDTO customerDTO = customerService.findById(chemicalFiberDeliveryNote.getCustomerId());
+        customerDTO.setAccount(customerDTO.getAccount().add(payedMoney));
+        customerService.save(customerMapper.toEntity(customerDTO));
+        chemicalFiberDeliveryNote.setRemainder(new BigDecimal(0));
+        chemicalFiberDeliveryNote.setEnable(Boolean.FALSE);
+        chemicalFiberDeliveryNote.setNoteStatus(2);
         update(chemicalFiberDeliveryNote);
     }
 
     @Override
     public void unInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
-        chemicalFiberDeliveryNote.setInvalid(0);
-        chemicalFiberDeliveryNote.setNoteStatus(chemicalFiberDeliveryNote.getBackNoteStatus());
+        chemicalFiberDeliveryNote.setEnable(Boolean.TRUE);
         update(chemicalFiberDeliveryNote);
+    }
+
+    @Override
+    public void updateBalance(ChemicalFiberDeliveryNote chemicalFiberDeliveryNote) {
+        chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
     }
 
     @Override
@@ -421,6 +476,10 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         TemplateExportParams params = new TemplateExportParams(templatePath);
         // 生成workbook 并导出
         Workbook workbook = null;
+        if (null == chemicalFiberDeliveryNote.getDeliveryDate() || chemicalFiberDeliveryNote.getDeliveryDate().equals("")) {
+            chemicalFiberDeliveryNote.setDeliveryDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+            update(chemicalFiberDeliveryNote);
+        }
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("customerName", chemicalFiberDeliveryNote.getCustomerName());
         map.put("customerAddress", chemicalFiberDeliveryNote.getCustomerAddress());
@@ -428,6 +487,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("contactPhone", chemicalFiberDeliveryNote.getContactPhone());
         map.put("scanNumber", chemicalFiberDeliveryNote.getScanNumber());
         map.put("createDate", chemicalFiberDeliveryNote.getCreateDate());
+        map.put("deliveryDate", chemicalFiberDeliveryNote.getDeliveryDate());
         map.put("createUser", chemicalFiberDeliveryNote.getCreateUser());
         map.put("driverMain",chemicalFiberDeliveryNote.getDriverMain());
         map.put("driverDeputy",chemicalFiberDeliveryNote.getDriverDeputy());
@@ -476,7 +536,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         map.put("deliveryList", listMap);
         workbook = ExcelExportUtil.exportExcel(params, map);
         FileUtil.downLoadExcel(chemicalFiberDeliveryNote.getScanNumber()+"-送货单导出.xlsx", response, workbook);
-        chemicalFiberDeliveryNote.setNoteStatus(2);
+        if(null != chemicalFiberDeliveryNote.getNoteStatus() && chemicalFiberDeliveryNote.getNoteStatus().equals(1)) {
+            chemicalFiberDeliveryNote.setNoteStatus(2);
+        }
         update(chemicalFiberDeliveryNote);
     }
 

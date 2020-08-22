@@ -3,6 +3,7 @@ package me.zhengjie.uma_mes.service.dto;
 import lombok.Data;
 import me.zhengjie.annotation.Query;
 
+import javax.persistence.Column;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -61,4 +62,9 @@ public class ChemicalFiberDeliveryNoteQueryCriteria{
 
     @Query(type = Query.Type.IN,propName = "invalid")
     private List<Integer> invalidList;
+
+    private Boolean showUnEnable;
+    // 是否可用
+    @Query(type = Query.Type.IN,propName = "enable")
+    private List<Boolean> enableList;
 }

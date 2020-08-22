@@ -9,6 +9,8 @@ import me.zhengjie.annotation.Query;
 */
 @Data
 public class CustomerQueryCriteria{
+    @Query(propName = "id")
+    private Integer id;
 
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
@@ -25,6 +27,10 @@ public class CustomerQueryCriteria{
     // 客户名称，精准查询
     @Query(propName = "name")
     private String nameAccurate;
+
+    // 客户全称，精准查询
+    @Query(propName = "fullName")
+    private String fullNameAccurate;
 
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)

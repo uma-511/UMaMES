@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Zheng Jie
@@ -36,6 +37,8 @@ public interface UserService {
     List<UserDTO> queryAll(UserQueryCriteria criteria);
 
     List<UserDTO> getUserList(Long deptId,String username);
+
+    List<UserDTO> getUserListByDept(List<Long> deptId, String username);
 
     void download(List<UserDTO> queryAll, HttpServletResponse response) throws IOException;
 }

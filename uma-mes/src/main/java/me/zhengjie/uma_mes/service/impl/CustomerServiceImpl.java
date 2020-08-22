@@ -79,7 +79,15 @@ public class CustomerServiceImpl implements CustomerService {
         }
         if (customerDTOs2.size() > 0 && customerDTOs2.get(0).getName().equals(resources.getName()) && resources.getId() != customerDTOs2.get(0).getId()) {
             throw new BadRequestException("请确保客户名称唯一");
-        } else {
+        }
+        CustomerQueryCriteria criteria3 = new CustomerQueryCriteria();
+        criteria3.setFullNameAccurate(resources.getFullName());
+        criteria3.setDelFlag(0);
+        List<CustomerDTO> customerDTOs3 = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria3,criteriaBuilder)));
+        if (customerDTOs3.size() > 0 && customerDTOs3.get(0).getFullName().equals(resources.getFullName()) && resources.getId() != customerDTOs3.get(0).getId()){
+            throw new BadRequestException("请确保客户全称唯一");
+        }
+        else {
             resources.setCreateUser(SecurityUtils.getUsername());
             resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
             resources.setDelFlag(0);
@@ -115,6 +123,11 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public void updateAccount(Customer customer) {
+        customerRepository.save(customer);
+    }
+
+    @Override
 //    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
@@ -141,5 +154,10 @@ public class CustomerServiceImpl implements CustomerService {
             list.add(map);
         }
         FileUtil.downloadExcel(list, response);
+    }
+
+    @Override
+    public void save(Customer customer) {
+        customerRepository.save(customer);
     }
 }

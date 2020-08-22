@@ -182,10 +182,10 @@ public class UserController {
         }
     }
 
-    @GetMapping(value = "/getUserListByDeptId")
+    @PostMapping(value = "/getUserListByDeptId")
     @ApiOperation("获取用户列表")
     public ResponseEntity getUserListByDeptId(UserQueryCriteria criteria){
-        List<UserDTO> userDTOS = userService.getUserList(criteria.getDeptId(),criteria.getRealname());
+        List<UserDTO> userDTOS = userService.getUserListByDept(criteria.getDeptIdList(),criteria.getRealname());
         return new ResponseEntity<>(userDTOS,HttpStatus.OK);
     }
 }

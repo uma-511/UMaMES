@@ -43,7 +43,7 @@ public class LogController {
 
     @GetMapping
     @ApiOperation("日志查询")
-    @PreAuthorize("@el.check()")
+    @PreAuthorize("@el.check('log:list')")
     public ResponseEntity getLogs(LogQueryCriteria criteria, Pageable pageable){
         criteria.setLogType("INFO");
         return new ResponseEntity<>(logService.queryAll(criteria,pageable), HttpStatus.OK);

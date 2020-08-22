@@ -21,6 +21,13 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
     @Query(value = "select COUNT(id) FROM uma_chemical_fiber_delivery_note WHERE create_date like %:currenDate%",nativeQuery = true)
     Integer getCurrenNoteCount(@Param("currenDate") String currenDate);
 
+    @Query(value = "select scan_number FROM uma_chemical_fiber_delivery_note WHERE create_date like %:currenDate%  \n" +
+            "ORDER BY create_date desc  LIMIT 1 ",nativeQuery = true)
+    String getCurrenNoteCountWithMaxNumber(@Param("currenDate") String currenDate);
+
+    @Query(value = "select * FROM uma_chemical_fiber_delivery_note where scan_number = :scanNumber",nativeQuery = true)
+    ChemicalFiberDeliveryNote getByScanNumber(@Param("scanNumber") String scanNumber);
+
     @Query(value = "SELECT  SUM(b.total_number) FROM uma_chemical_fiber_delivery_note a LEFT JOIN  uma_chemical_fiber_delivery_detail b on a.id = b.delivery_note_id where a.create_date LIKE %:dateTime% and b.unit = :unit",nativeQuery = true)
     Integer getTonnageInStorage(@Param("dateTime") String dateTime, @Param("unit") String unit);
 
