@@ -43,7 +43,7 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
     @Override
 //    @Cacheable
     public Map<String,Object> queryAll(ChemicalFiberStockQueryCriteria criteria, Pageable pageable){
-        criteria.setNumber(1);
+        criteria.setNumber(0);
         Page<ChemicalFiberStock> page = chemicalFiberStockRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberStockMapper::toDto));
     }

@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.Id;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 @Data
 public class ChemicalFiberStockLnventoryDTO implements Serializable {
@@ -28,6 +29,8 @@ public class ChemicalFiberStockLnventoryDTO implements Serializable {
 
     // 制单人名字
     private String lnventoryUser;
-    ;
+
+    // 时间
+    private Timestamp createDate;
 
 }

@@ -42,7 +42,7 @@ public class ChemicalFiberStockQueryCriteria{
     private Integer totalBag;
 
     // 总个数
-    @Query(type = Query.Type.GREATER_THAN, propName = "totalNumber")
+    @Query(type = Query.Type.NOT_EQUAL, propName = "totalNumber")
     private Integer number;
 
 //    @Query(type = Query.Type.NOT_EQUAL)
