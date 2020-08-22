@@ -324,7 +324,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             chemicalFiberDeliveryNote.setTotalPrice(realTotalPrise);
             update(chemicalFiberDeliveryNote);
             ChemicalFiberDeliveryNote note = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
-            List<ChemicalFiberDeliveryDetail> detail = chemicalFiberDeliveryDetailRepository.getDetailList(chemicalFiberDeliveryNote.getId());
+            List<ChemicalFiberDeliveryDetail> detail = chemicalFiberDeliveryDetailRepository.getDetailList(chemicalFiberDeliveryNote.getScanNumber());
             Timestamp time = note.getDeliveryDate();
             Date date = new Date(time.getTime());
             Calendar calendar = Calendar.getInstance();
