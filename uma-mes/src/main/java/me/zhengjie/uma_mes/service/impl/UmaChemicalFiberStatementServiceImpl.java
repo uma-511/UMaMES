@@ -9,6 +9,7 @@ import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.domain.UmaChemicalFiberStatement;
 import me.zhengjie.uma_mes.domain.UmaChemicalFiberStatementDetails;
+import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
 import me.zhengjie.uma_mes.service.UmaChemicalFiberStatementDetailsService;
@@ -21,7 +22,11 @@ import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.UmaChemicalFiberStatementRepository;
 import me.zhengjie.uma_mes.service.UmaChemicalFiberStatementService;
 import me.zhengjie.uma_mes.service.mapper.UmaChemicalFiberStatementMapper;
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -60,23 +65,51 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
 
     private final UmaChemicalFiberStatementDetailsService umaChemicalFiberStatementDetailsService;
 
+    private final ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository;
+
     public UmaChemicalFiberStatementServiceImpl(UmaChemicalFiberStatementRepository umaChemicalFiberStatementRepository,
                                                 UmaChemicalFiberStatementMapper umaChemicalFiberStatementMapper,
                                                 ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService,
                                                 ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService,
-                                                UmaChemicalFiberStatementDetailsService umaChemicalFiberStatementDetailsService) {
+                                                UmaChemicalFiberStatementDetailsService umaChemicalFiberStatementDetailsService,
+                                                ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository) {
         this.umaChemicalFiberStatementRepository = umaChemicalFiberStatementRepository;
         this.umaChemicalFiberStatementMapper = umaChemicalFiberStatementMapper;
         this.chemicalFiberDeliveryNoteService = chemicalFiberDeliveryNoteService;
         this.chemicalFiberDeliveryDetailService = chemicalFiberDeliveryDetailService;
         this.umaChemicalFiberStatementDetailsService = umaChemicalFiberStatementDetailsService;
+        this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
     }
 
     @Override
 //    @Cacheable
     public Map<String,Object> queryAll(UmaChemicalFiberStatementQueryCriteria criteria, Pageable pageable){
-        Page<UmaChemicalFiberStatement> page = umaChemicalFiberStatementRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
-        return PageUtil.toPage(page.map(umaChemicalFiberStatementMapper::toDto));
+        //Page<UmaChemicalFiberStatement> page = umaChemicalFiberStatementRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        Long createDate = criteria.getCreateDate();
+        Date date = new Date(createDate);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        Integer year = calendar.get(Calendar.YEAR);
+        Integer month = calendar.get(Calendar.MONTH) + 2;
+        String months = "";
+        String days = "";
+        String dateTime = "";
+        if (month < 10) {
+            months = "0" + month;
+        } else {
+            months = month + "";
+        }
+        int start = pageable.getPageSize();
+        int end = pageable.getPageNumber();
+        int PageNumber = start * end;
+        Map<String, Object> map = new HashMap<>();
+        List<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd(PageNumber, start, year + "-" + months);
+        Integer ListSeiz = umaChemicalFiberStatementRepository.findSize();
+        map.put("content", pages);
+        map.put("totalElements", ListSeiz);
+        // Page<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd();
+        return map;
+        //return PageUtil.toPage(page.map(umaChemicalFiberStatementMapper::toDto));
     }
 
     @Override
@@ -96,7 +129,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     @Override
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public UmaChemicalFiberStatementDTO create(CreateStatementDto createStatementDto) {
+    public UmaChemicalFiberStatementDTO create1(CreateStatementDto createStatementDto) {
         Calendar now = Calendar.getInstance();
         createStatementDto.getUmaChemicalFiberStatement().setCreateUser(SecurityUtils.getUsername());
         createStatementDto.getUmaChemicalFiberStatement().setCreateDate(new Timestamp(System.currentTimeMillis()));
@@ -131,6 +164,26 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             umaChemicalFiberStatementDetailsService.create(umaChemicalFiberStatementDetails);
         }
         return chemicalFiberStatementDTO;
+    }
+
+    @CacheEvict(allEntries = true)
+    @Transactional(rollbackFor = Exception.class)
+    public void create(Integer id) {
+        ChemicalFiberDeliveryNote note = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+        Date date = note.getDeliveryDate();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        Integer year = calendar.get(Calendar.YEAR);
+        Integer month = calendar.get(Calendar.MONTH) + 1;
+        String months = "";
+        String dateTime = "";
+        if (month < 10) {
+            months = "0" + month;
+        } else {
+            months = month + "";
+        }
+        UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(), year + "-" + months);
+
     }
 
     @Override
@@ -235,21 +288,19 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
 
         for (UmaChemicalFiberStatementDetailsDTO umaChemicalFiberStatementDetailsDTO : umaChemicalFiberStatementDetailsDTOS) {
             sumTotalBag = sumTotalBag + umaChemicalFiberStatementDetailsDTO.getTotalBag();
-            sumNetWeight = sumNetWeight.add(umaChemicalFiberStatementDetailsDTO.getNetWeight());
+            //sumNetWeight = sumNetWeight.add(umaChemicalFiberStatementDetailsDTO.getNetWeight());
             sumTotalPrice = sumTotalPrice.add(umaChemicalFiberStatementDetailsDTO.getTotalPrice());
-            sumAdvanceCharge = sumAdvanceCharge.add(umaChemicalFiberStatementDetailsDTO.getAdvanceCharge());
-            sumAmountDeducted = sumAmountDeducted.add(umaChemicalFiberStatementDetailsDTO.getAmountDeducted());
+            //sumAdvanceCharge = sumAdvanceCharge.add(umaChemicalFiberStatementDetailsDTO.getAdvanceCharge());
+            //sumAmountDeducted = sumAmountDeducted.add(umaChemicalFiberStatementDetailsDTO.getAmountDeducted());
         }
         List<Object> tempList = new ArrayList<>();
         tempList.add("合计");
         tempList.add("");
         tempList.add("");
+        tempList.add("");
         tempList.add(sumTotalBag);
-        tempList.add(sumNetWeight);
         tempList.add("");
         tempList.add(sumTotalPrice);
-        tempList.add(sumAdvanceCharge);
-        tempList.add(sumAmountDeducted);
         tempList.add("");
         List<Timestamp> cycleDate = new ArrayList<>();
         cycleDate.add(umaChemicalFiberStatementDetailsDTOS.get(0).getScanDate());

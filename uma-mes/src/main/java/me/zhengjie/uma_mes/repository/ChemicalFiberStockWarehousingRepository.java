@@ -17,5 +17,12 @@ public interface ChemicalFiberStockWarehousingRepository extends JpaRepository<C
     @Query(value = "select max(scan_number) FROM uma_chemical_fiber_stock_warehousing",nativeQuery = true)
     String getScanNumberMax();
 
+    @Query(value = "select COUNT(id) FROM uma_chemical_fiber_stock_warehousing WHERE warehousing_date like %:dateTime%",nativeQuery = true)
+    Integer getWarehousingOrders(@Param("dateTime") String dateTime);
+
+    @Query(value = "SELECT  SUM(b.total_price) FROM uma_chemical_fiber_stock_warehousing a LEFT JOIN  uma_chemical_fiber_stock_warehousing_detail b on a.id = b.warehousing_id where warehousing_date LIKE %:dateTime% and b.unit = :unit",nativeQuery = true)
+    Integer getTonnageInStorage(@Param("dateTime") String dateTime, @Param("unit") String unit);
+
+
 
 }

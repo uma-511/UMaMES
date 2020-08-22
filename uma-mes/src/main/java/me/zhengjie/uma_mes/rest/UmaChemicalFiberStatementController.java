@@ -56,7 +56,7 @@ public class UmaChemicalFiberStatementController {
     @ApiOperation("新增UmaChemicalFiberStatement")
     @PreAuthorize("@el.check('umaChemicalFiberStatement:add')")
     public ResponseEntity create(@RequestBody CreateStatementDto createStatementDto){
-        return new ResponseEntity<>(umaChemicalFiberStatementService.create(createStatementDto),HttpStatus.CREATED);
+        return new ResponseEntity<>(umaChemicalFiberStatementService.create1(createStatementDto),HttpStatus.CREATED);
     }
 
     @PutMapping

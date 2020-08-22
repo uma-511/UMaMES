@@ -43,7 +43,7 @@ public interface UmaChemicalFiberStatementService {
      */
     UmaChemicalFiberStatementDTO findById(Integer id);
 
-    UmaChemicalFiberStatementDTO create(CreateStatementDto createStatementDto);
+    UmaChemicalFiberStatementDTO create1(CreateStatementDto createStatementDto);
 
     void update(UmaChemicalFiberStatement resources);
 

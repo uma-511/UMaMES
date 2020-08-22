@@ -28,4 +28,7 @@ public interface ChemicalFiberStockRepository extends JpaRepository<ChemicalFibe
 
     @Query(value = "select * from uma_chemical_fiber_stock where prod_id =:prodId and prod_unit=:prodUnit",nativeQuery = true)
     ChemicalFiberStock findByProdId(@Param("prodId") Integer prodId, @Param("prodUnit") String prodUnit);
+
+    @Query(value = "SELECT SUM(total_number) FROM uma_chemical_fiber_stock where prod_unit = :unit",nativeQuery = true)
+    Integer getTonnageInStorage(@Param("unit") String unit);
 }

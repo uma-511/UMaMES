@@ -47,4 +47,6 @@ public class UmaChemicalFiberStatementDetailsDTO implements Serializable {
 
     // 扣除金额
     private BigDecimal amountDeducted;
+
+    private String unit;
 }
