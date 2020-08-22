@@ -33,6 +33,10 @@ public class Receipt implements Serializable {
     @Column(name = "customer_name")
     private String customerName;
 
+    // 客户编号
+    @Column(name = "customer_code")
+    private String customerCode;
+
     // 客户ID
     @Column(name = "customer_id")
     private Integer customerId;
@@ -81,6 +85,10 @@ public class Receipt implements Serializable {
     // 状态：0-失效 1-编辑 2-完结
     @Column(name = "status")
     private Integer status;
+
+    // 是否可用
+    @Column(name = "enable")
+    private Boolean enable;
 
     public void copy(Receipt source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

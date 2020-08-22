@@ -58,6 +58,17 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     public Map<String,Object> queryAll(ReceiptQueryCriteria criteria, Pageable pageable){
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+        }
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
+        if (null != criteria.getShowUnEnable() && criteria.getShowUnEnable())
+        {
+            booleanList.add(Boolean.FALSE);
+        }
+        criteria.setEnableList(booleanList);
         Page<Receipt> page = receiptRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(receiptMapper::toDto));
     }
@@ -82,8 +93,13 @@ public class ReceiptServiceImpl implements ReceiptService {
         resources.setReceiptNumber(getScanNumberWithMaxNumber());
         resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
         resources.setCreateUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
-        resources.setStatus(1);
+        resources.setStatus(2);
+        resources.setEnable(Boolean.TRUE);
+        CustomerDTO customerDTO = customerService.findById(resources.getCustomerId());
+        customerDTO.setAccount(customerDTO.getAccount().add(resources.getAmountOfMoney()));
+        customerService.save(customerMapper.toEntity(customerDTO));
         return receiptMapper.toDto(receiptRepository.save(resources));
+
     }
 
     public String getScanNumber () {
@@ -114,7 +130,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
         String currenNumber=receiptRepository.getCurrenReceiptCountWithMaxNumber(year.substring(2,4)+"-"+month);
 
-        if (null == currenNumber && currenNumber.equals("")) {
+        if (null == currenNumber || currenNumber.equals("")) {
             scanNumber = type + year.substring(2,4) + month + "00001";
         } else {
             Integer lastNumber = Integer.parseInt(currenNumber.substring(currenNumber.length()-5,currenNumber.length()));
@@ -159,10 +175,9 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         Receipt receipt = receiptRepository.findById(id).orElseGet(Receipt::new);
-        receipt.setStatus(0);
+        receipt.setEnable(Boolean.FALSE);
         receiptRepository.save(receipt);
     }
-
 
     @Override
     public void download(List<ReceiptDTO> all, HttpServletResponse response) throws IOException {

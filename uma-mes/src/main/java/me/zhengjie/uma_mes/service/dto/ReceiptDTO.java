@@ -24,13 +24,16 @@ public class ReceiptDTO implements Serializable {
     // 客户名称
     private String customerName;
 
+    // 客户编号
+    private String customerCode;
+
     // 客户ID
     private Integer customerId;
 
     // 收入类型
     private String type;
 
-    // 收款账号
+    // 收款方式
     private String recivedAccount;
 
     // 单据日期
@@ -60,4 +63,8 @@ public class ReceiptDTO implements Serializable {
 
     // 状态：0-失效 1-编辑 2-完结
     private Integer status;
+
+    // 是否可用
+    private Boolean enable;
+
 }

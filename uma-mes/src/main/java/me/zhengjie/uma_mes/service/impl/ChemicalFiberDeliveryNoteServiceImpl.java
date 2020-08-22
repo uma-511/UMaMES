@@ -15,9 +15,11 @@ import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryDetailMapper;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryNoteMapper;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberStockMapper;
+import me.zhengjie.uma_mes.service.mapper.CustomerMapper;
 import me.zhengjie.uma_mes.utils.NumberToCN;
 import me.zhengjie.utils.*;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
@@ -64,6 +66,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     private final ChemicalFiberStockMapper chemicalFiberStockMapper;
 
+    private final CustomerMapper customerMapper;
+
+    @Autowired
+    ChemicalFiberDeliveryNotePayDetailService chemicalFiberDeliveryNotePayDetailService;
+
     @Value("${globalCompanyName}")
     private String globalCompanyName;
 
@@ -74,9 +81,10 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                                                 ScanRecordService scanRecordService,
                                                 ScanRecordLabelService scanRecordLabelService,
                                                 ChemicalFiberLabelService chemicalFiberLabelService,
-                                                ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper,
+                                                 ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper,
                                                 ChemicalFiberStockService chemicalFiberStockService,
-                                                ChemicalFiberStockMapper chemicalFiberStockMapper) {
+                                                ChemicalFiberStockMapper chemicalFiberStockMapper,
+                                                CustomerMapper customerMapper) {
         this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
         this.chemicalFiberDeliveryNoteMapper = chemicalFiberDeliveryNoteMapper;
         this.customerService = customerService;
@@ -87,6 +95,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         this.chemicalFiberDeliveryDetailMapper = chemicalFiberDeliveryDetailMapper;
         this.chemicalFiberStockService = chemicalFiberStockService;
         this.chemicalFiberStockMapper = chemicalFiberStockMapper;
+        this.customerMapper = customerMapper;
     }
 
     @Override
@@ -288,19 +297,26 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     @Override
     public void doInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
-        chemicalFiberDeliveryNote.setInvalid(1);
+        List<ChemicalFiberDeliveryNotePayDetailDTO> payDetailList
+                =chemicalFiberDeliveryNotePayDetailService.findListByScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        BigDecimal payedMoney = new BigDecimal(0);
+        for(ChemicalFiberDeliveryNotePayDetailDTO payDetail:payDetailList){
+            payedMoney = payedMoney.add(payDetail.getAmount());
+            chemicalFiberDeliveryNotePayDetailService.delete(payDetail.getId());
+        }
+        CustomerDTO customerDTO = customerService.findById(chemicalFiberDeliveryNote.getCustomerId());
+        customerDTO.setAccount(customerDTO.getAccount().add(payedMoney));
+        customerService.save(customerMapper.toEntity(customerDTO));
+        chemicalFiberDeliveryNote.setRemainder(new BigDecimal(0));
         chemicalFiberDeliveryNote.setEnable(Boolean.FALSE);
-        chemicalFiberDeliveryNote.setBackNoteStatus(chemicalFiberDeliveryNote.getNoteStatus());
-        chemicalFiberDeliveryNote.setNoteStatus(0);
+        chemicalFiberDeliveryNote.setNoteStatus(2);
         update(chemicalFiberDeliveryNote);
     }
 
     @Override
     public void unInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
-        chemicalFiberDeliveryNote.setInvalid(0);
         chemicalFiberDeliveryNote.setEnable(Boolean.TRUE);
-        chemicalFiberDeliveryNote.setNoteStatus(chemicalFiberDeliveryNote.getBackNoteStatus());
         update(chemicalFiberDeliveryNote);
     }
 
