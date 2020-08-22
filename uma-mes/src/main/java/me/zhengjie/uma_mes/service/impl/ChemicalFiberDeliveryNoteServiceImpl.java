@@ -220,7 +220,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
         String currenNumber=chemicalFiberDeliveryNoteRepository.getCurrenNoteCountWithMaxNumber(year+"-"+month);
 
-        if (null == currenNumber && currenNumber.equals("")) {
+        if (null == currenNumber || currenNumber.equals("")) {
             scanNumber = type + year.substring(2,4) + month + "00001";
         } else {
             Integer lastNumber = Integer.parseInt(currenNumber.substring(currenNumber.length()-5,currenNumber.length()));
