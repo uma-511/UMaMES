@@ -14,8 +14,8 @@ import java.util.List;
 */
 public interface ChemicalFiberDeliveryDetailRepository extends JpaRepository<ChemicalFiberDeliveryDetail, Integer>, JpaSpecificationExecutor<ChemicalFiberDeliveryDetail> {
 
-    @Query(value = "SELECT * FROM uma_chemical_fiber_delivery_detail where delivery_note_id = :id",nativeQuery = true)
-    List<ChemicalFiberDeliveryDetail> getDetailList(@Param("id") Integer id);
+    @Query(value = "SELECT * FROM uma_chemical_fiber_delivery_detail where scan_number = :id",nativeQuery = true)
+    List<ChemicalFiberDeliveryDetail> getDetailList(@Param("id") String id);
 
 
 
