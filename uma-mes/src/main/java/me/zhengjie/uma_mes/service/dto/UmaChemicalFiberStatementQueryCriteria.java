@@ -3,6 +3,8 @@ package me.zhengjie.uma_mes.service.dto;
 import lombok.Data;
 import me.zhengjie.annotation.Query;
 
+import java.sql.Timestamp;
+
 /**
 * @author Xie Ji Biao
 * @date 2020-03-11
@@ -25,4 +27,10 @@ public class UmaChemicalFiberStatementQueryCriteria{
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String contactPhone;
+
+    // 模糊
+    @Query(type = Query.Type.INNER_LIKE)
+    private Long createDate;
+
+
 }

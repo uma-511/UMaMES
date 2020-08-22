@@ -27,4 +27,10 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
 
     @Query(value = "select * FROM uma_chemical_fiber_delivery_note where scan_number = :scanNumber",nativeQuery = true)
     ChemicalFiberDeliveryNote getByScanNumber(@Param("scanNumber") String scanNumber);
+
+    @Query(value = "SELECT  SUM(b.total_number) FROM uma_chemical_fiber_delivery_note a LEFT JOIN  uma_chemical_fiber_delivery_detail b on a.id = b.delivery_note_id where a.create_date LIKE %:dateTime% and b.unit = :unit",nativeQuery = true)
+    Integer getTonnageInStorage(@Param("dateTime") String dateTime, @Param("unit") String unit);
+
+    @Query(value = "SELECT SUM(total_price) from uma_chemical_fiber_delivery_note where create_date LIKE %:dateTime%",nativeQuery = true)
+    Integer getDeliveryAmount(@Param("dateTime") String dateTime);
 }

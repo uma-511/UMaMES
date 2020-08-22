@@ -23,35 +23,35 @@ public class UmaChemicalFiberStatementDetails implements Serializable {
     private Integer id;
 
     // 对账单主键
-    @Column(name = "statement_id",nullable = false)
+    @Column(name = "statement_id")
     private Integer statementId;
 
     // 送货单号
-    @Column(name = "scan_number",nullable = false)
+    @Column(name = "scan_number")
     private String scanNumber;
 
     // 送货日期
-    @Column(name = "scan_date",nullable = false)
+    @Column(name = "scan_date")
     private Timestamp scanDate;
 
     // 产品名称
-    @Column(name = "prod_name",nullable = false)
+    @Column(name = "prod_name")
     private String prodName;
 
     // 总件数
-    @Column(name = "total_bag",nullable = false)
+    @Column(name = "total_bag")
     private Integer totalBag;
 
     // 重量
-    @Column(name = "net_weight",nullable = false)
+    @Column(name = "net_weight")
     private BigDecimal netWeight;
 
     // 单价
-    @Column(name = "selling_price",nullable = false)
+    @Column(name = "selling_price")
     private BigDecimal sellingPrice;
 
     // 金额
-    @Column(name = "total_price",nullable = false)
+    @Column(name = "total_price")
     private BigDecimal totalPrice;
 
     // 备注
@@ -65,6 +65,10 @@ public class UmaChemicalFiberStatementDetails implements Serializable {
     // 扣除金额
     @Column(name = "amount_deducted")
     private BigDecimal amountDeducted;
+
+    // 单位
+    @Column(name = "unit")
+    private String unit;
 
     public void copy(UmaChemicalFiberStatementDetails source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
