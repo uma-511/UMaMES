@@ -99,8 +99,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                                                  ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper,
                                                 ChemicalFiberStockService chemicalFiberStockService,
                                                 ChemicalFiberStockMapper chemicalFiberStockMapper,
-                                                CustomerMapper customerMapper) {
-                                                {
+                                                CustomerMapper customerMapper){
         this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
         this.chemicalFiberDeliveryNoteMapper = chemicalFiberDeliveryNoteMapper;
         this.customerService = customerService;
