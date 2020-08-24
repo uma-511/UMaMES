@@ -281,14 +281,14 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         UmaChemicalFiberStatementDetailsQueryCriteria umaChemicalFiberStatementDetailsQueryCriteria = new UmaChemicalFiberStatementDetailsQueryCriteria();
         umaChemicalFiberStatementDetailsQueryCriteria.setStatementId(statementDetailsAllListDto.getStatementId());
         List<UmaChemicalFiberStatementDetailsDTO> umaChemicalFiberStatementDetailsDTOS = umaChemicalFiberStatementDetailsService.queryAll(umaChemicalFiberStatementDetailsQueryCriteria);
-        Integer sumTotalBag = 0;
+        BigDecimal sumTotalBag = new BigDecimal(0);
         BigDecimal sumNetWeight = new BigDecimal(0);
         BigDecimal sumTotalPrice = new BigDecimal(0);
         BigDecimal sumAdvanceCharge = new BigDecimal(0);
         BigDecimal sumAmountDeducted = new BigDecimal(0);
 
         for (UmaChemicalFiberStatementDetailsDTO umaChemicalFiberStatementDetailsDTO : umaChemicalFiberStatementDetailsDTOS) {
-            sumTotalBag = sumTotalBag + umaChemicalFiberStatementDetailsDTO.getTotalBag();
+            sumTotalBag = sumTotalBag.add(umaChemicalFiberStatementDetailsDTO.getTotalBag());
             //sumNetWeight = sumNetWeight.add(umaChemicalFiberStatementDetailsDTO.getNetWeight());
             sumTotalPrice = sumTotalPrice.add(umaChemicalFiberStatementDetailsDTO.getTotalPrice());
             //sumAdvanceCharge = sumAdvanceCharge.add(umaChemicalFiberStatementDetailsDTO.getAdvanceCharge());
@@ -326,7 +326,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         Map<String, Object> map = new HashMap<String, Object>();
         List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
         BigDecimal totalSum = new BigDecimal(0);
-        int sumTotalBag = 0;
+        BigDecimal sumTotalBag = new BigDecimal(0);
         Timestamp time = umaChemicalFiberStatement.getCreateDate();
         Date date = new Date(time.getTime());
         Calendar calendar = Calendar.getInstance();
@@ -367,7 +367,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             lm.put("remark", umaChemicalFiberStatementDetailsDTOS.get(i).getRemark());
             listMap.add(lm);
             totalSum = totalSum.add(umaChemicalFiberStatementDetailsDTOS.get(i).getTotalPrice());
-            sumTotalBag = sumTotalBag + umaChemicalFiberStatementDetailsDTOS.get(i).getTotalBag();
+            sumTotalBag = sumTotalBag.add(umaChemicalFiberStatementDetailsDTOS.get(i).getTotalBag());
         }
         List<Map<String, String>> receiptlistMap = new ArrayList<Map<String, String>>();
         List<Receipt> receiptList = receiptRepository.getReceiptList(umaChemicalFiberStatement.getCustomerId(), year + "-" + months);
