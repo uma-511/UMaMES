@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static cn.afterturn.easypoi.excel.ExcelExportUtil.SHEET_NAME;
@@ -323,80 +324,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             chemicalFiberDeliveryNote.setBalance(realTotalPrise);
             chemicalFiberDeliveryNote.setTotalPrice(realTotalPrise);
             update(chemicalFiberDeliveryNote);
-            ChemicalFiberDeliveryNote note = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
-            List<ChemicalFiberDeliveryDetail> detail = chemicalFiberDeliveryDetailRepository.getDetailList(chemicalFiberDeliveryNote.getScanNumber());
-            Timestamp time = note.getDeliveryDate();
-            Date date = new Date(time.getTime());
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-            Integer year = calendar.get(Calendar.YEAR);
-            Integer month = calendar.get(Calendar.MONTH) + 1;
-            Integer month1 = month - 1;
-            String months = "";
-            String months1 = "";
-            String dateTime = "";
-            if (month < 10) {
-                months = "0" + month;
-            } else {
-                months = month + "";
-            }
-            if (month1 == 0) {
-                year -= 1;
-                months1 = "12";
-            } else if (month1 < 10) {
-                months1 = "0" + month1;
-            } else {
-                months1 = month1 + "";
-            }
-            UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(), year + "-" + months);
-            String accoun = getAccountCode();
-            if (statement == null) {
-                UmaChemicalFiberStatement statementAdd = new UmaChemicalFiberStatement();
-                statementAdd.setAccountCode(accoun);
-                statementAdd.setCreateDate(note.getDeliveryDate());
-                statementAdd.setCustomerId(note.getCustomerId());
-                statementAdd.setCustomerName(note.getCustomerName());
-                statementAdd.setContacts(note.getContacts());
-                statementAdd.setContactPhone(note.getContactPhone());
-                //statementAdd.setTotalArrears(note.getBalance());
-                //statementAdd.setAccumulatedArrears(statement1.getTotalArrears());
-                statementAdd.setReceivable(note.getTotalPrice());
-                statementAdd = umaChemicalFiberStatementRepository.save(statementAdd);
-                List<UmaChemicalFiberStatementDetails> staementDetail = new ArrayList<>();
-                for (ChemicalFiberDeliveryDetail dto : detail) {
-                    UmaChemicalFiberStatementDetails add = new UmaChemicalFiberStatementDetails();
-                    add.setStatementId(statementAdd.getId());
-                    add.setScanNumber(dto.getScanNumber());
-                    add.setScanDate(statementAdd.getCreateDate());
-                    add.setProdName(dto.getProdName());
-                    add.setTotalBag(dto.getRealQuantity());
-                    add.setSellingPrice(dto.getSellingPrice());
-                    add.setTotalPrice(dto.getRealPrice());
-                    add.setUnit(dto.getUnit());
-                    staementDetail.add(add);
-                }
-                umaChemicalFiberStatementDetailsRepository.saveAll(staementDetail);
-            } else {
-                BigDecimal big = statement.getReceivable();
-                BigDecimal big1 = note.getTotalPrice();
-                BigDecimal big2 = big.add(big1);
-                statement.setReceivable(big2);
-                statement = umaChemicalFiberStatementRepository.save(statement);
-                List<UmaChemicalFiberStatementDetails> staementDetail = new ArrayList<>();
-                for (ChemicalFiberDeliveryDetail dto : detail) {
-                    UmaChemicalFiberStatementDetails add = new UmaChemicalFiberStatementDetails();
-                    add.setStatementId(statement.getId());
-                    add.setScanNumber(dto.getScanNumber());
-                    add.setScanDate(statement.getCreateDate());
-                    add.setProdName(dto.getProdName());
-                    add.setTotalBag(dto.getRealQuantity());
-                    add.setSellingPrice(dto.getSellingPrice());
-                    add.setTotalPrice(dto.getRealPrice());
-                    add.setUnit(dto.getUnit());
-                    staementDetail.add(add);
-                }
-                umaChemicalFiberStatementDetailsRepository.saveAll(staementDetail);
-            }
+            StatementUp(id);
         }catch (Exception e){
             throw new BadRequestException("签收失败，请校验订单数据");
         }
@@ -725,5 +653,93 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         list.add(totalPrice);
         list.add("");
         return Result.success(list);
+    }
+
+    public void StatementUp(Integer id) {
+        try {
+            ChemicalFiberDeliveryNote note = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+            List<ChemicalFiberDeliveryDetail> detail = chemicalFiberDeliveryDetailRepository.getDetailList(note.getScanNumber());
+            Timestamp time = note.getDeliveryDate();
+            Date date = new Date(time.getTime());
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            Integer year = calendar.get(Calendar.YEAR);
+            Integer month = calendar.get(Calendar.MONTH) + 1;
+            Integer da = 0;
+            Integer month1 = month - 1;
+            Integer day = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+            String months = "";
+            String months1 = "";
+            if (month < 10) {
+                months = "0" + month;
+            } else {
+                months = month + "";
+            }
+            if (month1 == 0) {
+                year -= 1;
+                months1 = "12";
+            } else if (month1 < 10) {
+                months1 = "0" + month1;
+            } else {
+                months1 = month1 + "";
+            }
+            String dateTime = year + "-" + months + "-" + day;
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date dateUp = simpleDateFormat.parse(dateTime);
+            UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(), year + "-" + months);
+            String accoun = getAccountCode();
+            if (statement == null) {
+                UmaChemicalFiberStatement statementAdd = new UmaChemicalFiberStatement();
+                statementAdd.setAccountCode(accoun);
+                statementAdd.setCreateDate(note.getDeliveryDate());
+                statementAdd.setCustomerId(note.getCustomerId());
+                statementAdd.setCustomerName(note.getCustomerName());
+                statementAdd.setContacts(note.getContacts());
+                statementAdd.setContactPhone(note.getContactPhone());
+                statementAdd.setUpDate(new Timestamp(dateUp.getTime()));
+                //statementAdd.setTotalArrears(note.getBalance());
+                //statementAdd.setAccumulatedArrears(statement1.getTotalArrears());
+                statementAdd.setReceivable(note.getTotalPrice());
+                statementAdd = umaChemicalFiberStatementRepository.save(statementAdd);
+                List<UmaChemicalFiberStatementDetails> staementDetail = new ArrayList<>();
+                for (ChemicalFiberDeliveryDetail dto : detail) {
+                    UmaChemicalFiberStatementDetails add = new UmaChemicalFiberStatementDetails();
+                    add.setStatementId(statementAdd.getId());
+                    add.setScanNumber(dto.getScanNumber());
+                    add.setScanDate(note.getCreateDate());
+                    add.setProdName(dto.getProdName());
+                    add.setTotalBag(dto.getRealQuantity());
+                    add.setSellingPrice(dto.getSellingPrice());
+                    add.setTotalPrice(dto.getRealPrice());
+                    add.setUnit(dto.getUnit());
+                    staementDetail.add(add);
+                }
+                umaChemicalFiberStatementDetailsRepository.saveAll(staementDetail);
+            } else {
+                BigDecimal big = statement.getReceivable();
+                BigDecimal big1 = note.getTotalPrice();
+                BigDecimal big2 = big.add(big1);
+                statement.setReceivable(big2);
+                statement = umaChemicalFiberStatementRepository.save(statement);
+                List<UmaChemicalFiberStatementDetails> staementDetail = new ArrayList<>();
+                for (ChemicalFiberDeliveryDetail dto : detail) {
+                    UmaChemicalFiberStatementDetails add = new UmaChemicalFiberStatementDetails();
+                    add.setStatementId(statement.getId());
+                    add.setScanNumber(dto.getScanNumber());
+                    add.setScanDate(note.getCreateDate());
+                    add.setProdName(dto.getProdName());
+                    add.setTotalBag(dto.getRealQuantity());
+                    add.setSellingPrice(dto.getSellingPrice());
+                    add.setTotalPrice(dto.getRealPrice());
+                    add.setUnit(dto.getUnit());
+                    staementDetail.add(add);
+                }
+                umaChemicalFiberStatementDetailsRepository.saveAll(staementDetail);
+            }
+
+        }catch (Exception e){
+            System.out.println(e);
+        }
+
     }
 }
