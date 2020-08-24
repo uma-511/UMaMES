@@ -69,6 +69,10 @@ public class UmaChemicalFiberStatement implements Serializable {
     @Column(name = "total_arrears")
     private BigDecimal totalArrears;
 
+    // 总欠金额
+    @Column(name = "up_date")
+    private Timestamp upDate;
+
     public void copy(UmaChemicalFiberStatement source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

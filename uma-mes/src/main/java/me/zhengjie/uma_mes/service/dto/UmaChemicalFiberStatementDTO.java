@@ -46,4 +46,6 @@ public class UmaChemicalFiberStatementDTO implements Serializable {
     // 总欠金额
     private BigDecimal totalArrears;
 
+    private Timestamp upDate;
+
 }
