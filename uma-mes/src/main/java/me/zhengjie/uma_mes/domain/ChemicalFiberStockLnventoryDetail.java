@@ -38,19 +38,19 @@ public class ChemicalFiberStockLnventoryDetail implements Serializable {
 
     // 产品数量
     @Column(name = "prod_number")
-    private Integer prodNumber;
+    private BigDecimal prodNumber;
 
     // 盘点数量
     @Column(name = "lnventory_number")
-    private Integer lnventoryNumber;
+    private BigDecimal lnventoryNumber;
 
     // 盘盈数量
     @Column(name = "lnventory_surplus")
-    private Integer lnventorySurplus;
+    private BigDecimal lnventorySurplus;
 
     // 盘亏数量
     @Column(name = "lnventory_loss")
-    private Integer lnventoryLoss;
+    private BigDecimal lnventoryLoss;
 
 
 }

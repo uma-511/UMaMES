@@ -28,7 +28,7 @@ public class UmaChemicalFiberStatementDetailsDTO implements Serializable {
     private String prodName;
 
     // 总件数
-    private Integer totalBag;
+    private BigDecimal totalBag;
 
     // 重量
     private BigDecimal netWeight;

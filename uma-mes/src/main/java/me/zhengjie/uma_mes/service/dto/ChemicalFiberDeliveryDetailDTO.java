@@ -52,10 +52,10 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     private BigDecimal totalPrice;
 
     // 总件数
-    private Integer totalBag;
+    private BigDecimal totalBag;
 
     // 总数量
-    private Integer totalNumber;
+    private BigDecimal totalNumber;
 
     // 总重量
     private BigDecimal totalWeight;
@@ -71,7 +71,7 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     private String warehouse;
 
     // 实收数量
-    private Integer realQuantity;
+    private BigDecimal realQuantity;
 
     // 实收金额
     private BigDecimal realPrice;

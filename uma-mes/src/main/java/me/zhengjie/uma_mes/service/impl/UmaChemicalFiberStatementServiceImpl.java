@@ -280,14 +280,14 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         UmaChemicalFiberStatementDetailsQueryCriteria umaChemicalFiberStatementDetailsQueryCriteria = new UmaChemicalFiberStatementDetailsQueryCriteria();
         umaChemicalFiberStatementDetailsQueryCriteria.setStatementId(statementDetailsAllListDto.getStatementId());
         List<UmaChemicalFiberStatementDetailsDTO> umaChemicalFiberStatementDetailsDTOS = umaChemicalFiberStatementDetailsService.queryAll(umaChemicalFiberStatementDetailsQueryCriteria);
-        Integer sumTotalBag = 0;
+        BigDecimal sumTotalBag = new BigDecimal(0);
         BigDecimal sumNetWeight = new BigDecimal(0);
         BigDecimal sumTotalPrice = new BigDecimal(0);
         BigDecimal sumAdvanceCharge = new BigDecimal(0);
         BigDecimal sumAmountDeducted = new BigDecimal(0);
 
         for (UmaChemicalFiberStatementDetailsDTO umaChemicalFiberStatementDetailsDTO : umaChemicalFiberStatementDetailsDTOS) {
-            sumTotalBag = sumTotalBag + umaChemicalFiberStatementDetailsDTO.getTotalBag();
+            sumTotalBag = sumTotalBag.add(umaChemicalFiberStatementDetailsDTO.getTotalBag());
             //sumNetWeight = sumNetWeight.add(umaChemicalFiberStatementDetailsDTO.getNetWeight());
             sumTotalPrice = sumTotalPrice.add(umaChemicalFiberStatementDetailsDTO.getTotalPrice());
             //sumAdvanceCharge = sumAdvanceCharge.add(umaChemicalFiberStatementDetailsDTO.getAdvanceCharge());
@@ -328,7 +328,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         BigDecimal totalAdvanceCharge = new BigDecimal(0);
         BigDecimal totalAmountDeducted = new BigDecimal(0);
         BigDecimal sumNetWeight = new BigDecimal(0);
-        int sumTotalBag = 0;
+        BigDecimal sumTotalBag = new BigDecimal(0);
         for (int i = 0; i < umaChemicalFiberStatementDetailsDTOS.size(); i++) {
             Map<String, String> lm = new HashMap<String, String>();
             lm.put("index", (i + 1) + "");
@@ -347,7 +347,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             totalAdvanceCharge = totalAdvanceCharge.add(umaChemicalFiberStatementDetailsDTOS.get(i).getAdvanceCharge());
             totalAmountDeducted = totalAmountDeducted.add(umaChemicalFiberStatementDetailsDTOS.get(i).getAmountDeducted());
             sumNetWeight = sumNetWeight.add(umaChemicalFiberStatementDetailsDTOS.get(i).getNetWeight());
-            sumTotalBag = sumTotalBag + umaChemicalFiberStatementDetailsDTOS.get(i).getTotalBag();
+            sumTotalBag = sumTotalBag.add(umaChemicalFiberStatementDetailsDTOS.get(i).getTotalBag());
         }
         Timestamp starDate = umaChemicalFiberStatementDetailsDTOS.get(0).getScanDate();
         Timestamp endDate = umaChemicalFiberStatementDetailsDTOS.get(umaChemicalFiberStatementDetailsDTOS.size() - 1).getScanDate();

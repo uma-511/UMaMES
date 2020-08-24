@@ -78,18 +78,18 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
             dto.setlnventoryId(lnventoryId);
             lnventoryDTO.add(chemicalFiberStockLnventoryDetailMapper.toDto(chemicalFiberStockLnventoryDetailRepository.save(resources)));
         }*/
-        Integer lnventorySurplus = 0;
-        Integer lnventoryLoss = 0;
+        BigDecimal lnventorySurplus = new BigDecimal(0);
+        BigDecimal lnventoryLoss = new BigDecimal(0);
         for (ChemicalFiberStockLnventoryDetail dto : resources) {
-            Integer a = 0;
-            Integer b = 0;
+            BigDecimal a = new BigDecimal(0);
+            BigDecimal b = new BigDecimal(0);
             if (dto.getLnventorySurplus() != null) {
                 a =  dto.getLnventorySurplus();
-                lnventorySurplus += a;
+                lnventorySurplus = lnventorySurplus.add(a);
             }
             if (dto.getLnventoryLoss() != null) {
                 b = dto.getLnventoryLoss();
-                lnventoryLoss += b;
+                lnventoryLoss = lnventoryLoss.add(b);
             }
         }
         ChemicalFiberStockLnventory Stock = chemicalFiberStockLnventoryRepository.findById(resources.get(0).getLnventoryId()).orElseGet(ChemicalFiberStockLnventory::new);
@@ -120,18 +120,18 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
             }
             cataLogParentIdList.add(dto);
         }*/
-        Integer lnventorySurplus = 0;
-        Integer lnventoryLoss = 0;
+        BigDecimal lnventorySurplus = new BigDecimal(0);
+        BigDecimal lnventoryLoss = new BigDecimal(0);
         for (ChemicalFiberStockLnventoryDetail dto : resources) {
-            Integer a = 0;
-            Integer b = 0;
+            BigDecimal a = new BigDecimal(0);
+            BigDecimal b = new BigDecimal(0);
             if (dto.getLnventorySurplus() != null) {
                 a =  dto.getLnventorySurplus();
-                lnventorySurplus += a;
+                lnventorySurplus =  lnventorySurplus.add(a);
             }
             if (dto.getLnventoryLoss() != null) {
                 b = dto.getLnventoryLoss();
-                lnventoryLoss += b;
+                lnventoryLoss = lnventoryLoss.add(b);
             }
         }
         ChemicalFiberStockLnventory Stock = chemicalFiberStockLnventoryRepository.findById(resources.get(0).getLnventoryId()).orElseGet(ChemicalFiberStockLnventory::new);
@@ -145,12 +145,12 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
     public void balance(List<ChemicalFiberStockLnventoryDetail> resources) {
         for (ChemicalFiberStockLnventoryDetail dto : resources) {
             ChemicalFiberStock stock = chemicalFiberStockRepository.findById(dto.getStockId()).orElseGet(ChemicalFiberStock::new);
-            int surplus = dto.getLnventorySurplus();
-            int loss = dto.getLnventoryLoss();
-            int number = stock.getTotalNumber();
+            BigDecimal surplus = dto.getLnventorySurplus();
+            BigDecimal loss = dto.getLnventoryLoss();
+            BigDecimal number = stock.getTotalNumber();
             int stockNumber = 0;
-            number += surplus;
-            number -= loss;
+            number = number.add(surplus);
+            number = number.subtract(loss);
             stock.setTotalNumber(number);
             chemicalFiberStockRepository.save(stock);
         }

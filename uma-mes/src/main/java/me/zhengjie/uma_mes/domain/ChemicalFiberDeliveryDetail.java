@@ -72,11 +72,11 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
 
     // 总件数
     @Column(name = "total_bag")
-    private Integer totalBag;
+    private BigDecimal totalBag;
 
     // 总数量
     @Column(name = "total_number")
-    private Integer totalNumber;
+    private BigDecimal totalNumber;
 
     // 总重量
     @Column(name = "total_weight")
@@ -100,7 +100,7 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
 
     // 实收数量
     @Column(name = "real_quantity")
-    private Integer realQuantity;
+    private BigDecimal realQuantity;
 
     // 实收金额
     @Column(name = "real_price")

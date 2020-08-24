@@ -15,9 +15,9 @@ public class ChemicalFiberDeliveryNoteSalesReportDTO implements Serializable {
     // 客户名称
     private String customerName;
     // 出库包数
-    private Integer outOfStockPackageNumber = 0;
+    private BigDecimal outOfStockPackageNumber = new BigDecimal(0);
     // 出库个数
-    private Integer outOfStockFactPerBagNumber = 0;
+    private BigDecimal outOfStockFactPerBagNumber = new BigDecimal(0);
     // 出库净重
     private BigDecimal outOfStockNetWeight = new BigDecimal(0.0);
     // 应收金额

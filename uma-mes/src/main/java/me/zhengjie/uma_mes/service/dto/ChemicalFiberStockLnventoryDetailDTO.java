@@ -27,14 +27,14 @@ public class ChemicalFiberStockLnventoryDetailDTO  implements Serializable {
     private String unit;
 
     // 产品数量
-    private Integer prodNumber;
+    private BigDecimal prodNumber;
 
     // 盘点数量
-    private Integer lnventoryNumber;
+    private BigDecimal lnventoryNumber;
 
     // 盘盈数量
-    private Integer lnventorySurplus;
+    private BigDecimal lnventorySurplus;
 
     // 盘亏数量
-    private Integer lnventoryLoss;
+    private BigDecimal lnventoryLoss;
 }

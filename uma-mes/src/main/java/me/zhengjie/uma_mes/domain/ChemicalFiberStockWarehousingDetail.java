@@ -30,7 +30,7 @@ public class ChemicalFiberStockWarehousingDetail implements Serializable {
 
     // 入库数量
     @Column(name = "warehousing_number")
-    private Integer warehousingNumber;
+    private BigDecimal warehousingNumber;
 
     // 产品编号
     @Column(name = "prod_model")

@@ -43,7 +43,7 @@ public class ChemicalFiberStockDTO implements Serializable {
     private BigDecimal totalGrossWeight;
 
     // 总个数
-    private Integer totalNumber;
+    private BigDecimal totalNumber;
 
     // 总件数
     private Integer totalBag;

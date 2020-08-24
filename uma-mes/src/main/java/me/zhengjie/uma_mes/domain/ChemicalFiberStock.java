@@ -61,7 +61,7 @@ public class ChemicalFiberStock implements Serializable {
 
     // 总个数
     @Column(name = "total_number")
-    private Integer totalNumber;
+    private BigDecimal totalNumber;
 
     // 总件数
     @Column(name = "total_bag")

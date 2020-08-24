@@ -298,7 +298,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                     //若实收数量为空则自动填入计划数
                     chemicalFiberDeliveryDetailDTO.setRealQuantity(chemicalFiberDeliveryDetailDTO.getTotalNumber());
                     detailPrise = new BigDecimal(0);
-                    detailPrise = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(BigDecimal.valueOf((int) chemicalFiberDeliveryDetailDTO.getRealQuantity()));
+                    detailPrise = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(chemicalFiberDeliveryDetailDTO.getRealQuantity());
                     realTotalPrise = realTotalPrise.add(detailPrise);
                     chemicalFiberDeliveryDetailDTO.setRealPrice(detailPrise);
                 }else{
@@ -313,9 +313,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 List<ChemicalFiberStockDTO> chemicalFiberStockDTOs = chemicalFiberStockService.queryAll(chemicalFiberStockQueryCriteria);
                 for (ChemicalFiberStockDTO chemicalFiberStockDTO : chemicalFiberStockDTOs){
                     if(null == chemicalFiberStockDTO.getTotalNumber()){
-                        chemicalFiberStockDTO.setTotalNumber(0);
+                        chemicalFiberStockDTO.setTotalNumber(new BigDecimal(0));
                     }
-                    chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber()-chemicalFiberDeliveryDetailDTO.getTotalNumber());
+                    chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber().subtract(chemicalFiberDeliveryDetailDTO.getTotalNumber()));
                     chemicalFiberStockService.update(chemicalFiberStockMapper.toEntity(chemicalFiberStockDTO));
                 }
             }
@@ -498,7 +498,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
         BigDecimal totalPriceWhitRealQuantity = new BigDecimal(0);
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
-            if (null == chemicalFiberDeliveryDetailDTO.getTotalNumber() || chemicalFiberDeliveryDetailDTO.getTotalNumber() == 0 ) {
+            if (null == chemicalFiberDeliveryDetailDTO.getTotalNumber() || chemicalFiberDeliveryDetailDTO.getTotalNumber().equals(0) ) {
                 throw new BadRequestException("请补充计划数量");
             }
             if (null == chemicalFiberDeliveryDetailDTO.getSellingPrice() || chemicalFiberDeliveryDetailDTO.getSellingPrice().compareTo(BigDecimal.ZERO) == 0) {
@@ -671,8 +671,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             ChemicalFiberDeliveryNoteSalesReportDTO chemicalFiberDeliveryNoteSalesReportDTO = new ChemicalFiberDeliveryNoteSalesReportDTO();
             ObjectTransfer.transValue(chemicalFiberDeliveryNote, chemicalFiberDeliveryNoteSalesReportDTO);
             for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryNoteSalesReportDTO.getChemicalFiberDeliveryDetails()) {
-                chemicalFiberDeliveryNoteSalesReportDTO.setOutOfStockPackageNumber(chemicalFiberDeliveryNoteSalesReportDTO.getOutOfStockPackageNumber() + chemicalFiberDeliveryDetail.getTotalBag());
-                chemicalFiberDeliveryNoteSalesReportDTO.setOutOfStockFactPerBagNumber(chemicalFiberDeliveryNoteSalesReportDTO.getOutOfStockFactPerBagNumber() + (chemicalFiberDeliveryDetail.getTotalNumber() == null ? 0 : chemicalFiberDeliveryDetail.getTotalNumber()));
+                chemicalFiberDeliveryNoteSalesReportDTO.setOutOfStockPackageNumber(chemicalFiberDeliveryNoteSalesReportDTO.getOutOfStockPackageNumber().add(chemicalFiberDeliveryDetail.getTotalBag()));
+                chemicalFiberDeliveryNoteSalesReportDTO.setOutOfStockFactPerBagNumber(chemicalFiberDeliveryNoteSalesReportDTO.getOutOfStockFactPerBagNumber().add((chemicalFiberDeliveryDetail.getTotalNumber() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalNumber())));
                 chemicalFiberDeliveryNoteSalesReportDTO.setOutOfStockNetWeight(chemicalFiberDeliveryNoteSalesReportDTO.getOutOfStockNetWeight().add(chemicalFiberDeliveryDetail.getTotalWeight() == null ? new BigDecimal(0.0) : chemicalFiberDeliveryDetail.getTotalWeight()));
                 chemicalFiberDeliveryNoteSalesReportDTO.setReceivablePrice(chemicalFiberDeliveryNoteSalesReportDTO.getReceivablePrice().add(chemicalFiberDeliveryDetail.getTotalPrice()));
                 chemicalFiberDeliveryNoteSalesReportDTO.setTotalCost(chemicalFiberDeliveryNoteSalesReportDTO.getTotalCost().add(chemicalFiberDeliveryDetail.getTotalCost()));
@@ -697,10 +697,10 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         BigDecimal totalPrice = new BigDecimal(0.0);
 
         // 总件数
-        Integer totalBag = 0;
+        BigDecimal totalBag = new BigDecimal(0.0);
 
         // 总数量
-        Integer totalNumber = 0;
+        BigDecimal totalNumber = new BigDecimal(0.0);
 
         // 总重量
         BigDecimal totalWeight = new BigDecimal(0.0);
@@ -709,8 +709,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryNote.getChemicalFiberDeliveryDetails()) {
                 totalCost = totalCost.add(chemicalFiberDeliveryDetail.getTotalCost());
                 totalPrice = totalPrice.add(chemicalFiberDeliveryDetail.getTotalPrice());
-                totalBag = totalBag + (chemicalFiberDeliveryDetail.getTotalBag() == null ? 0 : chemicalFiberDeliveryDetail.getTotalBag());
-                totalNumber = totalNumber + (chemicalFiberDeliveryDetail.getTotalNumber() == null ? 0 : chemicalFiberDeliveryDetail.getTotalNumber());
+                totalBag = totalBag.add((chemicalFiberDeliveryDetail.getTotalBag() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalBag()));
+                totalNumber = totalNumber.add((chemicalFiberDeliveryDetail.getTotalNumber() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalNumber()));
                 totalWeight = totalWeight.add(chemicalFiberDeliveryDetail.getTotalWeight() == null ? new BigDecimal(0.0) : chemicalFiberDeliveryDetail.getTotalWeight());
             }
         }

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -156,12 +157,12 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
                 detail.setStockId(Stock.getId());
                 chemicalFiberStockWarehousingDetailRepository.save(detail);
             } else {
-                int number = 0;
+                BigDecimal number = new BigDecimal(0);
                 if (chemicalFiberStock.getTotalNumber() != null) {
                     number = chemicalFiberStock.getTotalNumber();
                 }
-                int number1 = detail.getWarehousingNumber();
-                number += number1;
+                BigDecimal number1 = detail.getWarehousingNumber();
+                number = number.add(number1);
                 chemicalFiberStock.setTotalNumber(number);
                 Stock = chemicalFiberStockRepository.save(chemicalFiberStock);
                 detail.setStockId(Stock.getId());
@@ -202,15 +203,15 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
                 if (Warehousing.getWarehousingStatus() == 2) {
                     ChemicalFiberStock chemicalFiberStock = chemicalFiberStockRepository.findById(Detail.getStockId()).orElseGet(ChemicalFiberStock::new);
                     ValidationUtil.isNull( chemicalFiberStock.getId(),"chemicalFiberStock","id",Detail.getStockId());
-                    int number = 0;
-                    int number1 = 0;
+                    BigDecimal number = new BigDecimal(0);
+                    BigDecimal number1 = new BigDecimal(0);
                     if (chemicalFiberStock.getTotalNumber() != null) {
                         number = chemicalFiberStock.getTotalNumber();
                     }
                     if (Detail.getWarehousingNumber() != null) {
                         number1 = Detail.getWarehousingNumber();
                     }
-                    number -= number1;
+                    number = number.subtract(number1);
                     chemicalFiberStock.setTotalNumber(number);
                     chemicalFiberStockRepository.save(chemicalFiberStock);
 

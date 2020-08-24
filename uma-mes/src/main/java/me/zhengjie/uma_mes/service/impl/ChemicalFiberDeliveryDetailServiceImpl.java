@@ -170,10 +170,10 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
         List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails = chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
 
         // 包数
-        Integer totalNumber = 0;
+        BigDecimal totalNumber = new BigDecimal(0.0);
 
         // 个数
-        Integer totalBag = 0;
+        BigDecimal totalBag = new BigDecimal(0.0);
 
         // 净重
         BigDecimal totalWeight = new BigDecimal(0.0);
@@ -186,8 +186,8 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
 
 
         for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryDetails) {
-            totalNumber = totalNumber + (chemicalFiberDeliveryDetail.getTotalBag() == null ? 0 : chemicalFiberDeliveryDetail.getTotalBag());
-            totalBag = totalBag + (chemicalFiberDeliveryDetail.getTotalNumber() == null ? 0 : chemicalFiberDeliveryDetail.getTotalNumber());
+            totalNumber = totalNumber.add((chemicalFiberDeliveryDetail.getTotalBag() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalBag()));
+            totalBag = totalBag.add((chemicalFiberDeliveryDetail.getTotalNumber() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalNumber()));
             totalWeight = totalWeight.add((chemicalFiberDeliveryDetail.getTotalWeight() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalWeight()));
             totalCost = totalCost.add((chemicalFiberDeliveryDetail.getTotalCost() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalCost()));
             totalPrice = totalPrice.add((chemicalFiberDeliveryDetail.getTotalPrice() == null ? new BigDecimal(0) : chemicalFiberDeliveryDetail.getTotalPrice()));

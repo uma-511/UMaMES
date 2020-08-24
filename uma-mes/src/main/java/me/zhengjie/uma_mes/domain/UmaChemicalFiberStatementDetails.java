@@ -40,7 +40,7 @@ public class UmaChemicalFiberStatementDetails implements Serializable {
 
     // 总件数
     @Column(name = "total_bag")
-    private Integer totalBag;
+    private BigDecimal totalBag;
 
     // 重量
     @Column(name = "net_weight")
