@@ -83,7 +83,7 @@ public class CustomerServiceImpl implements CustomerService {
         if (null == criteria.getContactPhone()){
             criteria.setContactPhone("");
         }
-        List<Customer> pages = customerRepository.findAllWithTotalArrears(PageNumber, start,otherDate,criteria.getName(),criteria.getCode(),criteria.getAddress());
+        List<Customer> pages = customerRepository.findAllWithTotalArrears(PageNumber, start,otherDate,criteria.getName(),criteria.getCode(),criteria.getAddress(),criteria.getContacts(),criteria.getContactPhone());
         Integer Size = customerRepository.findSize();
         map.put("content", pages);
         map.put("totalElements", Size);
