@@ -1,9 +1,14 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockLnventory;
+import me.zhengjie.uma_mes.domain.ChemicalFiberStockLnventoryDetail;
+import me.zhengjie.uma_mes.repository.ChemicalFiberStockLnventoryDetailRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberStockLnventoryRepository;
+import me.zhengjie.uma_mes.repository.ChemicalFiberStockRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberStockLnventoryService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockLnventoryDTO;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockLnventoryDetailQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockLnventoryQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberStockLnventoryMapper;
 import me.zhengjie.utils.PageUtil;
@@ -18,9 +23,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @CacheConfig(cacheNames = "chemicalFiberStockLnventory")
@@ -30,6 +33,13 @@ public class ChemicalFiberStockLnventoryServiceImpl implements ChemicalFiberStoc
     final ChemicalFiberStockLnventoryRepository chemicalFiberStockLnventoryRepository;
 
     final ChemicalFiberStockLnventoryMapper chemicalFiberStockLnventoryMapper;
+
+    @Autowired
+    private ChemicalFiberStockLnventoryDetailRepository chemicalFiberStockLnventoryDetailRepository;
+
+    @Autowired
+    private ChemicalFiberStockRepository chemicalFiberStockRepository;
+
 
     public ChemicalFiberStockLnventoryServiceImpl(ChemicalFiberStockLnventoryRepository chemicalFiberStockLnventoryRepository,
                                                   ChemicalFiberStockLnventoryMapper chemicalFiberStockLnventoryMapper) {
@@ -42,6 +52,13 @@ public class ChemicalFiberStockLnventoryServiceImpl implements ChemicalFiberStoc
             criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
         }
+        List<Integer> invalidList = new ArrayList<>();
+        invalidList.add(0);
+        if (null != criteria.getQueryWithInvalid() && criteria.getQueryWithInvalid())
+        {
+            invalidList.add(1);
+        }
+        criteria.setInvalidList(invalidList);
         Page<ChemicalFiberStockLnventory> page = chemicalFiberStockLnventoryRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberStockLnventoryMapper::toDto));
     }
@@ -52,6 +69,7 @@ public class ChemicalFiberStockLnventoryServiceImpl implements ChemicalFiberStoc
         resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         resources.setLnventoryNumber(getLnventoryNumber());
         resources.setLnventoryName(getLnventoryName());
+        resources.setInvalid(0);
         resources.setLnventoryUser(chemicalFiberStockLnventoryRepository.getRealNameByUserName(SecurityUtils.getUsername()));
         resources.setLnventoryStatus(1);
         return chemicalFiberStockLnventoryMapper.toDto(chemicalFiberStockLnventoryRepository.save(resources));
@@ -107,6 +125,29 @@ public class ChemicalFiberStockLnventoryServiceImpl implements ChemicalFiberStoc
         String lnventoryName = month + "月盘点单";
         return lnventoryName;
 
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(Integer id) {
+        ChemicalFiberStockLnventory lnventory = chemicalFiberStockLnventoryRepository.findById(id).orElseGet(ChemicalFiberStockLnventory::new);
+        if (lnventory.getLnventoryStatus() == 1) {
+            chemicalFiberStockLnventoryDetailRepository.deleteByLnventoryId(id);
+            // chemicalFiberStockLnventoryRepository.deleteById(id);
+            lnventory.setInvalid(1);
+            chemicalFiberStockLnventoryRepository.save(lnventory);
+        } else {
+            List<ChemicalFiberStockLnventoryDetail> detaList = chemicalFiberStockLnventoryDetailRepository.getDetaList(id);
+            for (ChemicalFiberStockLnventoryDetail date : detaList) {
+                ChemicalFiberStock stockadd = chemicalFiberStockRepository.findById(date.getStockId()).orElseGet(ChemicalFiberStock::new);
+                if (stockadd.getProdId() != null) {
+                    stockadd.setTotalNumber(date.getProdNumber());
+                    chemicalFiberStockRepository.save(stockadd);
+                }
+            }
+            lnventory.setInvalid(1);
+            chemicalFiberStockLnventoryRepository.save(lnventory);
+
+        }
     }
 
 }

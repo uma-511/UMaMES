@@ -67,6 +67,9 @@ public class ChemicalFiberStockWarehousingQueryCriteria {
     @Query(type = Query.Type.IN,propName = "invalid")
     private List<Integer> invalidList;
 
+    @Query(type = Query.Type.EQUAL)
+    private Integer warehousingStatus;
+
 
     // 大于等于
     @Query(type = Query.Type.GREATER_THAN, propName = "createDate")

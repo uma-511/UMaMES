@@ -80,22 +80,49 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
         }*/
         BigDecimal lnventorySurplus = new BigDecimal(0);
         BigDecimal lnventoryLoss = new BigDecimal(0);
+        BigDecimal lnventorySurplusTon = new BigDecimal(0);
+        BigDecimal lnventoryLossTon = new BigDecimal(0);
+        BigDecimal lnventorySurplusBranch = new BigDecimal(0);
+        BigDecimal lnventoryLossBranch = new BigDecimal(0);
         for (ChemicalFiberStockLnventoryDetail dto : resources) {
+            BigDecimal Surplus = new BigDecimal(0);
+            BigDecimal SurplusTon = new BigDecimal(0);
+            BigDecimal Loss = new BigDecimal(0);
+            BigDecimal LossTon = new BigDecimal(0);
             BigDecimal a = new BigDecimal(0);
             BigDecimal b = new BigDecimal(0);
+            String unit = dto.getUnit();
             if (dto.getLnventorySurplus() != null) {
+                if (unit.equals("吨")) {
+                    SurplusTon = dto.getLnventorySurplus();
+                    lnventorySurplusTon = lnventorySurplusTon.add(SurplusTon);
+                } else {
+                    Surplus = dto.getLnventorySurplus();
+                    lnventorySurplusBranch = lnventorySurplusBranch.add(Surplus);
+                }
                 a =  dto.getLnventorySurplus();
                 lnventorySurplus = lnventorySurplus.add(a);
             }
             if (dto.getLnventoryLoss() != null) {
+                if (unit.equals("吨")) {
+                    LossTon = dto.getLnventoryLoss();
+                    lnventoryLossTon = lnventoryLossTon.add(LossTon);
+                } else {
+                    Loss = dto.getLnventoryLoss();
+                    lnventoryLossBranch = lnventoryLossBranch.add(Loss);
+                }
                 b = dto.getLnventoryLoss();
                 lnventoryLoss = lnventoryLoss.add(b);
             }
         }
+        String lnventorySurplusStr = lnventorySurplusTon.toString() + "吨/"+ lnventorySurplusBranch.toString() + "支";
+        String lnventoryLossStr = lnventoryLossTon.toString() + "吨/"+ lnventoryLossBranch.toString() + "支";
         ChemicalFiberStockLnventory Stock = chemicalFiberStockLnventoryRepository.findById(resources.get(0).getLnventoryId()).orElseGet(ChemicalFiberStockLnventory::new);
         ValidationUtil.isNull( Stock.getId(),"chemicalFiberStockWarehousingDetail","id",resources.get(0).getLnventoryId());
         Stock.setLnventorySurplus(lnventorySurplus);
         Stock.setLnventoryLoss(lnventoryLoss);
+        Stock.setLnventoryLossStr(lnventoryLossStr);
+        Stock.setLnventorySurplusStr(lnventorySurplusStr);
         chemicalFiberStockLnventoryRepository.save(Stock);
         return  chemicalFiberStockLnventoryDetailMapper.toDto(chemicalFiberStockLnventoryDetailRepository.saveAll(resources));
     }
@@ -122,22 +149,50 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
         }*/
         BigDecimal lnventorySurplus = new BigDecimal(0);
         BigDecimal lnventoryLoss = new BigDecimal(0);
+        BigDecimal lnventorySurplusTon = new BigDecimal(0);
+        BigDecimal lnventoryLossTon = new BigDecimal(0);
+        BigDecimal lnventorySurplusBranch = new BigDecimal(0);
+        BigDecimal lnventoryLossBranch = new BigDecimal(0);
         for (ChemicalFiberStockLnventoryDetail dto : resources) {
+            BigDecimal Surplus = new BigDecimal(0);
+            BigDecimal SurplusTon = new BigDecimal(0);
+            BigDecimal Loss = new BigDecimal(0);
+            BigDecimal LossTon = new BigDecimal(0);
             BigDecimal a = new BigDecimal(0);
             BigDecimal b = new BigDecimal(0);
+            String unit = dto.getUnit();
             if (dto.getLnventorySurplus() != null) {
+                if (unit.equals("吨")) {
+                    SurplusTon = dto.getLnventorySurplus();
+                    lnventorySurplusTon = lnventorySurplusTon.add(SurplusTon);
+                } else {
+                    Surplus = dto.getLnventorySurplus();
+                    lnventorySurplusBranch = lnventorySurplusBranch.add(Surplus);
+                }
                 a =  dto.getLnventorySurplus();
-                lnventorySurplus =  lnventorySurplus.add(a);
+                lnventorySurplus = lnventorySurplus.add(a);
             }
             if (dto.getLnventoryLoss() != null) {
+                if (unit.equals("吨")) {
+                    LossTon = dto.getLnventoryLoss();
+                    lnventoryLossTon = lnventoryLossTon.add(LossTon);
+                } else {
+                    Loss = dto.getLnventoryLoss();
+                    lnventoryLossBranch = lnventoryLossBranch.add(Loss);
+                }
                 b = dto.getLnventoryLoss();
                 lnventoryLoss = lnventoryLoss.add(b);
             }
         }
+        String lnventorySurplusStr = lnventorySurplusTon.toString() + "吨/"+ lnventorySurplusBranch.toString() + "支";
+        String lnventoryLossStr = lnventoryLossTon.toString() + "吨/"+ lnventoryLossBranch.toString() + "支";
         ChemicalFiberStockLnventory Stock = chemicalFiberStockLnventoryRepository.findById(resources.get(0).getLnventoryId()).orElseGet(ChemicalFiberStockLnventory::new);
         ValidationUtil.isNull( Stock.getId(),"chemicalFiberStockWarehousingDetail","id",resources.get(0).getLnventoryId());
         Stock.setLnventorySurplus(lnventorySurplus);
         Stock.setLnventoryLoss(lnventoryLoss);
+        Stock.setLnventoryLossStr(lnventoryLossStr);
+        Stock.setLnventorySurplusStr(lnventorySurplusStr);
+        chemicalFiberStockLnventoryRepository.save(Stock);
         chemicalFiberStockLnventoryDetailRepository.saveAll(resources);
     }
 

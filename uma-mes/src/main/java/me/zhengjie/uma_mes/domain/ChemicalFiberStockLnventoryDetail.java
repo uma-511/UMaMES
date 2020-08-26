@@ -52,5 +52,13 @@ public class ChemicalFiberStockLnventoryDetail implements Serializable {
     @Column(name = "lnventory_loss")
     private BigDecimal lnventoryLoss;
 
+    // 盘盈数量
+    @Column(name = "lnventory_surplus_str")
+    private String lnventorySurplusStr;
+
+    // 盘亏数量
+    @Column(name = "lnventory_loss_str")
+    private String lnventoryLossStr;
+
 
 }

@@ -7,8 +7,13 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Data
-public class ChemicalFiberStockLnventoryQueryCriteria {
+public class ChemicalFiberWarehousingReortQueryCriteria {
 
+    @Query(type = Query.Type.INNER_LIKE)
+    private String scanNumber;
+
+    @Query(type = Query.Type.INNER_LIKE)
+    private String prodName;
 
     // 大于等于
     @Query(type = Query.Type.GREATER_THAN, propName = "createDate")
@@ -24,11 +29,18 @@ public class ChemicalFiberStockLnventoryQueryCriteria {
     // 临时结束时间
     private Long tempEndTime;
 
+    private Integer id;
 
     private Boolean queryWithInvalid;
 
     @Query(type = Query.Type.IN,propName = "invalid")
     private List<Integer> invalidList;
 
+    @Query(type = Query.Type.IN,propName = "warehousingId")
+    private List<Integer> warehousingIdList;
+
+    private String createUser;
+
+    private String supplierName;
 
 }

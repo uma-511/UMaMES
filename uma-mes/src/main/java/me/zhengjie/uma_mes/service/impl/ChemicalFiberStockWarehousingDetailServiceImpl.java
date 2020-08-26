@@ -73,6 +73,7 @@ public class ChemicalFiberStockWarehousingDetailServiceImpl implements ChemicalF
                 chemicalFiberStock.setBranchNumber(branch);
                 chemicalFiberStockRepository.save(chemicalFiberStock);
             }*/
+
             ChemicalFiberStockWarehousingDetail chemicalFiberStockWarehousingDetail = chemicalFiberStockWarehousingDetailRepository.findById(detail.getId()).orElseGet(ChemicalFiberStockWarehousingDetail::new);
             ValidationUtil.isNull( chemicalFiberStockWarehousingDetail.getId(),"chemicalFiberStockWarehousingDetail","id",detail.getId());
             chemicalFiberStockWarehousingDetailRepository.save(detail);
