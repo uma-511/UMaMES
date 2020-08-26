@@ -55,8 +55,8 @@ public class ChemicalFiberStockLnventoryDetailController {
     }
 
     @PostMapping(value = "/addList")
-    @Log("查询chemicalFiberStockLnventoryDetailList")
-    @ApiOperation("查询chemicalFiberStockLnventoryDetailList")
+    @Log("修改chemicalFiberStockLnventoryDetailList")
+    @ApiOperation("修改chemicalFiberStockLnventoryDetailList")
     //@PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:list')")
     public ResponseEntity update(@Validated @RequestBody List<ChemicalFiberStockLnventoryDetail> resources) {
         chemicalFiberStockLnventoryDetailService.update(resources);

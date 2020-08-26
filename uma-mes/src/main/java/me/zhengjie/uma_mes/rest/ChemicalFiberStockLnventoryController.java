@@ -10,10 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "优码MES:化纤-盘点单管理")
 @RestController
@@ -41,5 +38,14 @@ public class ChemicalFiberStockLnventoryController {
     //@PreAuthorize("@el.check('chemicalFiberStockLnventory:add')")
     public ResponseEntity create(){
         return new ResponseEntity<>(chemicalFiberStockLnventoryService.create(), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    @Log("删除ChemicalFiberDeliveryDetail")
+    //@ApiOperation("删除ChemicalFiberDeliveryDetail")
+    //@PreAuthorize("@el.check('chemicalFiberDeliveryDetail:del')")
+    public ResponseEntity delete(@PathVariable Integer id){
+        chemicalFiberStockLnventoryService.delete(id);
+        return new ResponseEntity(HttpStatus.OK);
     }
 }

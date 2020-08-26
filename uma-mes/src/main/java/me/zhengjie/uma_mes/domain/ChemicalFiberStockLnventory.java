@@ -45,5 +45,18 @@ public class ChemicalFiberStockLnventory implements Serializable {
     @Column(name = "lnventory_user")
     private String lnventoryUser;
 
+    // 失效
+    @Column(name = "invalid")
+    private Integer invalid;
+
+    // 盘盈数量
+    @Column(name = "lnventory_surplus_str")
+    private String lnventorySurplusStr;
+
+    // 盘亏数量
+    @Column(name = "lnventory_loss_str")
+    private String lnventoryLossStr;
+
+
 
 }

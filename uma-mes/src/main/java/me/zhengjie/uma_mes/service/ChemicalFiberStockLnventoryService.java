@@ -11,4 +11,6 @@ public interface ChemicalFiberStockLnventoryService {
     Map<String,Object> queryAll(ChemicalFiberStockLnventoryQueryCriteria criteria, Pageable pageable);
 
     ChemicalFiberStockLnventoryDTO create();
+
+    void delete(Integer id);
 }

@@ -33,4 +33,11 @@ public class ChemicalFiberStockLnventoryDTO implements Serializable {
     // 时间
     private Timestamp createDate;
 
+
+    // 盘盈数量
+    private String lnventorySurplusStr;
+
+    // 盘亏数量
+    private String lnventoryLossStr;
+
 }

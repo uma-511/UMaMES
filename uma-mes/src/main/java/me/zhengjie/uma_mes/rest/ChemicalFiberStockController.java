@@ -130,7 +130,7 @@ public class ChemicalFiberStockController {
                 sumFactPerBagNumber = sumFactPerBagNumber.add(chemicalFiberStockDTO.getTotalNumber());
             }
         }
-        sumNetWeight =  sumNetWeight.multiply(new BigDecimal(1000));
+        //sumNetWeight =  sumNetWeight.multiply(new BigDecimal(1000));
         Map<String, Object> map = new HashMap<>();
         map.put("sumFactPerBagNumber", sumFactPerBagNumber);
         map.put("sumNetWeight", sumNetWeight);

@@ -37,4 +37,11 @@ public class ChemicalFiberStockLnventoryDetailDTO  implements Serializable {
 
     // 盘亏数量
     private BigDecimal lnventoryLoss;
+
+
+    // 盘盈数量
+    private String lnventorySurplusStr;
+
+    // 盘亏数量
+    private String lnventoryLossStr;
 }
