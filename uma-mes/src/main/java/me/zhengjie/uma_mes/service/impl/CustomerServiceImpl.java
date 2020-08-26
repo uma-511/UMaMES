@@ -18,10 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
 * @author Tan Jun Ming
@@ -41,11 +38,56 @@ public class CustomerServiceImpl implements CustomerService {
         this.customerMapper = customerMapper;
     }
 
+    public static Map monthTimeInMillis() {
+        Calendar calendar = Calendar.getInstance();// 获取当前日期
+        calendar.add(Calendar.YEAR, 0);
+        calendar.add(Calendar.MONTH, 0);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Long time = calendar.getTimeInMillis();
+        int month = calendar.get(Calendar.MONTH)+1;
+        int year = calendar.get(Calendar.YEAR);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("time", time);
+        map.put("month", month < 10 ? "0" + month : month);
+        map.put("year", year);
+        return map;
+    }
+
     @Override
     public Map<String,Object> queryAll(CustomerQueryCriteria criteria, Pageable pageable){
         criteria.setDelFlag(0);
-        Page<Customer> page = customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
-        return PageUtil.toPage(page.map(customerMapper::toDto));
+        Map<String, Object> timeMap = monthTimeInMillis();
+        String year = timeMap.get("year").toString();
+        String month = timeMap.get("month").toString();
+        String otherDate= year+"-"+month;
+        int start = pageable.getPageSize();
+        int end = pageable.getPageNumber();
+        int PageNumber = start * end;
+        Map<String, Object> map = new HashMap<>();
+        if (null == criteria.getName()){
+            criteria.setName("");
+        }
+        if (null == criteria.getAddress()){
+            criteria.setAddress("");
+        }
+        if (null == criteria.getCode()){
+            criteria.setCode("");
+        }
+        if (null == criteria.getContacts()){
+            criteria.setContacts("");
+        }
+        if (null == criteria.getContactPhone()){
+            criteria.setContactPhone("");
+        }
+        List<Customer> pages = customerRepository.findAllWithTotalArrears(PageNumber, start,otherDate,criteria.getName(),criteria.getCode(),criteria.getAddress());
+        Integer Size = customerRepository.findSize();
+        map.put("content", pages);
+        map.put("totalElements", Size);
+        return map;
     }
 
     @Override
@@ -53,6 +95,11 @@ public class CustomerServiceImpl implements CustomerService {
         criteria.setDelFlag(0);
         return customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
+/*
+    public List<CustomerDTO> queryAllWithTotalArrears(CustomerQueryCriteria criteria){
+        criteria.setDelFlag(0);
+        return customerMapper.toDto(customerRepository.findAllWithTotalArrears((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+    }*/
 
     @Override
 //    @Cacheable(key = "#p0")

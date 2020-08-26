@@ -2,8 +2,10 @@ package me.zhengjie.uma_mes.service.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
+import me.zhengjie.annotation.Query;
 import me.zhengjie.uma_mes.utils.CustomerBigDecimalSerialize;
 
+import javax.persistence.NamedQuery;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -51,4 +53,7 @@ public class CustomerDTO implements Serializable {
 
     // 删除标识
     private Integer delFlag;
+
+    // 客户当前总欠款
+    private BigDecimal totalArrears;
 }

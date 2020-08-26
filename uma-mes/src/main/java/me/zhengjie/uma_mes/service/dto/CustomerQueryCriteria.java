@@ -47,4 +47,12 @@ public class CustomerQueryCriteria{
     // 删除标识
     @Query
     private Integer delFlag;
+
+    // 模糊
+    @Query(type = Query.Type.INNER_LIKE)
+    private Long createDate;
+
+    // 模糊
+    @Query(type = Query.Type.LESS_THAN)
+    private Long otherDate;
 }

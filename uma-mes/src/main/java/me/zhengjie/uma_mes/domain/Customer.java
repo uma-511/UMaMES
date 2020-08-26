@@ -70,6 +70,9 @@ public class Customer implements Serializable {
     @Column(name = "del_flag")
     private Integer delFlag;
 
+    // 客户当前总欠款
+    private BigDecimal totalArrears;
+
     public void copy(Customer source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }
