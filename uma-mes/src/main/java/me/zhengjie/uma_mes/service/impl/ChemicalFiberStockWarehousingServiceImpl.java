@@ -155,6 +155,7 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
                 Stock.setProdUnit(detail.getUnit());
                 Stock = chemicalFiberStockRepository.save(Stock);
                 detail.setStockId(Stock.getId());
+                detail.setCreateDate(chemicalFiberStockWarehousing.getCreateDate());
                 chemicalFiberStockWarehousingDetailRepository.save(detail);
             } else {
                 BigDecimal number = new BigDecimal(0);
@@ -166,6 +167,7 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
                 chemicalFiberStock.setTotalNumber(number);
                 Stock = chemicalFiberStockRepository.save(chemicalFiberStock);
                 detail.setStockId(Stock.getId());
+                detail.setCreateDate(chemicalFiberStockWarehousing.getCreateDate());
                 chemicalFiberStockWarehousingDetailRepository.save(detail);
             }
 

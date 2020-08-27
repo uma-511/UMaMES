@@ -21,10 +21,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @CacheConfig(cacheNames = "chemicalFiberWarehousingReort")
@@ -43,7 +40,9 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
         String supplierName = "";
         if (criteria.getTempStartTime() != null) {
             ca.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             ca.setEndTime(new Timestamp(criteria.getTempEndTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
         }
         if (criteria.getCreateUser() != null) {
             ca.setCreateUser(criteria.getCreateUser());
