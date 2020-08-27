@@ -316,7 +316,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                     if(null == chemicalFiberStockDTO.getTotalNumber()){
                         chemicalFiberStockDTO.setTotalNumber(new BigDecimal(0));
                     }
-                    chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber().subtract(chemicalFiberDeliveryDetailDTO.getTotalNumber()));
+                    chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber().subtract(chemicalFiberDeliveryDetailDTO.getRealQuantity()));
                     chemicalFiberStockService.update(chemicalFiberStockMapper.toEntity(chemicalFiberStockDTO));
                 }
             }
@@ -440,7 +440,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             lm.put("unit", chemicalFiberDeliveryDetailDTO.getUnit());
             lm.put("sellingPrice", chemicalFiberDeliveryDetailDTO.getSellingPrice() + "");
             if(null != chemicalFiberDeliveryDetailDTO.getRealQuantity() && !chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)){
-                BigDecimal detailTotalPrice = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(new BigDecimal( Integer.parseInt ( chemicalFiberDeliveryDetailDTO.getRealQuantity().toString() ) ));
+                BigDecimal detailTotalPrice = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(chemicalFiberDeliveryDetailDTO.getRealQuantity());
                 chemicalFiberDeliveryDetailDTO.setTotalPrice(detailTotalPrice);
                 totalPriceWhitRealQuantity = totalPriceWhitRealQuantity.add(detailTotalPrice);
                 lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");
