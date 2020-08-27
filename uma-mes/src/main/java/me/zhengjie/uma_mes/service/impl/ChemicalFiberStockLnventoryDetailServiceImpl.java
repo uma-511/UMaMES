@@ -147,13 +147,16 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
             }
             cataLogParentIdList.add(dto);
         }*/
+        ChemicalFiberStockLnventory Stock = chemicalFiberStockLnventoryRepository.findById(resources.get(0).getLnventoryId()).orElseGet(ChemicalFiberStockLnventory::new);
+        ValidationUtil.isNull( Stock.getId(),"chemicalFiberStockWarehousingDetail","id",resources.get(0).getLnventoryId());
         BigDecimal lnventorySurplus = new BigDecimal(0);
         BigDecimal lnventoryLoss = new BigDecimal(0);
         BigDecimal lnventorySurplusTon = new BigDecimal(0);
         BigDecimal lnventoryLossTon = new BigDecimal(0);
         BigDecimal lnventorySurplusBranch = new BigDecimal(0);
         BigDecimal lnventoryLossBranch = new BigDecimal(0);
-        for (ChemicalFiberStockLnventoryDetail dto : resources) {
+        for (int i = 0; i < resources.size(); i++) {
+            ChemicalFiberStockLnventoryDetail dto = resources.get(i);
             BigDecimal Surplus = new BigDecimal(0);
             BigDecimal SurplusTon = new BigDecimal(0);
             BigDecimal Loss = new BigDecimal(0);
@@ -183,11 +186,10 @@ public class ChemicalFiberStockLnventoryDetailServiceImpl implements ChemicalFib
                 b = dto.getLnventoryLoss();
                 lnventoryLoss = lnventoryLoss.add(b);
             }
+            resources.get(i).setLnventoryId(Stock.getId());
         }
         String lnventorySurplusStr = lnventorySurplusTon.toString() + "吨/"+ lnventorySurplusBranch.toString() + "支";
         String lnventoryLossStr = lnventoryLossTon.toString() + "吨/"+ lnventoryLossBranch.toString() + "支";
-        ChemicalFiberStockLnventory Stock = chemicalFiberStockLnventoryRepository.findById(resources.get(0).getLnventoryId()).orElseGet(ChemicalFiberStockLnventory::new);
-        ValidationUtil.isNull( Stock.getId(),"chemicalFiberStockWarehousingDetail","id",resources.get(0).getLnventoryId());
         Stock.setLnventorySurplus(lnventorySurplus);
         Stock.setLnventoryLoss(lnventoryLoss);
         Stock.setLnventoryLossStr(lnventoryLossStr);

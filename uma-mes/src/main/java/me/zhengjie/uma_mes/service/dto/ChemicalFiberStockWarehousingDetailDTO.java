@@ -18,7 +18,7 @@ public class ChemicalFiberStockWarehousingDetailDTO implements Serializable {
     private String prodName;
 
     // 入库数量
-    private Integer warehousingNumber;
+    private BigDecimal warehousingNumber;
 
     // 产品编号
     private String prodModel;
