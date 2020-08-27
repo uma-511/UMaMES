@@ -131,12 +131,14 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         return map;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void update(ChemicalFiberStockWarehousing resources) {
         ChemicalFiberStockWarehousing chemicalFiberStockWarehousing = chemicalFiberStockWarehousingRepository.findById(resources.getId()).orElseGet(ChemicalFiberStockWarehousing::new);
         ValidationUtil.isNull( chemicalFiberStockWarehousing.getId(),"chemicalFiberStockWarehousing","id",resources.getId());
         chemicalFiberStockWarehousingRepository.save(resources);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void warehousing(List<ChemicalFiberStockWarehousingDetail> resources) {
         ChemicalFiberStockWarehousing chemicalFiberStockWarehousing = chemicalFiberStockWarehousingRepository.findById(resources.get(0).getWarehousingId()).orElseGet(ChemicalFiberStockWarehousing::new);
         ValidationUtil.isNull( chemicalFiberStockWarehousing.getId(),"chemicalFiberStockWarehousing","id",resources.get(0).getWarehousingId());
@@ -155,6 +157,7 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
                 Stock.setProdUnit(detail.getUnit());
                 Stock = chemicalFiberStockRepository.save(Stock);
                 detail.setStockId(Stock.getId());
+                detail.setCreateDate(chemicalFiberStockWarehousing.getCreateDate());
                 chemicalFiberStockWarehousingDetailRepository.save(detail);
             } else {
                 BigDecimal number = new BigDecimal(0);
@@ -166,6 +169,7 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
                 chemicalFiberStock.setTotalNumber(number);
                 Stock = chemicalFiberStockRepository.save(chemicalFiberStock);
                 detail.setStockId(Stock.getId());
+                detail.setCreateDate(chemicalFiberStockWarehousing.getCreateDate());
                 chemicalFiberStockWarehousingDetailRepository.save(detail);
             }
 
@@ -192,6 +196,7 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         ChemicalFiberStockWarehousingDetailQueryCriteria criteria = new ChemicalFiberStockWarehousingDetailQueryCriteria();
         criteria.setWarehousingId(id);

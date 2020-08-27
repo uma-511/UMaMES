@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 @Entity
 @Data
@@ -59,4 +60,8 @@ public class ChemicalFiberStockWarehousingDetail implements Serializable {
     // 产品备注
     @Column(name = "remark")
     private String remark;
+
+    // 时间
+    @Column(name = "create_date")
+    private Timestamp createDate;
 }
