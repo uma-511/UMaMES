@@ -1,6 +1,7 @@
 package me.zhengjie.uma_mes.domain;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Builder;
 import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
@@ -71,7 +72,12 @@ public class Customer implements Serializable {
     private Integer delFlag;
 
     // 客户当前总欠款
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalArrears;
+
+    // 客户当月总欠款
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal currentArrears;
 
     public void copy(Customer source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

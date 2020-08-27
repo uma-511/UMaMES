@@ -32,7 +32,7 @@ public class ChemicalFiberProductMenuController {
     @GetMapping
     @Log("查询ChemicalFiberProductMenu")
     @ApiOperation("查询ChemicalFiberProductMenu")
-    @PreAuthorize("@el.check('chemicalFiberProductMenu:list')")
+    //@PreAuthorize("@el.check('chemicalFiberProductMenu:list')")
     public ResponseEntity getChemicalFiberProductMenus(ChemicalFiberProductMenuQueryCriteria criteria){
         List<ChemicalFiberProductMenuDTO> productMenu = chemicalFiberProductMenuService.queryAll(criteria);
         return new ResponseEntity<>(productMenu, HttpStatus.OK);
@@ -41,7 +41,7 @@ public class ChemicalFiberProductMenuController {
     @GetMapping(value = "/add")
     @Log("新增ChemicalFiberProductMenu")
     @ApiOperation("新增ChemicalFiberProductMenu")
-    @PreAuthorize("@el.check('chemicalFiberProductMenu:add')")
+    //@PreAuthorize("@el.check('chemicalFiberProductMenu:add')")
     public ResponseEntity addChemicalFiberProductMenus(ChemicalFiberProductMenu resources){
         return new ResponseEntity<>(chemicalFiberProductMenuService.create(resources), HttpStatus.CREATED);
     }

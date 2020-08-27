@@ -89,6 +89,6 @@ public class CustomerController {
 //    @PreAuthorize("@el.check('chemicalFiberProduct:getList')")
     @AnonymousAccess()
     public ResponseEntity getCustomerById(@RequestBody CustomerQueryCriteria criteria) {
-        return new ResponseEntity<>(customerService.findById(criteria.getId()),HttpStatus.OK);
+        return new ResponseEntity<>(customerService.findByIdWithTotalArrears(criteria.getId()),HttpStatus.OK);
     }
 }

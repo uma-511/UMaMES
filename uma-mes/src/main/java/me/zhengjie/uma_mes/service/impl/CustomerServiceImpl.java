@@ -109,6 +109,16 @@ public class CustomerServiceImpl implements CustomerService {
         return customerMapper.toDto(customer);
     }
 
+    public CustomerDTO findByIdWithTotalArrears(Integer id) {
+        Map<String, Object> timeMap = monthTimeInMillis();
+        String year = timeMap.get("year").toString();
+        String month = timeMap.get("month").toString();
+        String otherDate= year+"-"+month;
+        Customer customer = customerRepository.findByIdWithArrears(id,otherDate);
+        ValidationUtil.isNull(customer.getId(),"Customer","id",id);
+        return customerMapper.toDto(customer);
+    }
+
     @Override
 //    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)

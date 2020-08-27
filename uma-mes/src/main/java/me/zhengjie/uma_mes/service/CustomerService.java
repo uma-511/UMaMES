@@ -38,6 +38,8 @@ public interface CustomerService {
      */
     CustomerDTO findById(Integer id);
 
+    CustomerDTO findByIdWithTotalArrears(Integer id);
+
     CustomerDTO create(Customer resources);
 
     void update(Customer resources);
