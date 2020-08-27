@@ -28,10 +28,10 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
     @Query(value = "select * FROM uma_chemical_fiber_delivery_note where scan_number = :scanNumber",nativeQuery = true)
     ChemicalFiberDeliveryNote getByScanNumber(@Param("scanNumber") String scanNumber);
 
-    @Query(value = "SELECT  SUM(b.total_number) FROM uma_chemical_fiber_delivery_note a LEFT JOIN  uma_chemical_fiber_delivery_detail b on a.id = b.delivery_note_id where a.create_date LIKE %:dateTime% and b.unit = :unit",nativeQuery = true)
+    @Query(value = "SELECT  SUM(b.total_number) FROM uma_chemical_fiber_delivery_note a LEFT JOIN  uma_chemical_fiber_delivery_detail b on a.scan_number = b.scan_number where a.create_date LIKE %:dateTime% and b.unit = :unit and invalid = 0",nativeQuery = true)
     Integer getTonnageInStorage(@Param("dateTime") String dateTime, @Param("unit") String unit);
 
-    @Query(value = "SELECT SUM(total_price) from uma_chemical_fiber_delivery_note where create_date LIKE %:dateTime%",nativeQuery = true)
+    @Query(value = "SELECT SUM(total_price) from uma_chemical_fiber_delivery_note where create_date LIKE %:dateTime% and invalid = 0",nativeQuery = true)
     Integer getDeliveryAmount(@Param("dateTime") String dateTime);
 
     @Query(value = "SELECT sum(b.total_price) as k FROM uma_chemical_fiber_delivery_note b WHERE b.customer_id = :customerId AND b.delivery_date > '1950-01' AND delivery_date < :dateTime ",nativeQuery = true)
