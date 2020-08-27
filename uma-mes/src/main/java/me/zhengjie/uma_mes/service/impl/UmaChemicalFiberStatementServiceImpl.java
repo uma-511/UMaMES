@@ -327,6 +327,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
         BigDecimal totalSum = new BigDecimal(0);
         BigDecimal sumTotalBag = new BigDecimal(0);
+        BigDecimal sumAmountOfMoney = new BigDecimal(0);
         Timestamp time = umaChemicalFiberStatement.getCreateDate();
         Date date = new Date(time.getTime());
         Calendar calendar = Calendar.getInstance();
@@ -379,6 +380,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             lm.put("recivedNumber", receipt.getRecivedNumber() + "");
             lm.put("amountOfMoney", receipt.getAmountOfMoney() + "");
             lm.put("remark", receipt.getRemark() + "");
+            sumAmountOfMoney = sumAmountOfMoney.add(receipt.getAmountOfMoney());
             receiptlistMap.add(lm);
         }
         Timestamp starDate = umaChemicalFiberStatementDetailsDTOS.get(0).getScanDate();
@@ -398,6 +400,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         map.put("onCredit", onCredit + "");//上期欠款
         map.put("sumTotal", sumTotal + ""); // 总欠款
         map.put("totalSum", totalSum + ""); // 总金额
+        map.put("sumAmountOfMoney", sumAmountOfMoney + ""); // 总金额
         map.put("statementLists", listMap);
         map.put("receiptlistMap", receiptlistMap);
         map.put("sumTotalBag", sumTotalBag);
