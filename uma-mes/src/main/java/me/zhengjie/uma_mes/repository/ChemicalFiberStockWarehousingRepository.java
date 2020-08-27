@@ -25,7 +25,7 @@ public interface ChemicalFiberStockWarehousingRepository extends JpaRepository<C
     @Query(value = "SELECT  SUM(b.total_price) FROM uma_chemical_fiber_stock_warehousing a LEFT JOIN  uma_chemical_fiber_stock_warehousing_detail b on a.id = b.warehousing_id where warehousing_date LIKE %:dateTime% and b.unit = :unit",nativeQuery = true)
     Integer getTonnageInStorage(@Param("dateTime") String dateTime, @Param("unit") String unit);
 
-    @Query(value = "SELECT b.id from uma_chemical_fiber_stock_warehousing b where b.invalid = 0 and b.warehousing_status = 2 and  supplier_name like %:name% and create_user like %:user%",nativeQuery = true)
+    @Query(value = "SELECT b.id from uma_chemical_fiber_stock_warehousing b where b.invalid = 0 and b.warehousing_status = 2 and  supplier_name like %:name% and create_user like %:user% ",nativeQuery = true)
     List<Integer> getNotId(@Param("user") String user, @Param("name") String name);
 
 
