@@ -93,26 +93,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<CustomerDTO> queryAll(CustomerQueryCriteria criteria){
         criteria.setDelFlag(0);
-        Map<String, Object> timeMap = monthTimeInMillis();
-        String year = timeMap.get("year").toString();
-        String month = timeMap.get("month").toString();
-        String otherDate= year+"-"+month;
-        if (null == criteria.getName()){
-            criteria.setName("");
-        }
-        if (null == criteria.getAddress()){
-            criteria.setAddress("");
-        }
-        if (null == criteria.getCode()){
-            criteria.setCode("");
-        }
-        if (null == criteria.getContacts()){
-            criteria.setContacts("");
-        }
-        if (null == criteria.getContactPhone()){
-            criteria.setContactPhone("");
-        }
-        return customerMapper.toDto(customerRepository.findAllWithTotalArrearsForGetList(otherDate,criteria.getName(),criteria.getCode(),criteria.getAddress(),criteria.getContacts(),criteria.getContactPhone()));
+        return customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 /*
     public List<CustomerDTO> queryAllWithTotalArrears(CustomerQueryCriteria criteria){
