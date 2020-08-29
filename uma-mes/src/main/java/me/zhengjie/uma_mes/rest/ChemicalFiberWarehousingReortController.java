@@ -1,6 +1,5 @@
 package me.zhengjie.uma_mes.rest;
 
-import com.lgmn.common.result.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import me.zhengjie.aop.log.Log;
@@ -11,10 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Api(tags = "优码MES:化纤-盘点单列表管理")
 @RestController
@@ -30,16 +28,6 @@ public class ChemicalFiberWarehousingReortController {
     @ApiOperation("查询chemicalFiberWarehousingReort")
     //@PreAuthorize("@el.check('chemicalFiberStockLnventoryDetail:list')")
     public ResponseEntity queryAll(ChemicalFiberWarehousingReortQueryCriteria criteria, Pageable pageable){
-
         return new ResponseEntity<>(chemicalFiberWarehousingReortService.queryAll(criteria, pageable), HttpStatus.OK);
-    }
-
-    @PostMapping("/getSummaryData")
-    @Log("查询ChemicalFiberLabel")
-    @ApiOperation("查询ChemicalFiberLabel")
-    public Result getSummaryData(@RequestBody ChemicalFiberWarehousingReortQueryCriteria criteria) {
-
-        Map<String, Object> map = chemicalFiberWarehousingReortService.getSummaryData(criteria);
-        return Result.success(map);
     }
 }
