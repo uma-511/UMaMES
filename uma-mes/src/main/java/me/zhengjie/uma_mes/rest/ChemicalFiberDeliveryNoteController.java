@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author Tan Jun Ming
@@ -166,4 +168,27 @@ public class ChemicalFiberDeliveryNoteController {
     public Result getSalesReportSummaries(@RequestBody ChemicalFiberDeliveryNoteQueryCriteria criteria) {
         return chemicalFiberDeliveryNoteService.getSalesReportSummaries(criteria);
     }
+
+    /*@PostMapping("/getSummaryData")
+    @Log("查询ChemicalFiberLabel")
+    @ApiOperation("查询ChemicalFiberLabel")
+    public Result getSummaryData(@RequestBody ChemicalFiberStockQueryCriteria criteria) {
+        BigDecimal sumNetWeight = new BigDecimal(0);
+        BigDecimal sumFactPerBagNumber = new BigDecimal(0);
+        List<ChemicalFiberStockDTO> chemicalFiberStockDTOList = chemicalFiberStockService.queryAll(criteria);
+        for (ChemicalFiberStockDTO chemicalFiberStockDTO : chemicalFiberStockDTOList) {
+            String unit = chemicalFiberStockDTO.getProdUnit();
+            if (unit.equals("吨")) {
+                sumNetWeight = sumNetWeight.add(chemicalFiberStockDTO.getTotalNumber());
+            }
+            if (unit.equals("支")) {
+                sumFactPerBagNumber = sumFactPerBagNumber.add(chemicalFiberStockDTO.getTotalNumber());
+            }
+        }
+        //sumNetWeight =  sumNetWeight.multiply(new BigDecimal(1000));
+        Map<String, Object> map = new HashMap<>();
+        map.put("sumFactPerBagNumber", sumFactPerBagNumber);
+        map.put("sumNetWeight", sumNetWeight);
+        return Result.success(map);
+    }*/
 }

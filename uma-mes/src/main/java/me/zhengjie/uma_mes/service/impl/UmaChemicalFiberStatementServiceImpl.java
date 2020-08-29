@@ -86,25 +86,36 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
 //    @Cacheable
     public Map<String,Object> queryAll(UmaChemicalFiberStatementQueryCriteria criteria, Pageable pageable){
         //Page<UmaChemicalFiberStatement> page = umaChemicalFiberStatementRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
-        Long createDate = criteria.getCreateDate();
-        Date date = new Date(createDate);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        Integer year = calendar.get(Calendar.YEAR);
-        Integer month = calendar.get(Calendar.MONTH) + 2;
+        String years = "";
         String months = "";
-        String days = "";
-        String dateTime = "";
-        if (month < 10) {
-            months = "0" + month;
-        } else {
-            months = month + "";
+        if (criteria.getCreateDate() != null) {
+            Long createDate = criteria.getCreateDate();
+            Date date = new Date(createDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            Integer year = calendar.get(Calendar.YEAR);
+            Integer month = calendar.get(Calendar.MONTH) + 1;
+            years = year + "";
+            if (month < 10) {
+                months = "0" + month;
+            } else {
+                months = month + "";
+            }
+        }
+
+        String customerName = "";
+        String accountCode = "";
+        if (criteria.getCustomerName() != null) {
+            customerName = criteria.getCustomerName();
+        }
+        if (criteria.getAccountCode() != null) {
+            accountCode = criteria.getAccountCode();
         }
         int start = pageable.getPageSize();
         int end = pageable.getPageNumber();
         int PageNumber = start * end;
         Map<String, Object> map = new HashMap<>();
-        List<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd(PageNumber, start);
+        List<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd(PageNumber, start, customerName, accountCode, years + "-" + months);
         Integer ListSeiz = umaChemicalFiberStatementRepository.findSize();
         map.put("content", pages);
         map.put("totalElements", ListSeiz);
