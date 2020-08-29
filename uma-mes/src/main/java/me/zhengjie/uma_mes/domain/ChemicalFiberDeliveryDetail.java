@@ -1,11 +1,8 @@
 package me.zhengjie.uma_mes.domain;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
-import me.zhengjie.uma_mes.utils.CustomerBigDecimalSerialize;
-
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.io.Serializable;
@@ -71,7 +68,6 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
 
     // 总金额
     @Column(name = "total_price")
-    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalPrice;
 
     // 总件数

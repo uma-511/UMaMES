@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -317,7 +316,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                     if(null == chemicalFiberStockDTO.getTotalNumber()){
                         chemicalFiberStockDTO.setTotalNumber(new BigDecimal(0));
                     }
-                    chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber().subtract(chemicalFiberDeliveryDetailDTO.getRealQuantity()));
+                    chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber().subtract(chemicalFiberDeliveryDetailDTO.getTotalNumber()));
                     chemicalFiberStockService.update(chemicalFiberStockMapper.toEntity(chemicalFiberStockDTO));
                 }
             }
@@ -395,7 +394,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void downloadDeliveryNote(Integer id, HttpServletResponse response) {
-        DecimalFormat df = new DecimalFormat("0.00");
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
         chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
@@ -442,10 +440,10 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             lm.put("unit", chemicalFiberDeliveryDetailDTO.getUnit());
             lm.put("sellingPrice", chemicalFiberDeliveryDetailDTO.getSellingPrice() + "");
             if(null != chemicalFiberDeliveryDetailDTO.getRealQuantity() && !chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)){
-                BigDecimal detailTotalPrice = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(chemicalFiberDeliveryDetailDTO.getRealQuantity());
+                BigDecimal detailTotalPrice = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(new BigDecimal( Integer.parseInt ( chemicalFiberDeliveryDetailDTO.getRealQuantity().toString() ) ));
                 chemicalFiberDeliveryDetailDTO.setTotalPrice(detailTotalPrice);
                 totalPriceWhitRealQuantity = totalPriceWhitRealQuantity.add(detailTotalPrice);
-                lm.put("totalPrice", df.format(chemicalFiberDeliveryDetailDTO.getTotalPrice()) + "");
+                lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");
                 lm.put("realQuantity", chemicalFiberDeliveryDetailDTO.getRealQuantity() + "");
             }else{
                 lm.put("realQuantity","");
@@ -459,7 +457,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             map.put("total", "");
             map.put("capitalizationTotal","");
         }else {
-            map.put("total",df.format(totalPriceWhitRealQuantity) + "");
+            map.put("total",totalPriceWhitRealQuantity + "");
             map.put("capitalizationTotal", NumberToCN.number2CNMontrayUnit(totalPriceWhitRealQuantity));
         }
         map.put("deliveryList", listMap);

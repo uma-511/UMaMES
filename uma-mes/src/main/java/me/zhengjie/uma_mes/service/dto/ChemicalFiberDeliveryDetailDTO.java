@@ -1,8 +1,6 @@
 package me.zhengjie.uma_mes.service.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
-import me.zhengjie.uma_mes.utils.CustomerBigDecimalSerialize;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -51,7 +49,6 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     private BigDecimal totalCost;
 
     // 总金额
-    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalPrice;
 
     // 总件数
