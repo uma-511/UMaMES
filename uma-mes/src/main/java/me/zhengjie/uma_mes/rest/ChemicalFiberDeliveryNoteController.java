@@ -22,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -169,26 +172,41 @@ public class ChemicalFiberDeliveryNoteController {
         return chemicalFiberDeliveryNoteService.getSalesReportSummaries(criteria);
     }
 
-    /*@PostMapping("/getSummaryData")
+    @PostMapping("/getSummaryData")
     @Log("查询ChemicalFiberLabel")
     @ApiOperation("查询ChemicalFiberLabel")
-    public Result getSummaryData(@RequestBody ChemicalFiberStockQueryCriteria criteria) {
-        BigDecimal sumNetWeight = new BigDecimal(0);
-        BigDecimal sumFactPerBagNumber = new BigDecimal(0);
-        List<ChemicalFiberStockDTO> chemicalFiberStockDTOList = chemicalFiberStockService.queryAll(criteria);
-        for (ChemicalFiberStockDTO chemicalFiberStockDTO : chemicalFiberStockDTOList) {
-            String unit = chemicalFiberStockDTO.getProdUnit();
-            if (unit.equals("吨")) {
-                sumNetWeight = sumNetWeight.add(chemicalFiberStockDTO.getTotalNumber());
+    public Result getSummaryData(@RequestBody ChemicalFiberDeliveryNoteQueryCriteria criteria) {
+        BigDecimal sumTotalCost = new BigDecimal(0);
+        BigDecimal sumTotalPrice = new BigDecimal(0);
+        BigDecimal sumRemainder = new BigDecimal(0);
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+        }
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
+        if (null != criteria.getShowUnEnable() && criteria.getShowUnEnable())
+        {
+            booleanList.add(Boolean.FALSE);
+        }
+        criteria.setEnableList(booleanList);
+        List<ChemicalFiberDeliveryNoteDTO> ChemicalFiberDeliveryNoteList = chemicalFiberDeliveryNoteService.queryAll(criteria);
+        for (ChemicalFiberDeliveryNoteDTO Note : ChemicalFiberDeliveryNoteList) {
+            if (Note.getTotalCost() != null) {
+                sumTotalCost = sumTotalCost.add(Note.getTotalCost());
             }
-            if (unit.equals("支")) {
-                sumFactPerBagNumber = sumFactPerBagNumber.add(chemicalFiberStockDTO.getTotalNumber());
+            if (Note.getTotalPrice() != null) {
+                sumTotalPrice = sumTotalPrice.add(Note.getTotalPrice());
+            }
+            if (Note.getRemainder() != null) {
+                sumRemainder = sumRemainder.add(Note.getRemainder());
             }
         }
         //sumNetWeight =  sumNetWeight.multiply(new BigDecimal(1000));
         Map<String, Object> map = new HashMap<>();
-        map.put("sumFactPerBagNumber", sumFactPerBagNumber);
-        map.put("sumNetWeight", sumNetWeight);
+        map.put("sumTotalCost", sumTotalCost);
+        map.put("sumTotalPrice", sumTotalPrice);
+        map.put("sumRemainder", sumRemainder);
         return Result.success(map);
-    }*/
+    }
 }
