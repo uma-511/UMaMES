@@ -10,5 +10,5 @@ public interface ChemicalFiberWarehousingReortService {
 
     Map<String,Object> queryAll(ChemicalFiberWarehousingReortQueryCriteria criteria, Pageable pageable);
 
-
+    Map<String,Object> getSummaryData(ChemicalFiberWarehousingReortQueryCriteria criteria);
 }
