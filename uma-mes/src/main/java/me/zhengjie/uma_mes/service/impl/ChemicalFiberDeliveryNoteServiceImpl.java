@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -394,6 +395,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void downloadDeliveryNote(Integer id, HttpServletResponse response) {
+        DecimalFormat df = new DecimalFormat("0.00");
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
         chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
@@ -443,7 +445,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 BigDecimal detailTotalPrice = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(chemicalFiberDeliveryDetailDTO.getRealQuantity());
                 chemicalFiberDeliveryDetailDTO.setTotalPrice(detailTotalPrice);
                 totalPriceWhitRealQuantity = totalPriceWhitRealQuantity.add(detailTotalPrice);
-                lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPrice() + "");
+                lm.put("totalPrice", df.format(chemicalFiberDeliveryDetailDTO.getTotalPrice()) + "");
                 lm.put("realQuantity", chemicalFiberDeliveryDetailDTO.getRealQuantity() + "");
             }else{
                 lm.put("realQuantity","");
@@ -457,7 +459,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             map.put("total", "");
             map.put("capitalizationTotal","");
         }else {
-            map.put("total",totalPriceWhitRealQuantity + "");
+            map.put("total",df.format(totalPriceWhitRealQuantity) + "");
             map.put("capitalizationTotal", NumberToCN.number2CNMontrayUnit(totalPriceWhitRealQuantity));
         }
         map.put("deliveryList", listMap);
