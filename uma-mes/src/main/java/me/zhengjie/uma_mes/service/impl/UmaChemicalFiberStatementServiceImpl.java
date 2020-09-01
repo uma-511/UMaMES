@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -52,6 +53,9 @@ import javax.servlet.http.HttpServletResponse;
 @CacheConfig(cacheNames = "umaChemicalFiberStatement")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberStatementService {
+
+    @Value("${globalCompanyName}")
+    private String globalCompanyName;
 
     private final UmaChemicalFiberStatementRepository umaChemicalFiberStatementRepository;
 
@@ -325,6 +329,13 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
 
     @Override
     public void exportStatement(HttpServletResponse response, Integer id) {
+        String global = "";
+        if (globalCompanyName.equals("YQ")) {
+            global = "高明"+"永琪";
+        } else if (globalCompanyName.equals("XQ")) {
+            global = "南海" + "祥琪";
+
+        }
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(id).orElseGet(UmaChemicalFiberStatement::new);
         UmaChemicalFiberStatementDetailsQueryCriteria umaChemicalFiberStatementDetailsQueryCriteria = new UmaChemicalFiberStatementDetailsQueryCriteria();
         umaChemicalFiberStatementDetailsQueryCriteria.setStatementId(umaChemicalFiberStatement.getId());
@@ -415,6 +426,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         map.put("statementLists", listMap);
         map.put("receiptlistMap", receiptlistMap);
         map.put("sumTotalBag", sumTotalBag);
+        map.put("global", global);
         workbook = ExcelExportUtil.exportExcel(params, map);
         FileUtil.downLoadExcel("对账单导出.xlsx", response, workbook);
     }
