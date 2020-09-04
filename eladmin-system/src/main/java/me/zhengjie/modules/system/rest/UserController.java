@@ -188,4 +188,11 @@ public class UserController {
         List<UserDTO> userDTOS = userService.getUserListByDept(criteria.getDeptIdList(),criteria.getRealname());
         return new ResponseEntity<>(userDTOS,HttpStatus.OK);
     }
+
+    @PostMapping(value = "/getPermissionByUserId")
+    @ApiOperation("获取用户职位")
+    public ResponseEntity getPermissionByUserId(UserQueryCriteria criteria){
+        String permission = userService.getPermissionByUserId(criteria.getId());
+        return new ResponseEntity<>(permission,HttpStatus.OK);
+    }
 }

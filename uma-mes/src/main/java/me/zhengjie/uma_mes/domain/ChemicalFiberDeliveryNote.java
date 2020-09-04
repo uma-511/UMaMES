@@ -136,6 +136,14 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "enable")
     private Boolean enable;
 
+    // 发货地
+    @Column(name = "start_place")
+    private String startPlace;
+
+    // 目的地
+    @Column(name = "end_place")
+    private String endPlace;
+
     @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;
 

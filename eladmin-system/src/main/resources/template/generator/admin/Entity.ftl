@@ -24,7 +24,9 @@ public class ${className} implements Serializable {
     <#list columns as column>
 
     <#if column.columnComment != ''>
-    // ${column.columnComment}
+    /**
+     * ${column.columnComment}
+     */
     </#if>
     <#if column.columnKey = 'PRI' || column.columnName='id'>
     @Id

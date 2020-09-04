@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -167,6 +168,7 @@ public class CustomerServiceImpl implements CustomerService {
             resources.setCreateUser(SecurityUtils.getUsername());
             resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
             resources.setDelFlag(0);
+            resources.setAccount(new BigDecimal(0));
             return customerMapper.toDto(customerRepository.save(resources));
         }
     }

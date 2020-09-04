@@ -127,6 +127,9 @@ public class ChemicalFiberDeliveryNotePayDetailServiceImpl implements ChemicalFi
                }
            }
         }
+        else {
+            throw new BadRequestException("客户账号余额不足，无法结款");
+        }
         resources.setCreateDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         resources.setInputUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
         return chemicalFiberDeliveryNotePayDetailMapper.toDto(chemicalFiberDeliveryNotePayDetailRepository.save(resources));

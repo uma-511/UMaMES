@@ -100,4 +100,10 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
 
     // 是否可用
     private Boolean enable;
+
+    // 发货地
+    private String startPlace;
+
+    // 目的地
+    private String endPlace;
 }

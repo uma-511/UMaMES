@@ -1,9 +1,11 @@
 package me.zhengjie.uma_mes.rest;
 
+import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.Car;
 import me.zhengjie.uma_mes.service.CarService;
 import me.zhengjie.uma_mes.service.dto.CarQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.CustomerQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +44,15 @@ public class CarController {
     @ApiOperation("查询Car")
     //@PreAuthorize("@el.check('car:list')")
     public ResponseEntity getCars(CarQueryCriteria criteria, Pageable pageable){
-        //return new ResponseEntity(HttpStatus.OK);
         return new ResponseEntity<>(carService.queryAll(criteria,pageable),HttpStatus.OK);
+    }
+
+    @Log("获取车辆列表")
+    @ApiOperation("获取车辆列表")
+    @PostMapping(value = "/getCarList")
+    @AnonymousAccess()
+    public ResponseEntity getCustomerList(@RequestBody CarQueryCriteria criteria) {
+        return new ResponseEntity<>(carService.queryAll(criteria),HttpStatus.OK);
     }
 
     @PostMapping

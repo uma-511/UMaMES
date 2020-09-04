@@ -46,20 +46,24 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    @Cacheable
     public Map<String,Object> queryAll(CarQueryCriteria criteria, Pageable pageable){
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
+        if (null != criteria.getShowUnEnable() && criteria.getShowUnEnable())
+        {
+            booleanList.add(Boolean.FALSE);
+        }
+        criteria.setEnableList(booleanList);
         Page<Car> page = carRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(carMapper::toDto));
     }
 
     @Override
-    @Cacheable
     public List<CarDTO> queryAll(CarQueryCriteria criteria){
         return carMapper.toDto(carRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
     public CarDTO findById(Integer id) {
         Car car = carRepository.findById(id).orElseGet(Car::new);
         ValidationUtil.isNull(car.getId(),"Car","id",id);
@@ -67,7 +71,6 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public CarDTO create(Car resources) {
         Integer offSetInt = 0;
@@ -90,7 +93,6 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(Car resources) {
         Car car = carRepository.findById(resources.getId()).orElseGet(Car::new);
@@ -115,7 +117,6 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         Car car = carRepository.findById(id).orElseGet(Car::new);

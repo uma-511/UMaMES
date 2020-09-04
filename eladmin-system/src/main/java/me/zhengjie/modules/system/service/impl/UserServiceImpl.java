@@ -76,6 +76,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String getPermissionByUserId(Long id){
+        String permission = userRepository.getPermissionByUserId(id);
+        return permission;
+    }
+
+    @Override
     @Cacheable
     public List<UserDTO> queryAll(UserQueryCriteria criteria) {
         List<User> users = userRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));

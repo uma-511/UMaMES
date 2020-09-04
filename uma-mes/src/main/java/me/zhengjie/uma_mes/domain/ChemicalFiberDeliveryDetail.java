@@ -76,14 +76,17 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
 
     // 总件数
     @Column(name = "total_bag")
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalBag;
 
     // 总数量
     @Column(name = "total_number")
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalNumber;
 
     // 总重量
     @Column(name = "total_weight")
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalWeight;
 
     // 备注
@@ -104,10 +107,12 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
 
     // 实收数量
     @Column(name = "real_quantity")
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal realQuantity;
 
     // 实收金额
     @Column(name = "real_price")
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal realPrice;
 
     // 产品列表编号

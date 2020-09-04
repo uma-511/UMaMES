@@ -33,7 +33,7 @@ public class ReceiptController {
     @Log("导出数据")
     @ApiOperation("导出数据")
     @GetMapping(value = "/download")
-    @PreAuthorize("@el.check('receipt:list')")
+    //@PreAuthorize("@el.check('receipt:list')")
     public void download(HttpServletResponse response, ReceiptQueryCriteria criteria) throws IOException {
         receiptService.download(receiptService.queryAll(criteria), response);
     }
@@ -41,7 +41,7 @@ public class ReceiptController {
     @GetMapping
     @Log("查询Receipt")
     @ApiOperation("查询Receipt")
-    @PreAuthorize("@el.check('receipt:list')")
+    //@PreAuthorize("@el.check('receipt:list')")
     public ResponseEntity getReceipts(ReceiptQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(receiptService.queryAll(criteria,pageable),HttpStatus.OK);
     }
@@ -49,7 +49,7 @@ public class ReceiptController {
     @PostMapping
     @Log("新增Receipt")
     @ApiOperation("新增Receipt")
-    @PreAuthorize("@el.check('receipt:add')")
+    //@PreAuthorize("@el.check('receipt:add')")
     public ResponseEntity create(@Validated @RequestBody Receipt resources){
         return new ResponseEntity<>(receiptService.create(resources),HttpStatus.CREATED);
     }
@@ -72,7 +72,7 @@ public class ReceiptController {
 
     @DeleteMapping(value = "/{id}")
     @Log("删除Receipt")
-    @ApiOperation("删除Receipt")
+    //@ApiOperation("删除Receipt")
     @PreAuthorize("@el.check('receipt:del')")
     public ResponseEntity delete(@PathVariable Integer id){
         receiptService.delete(id);
