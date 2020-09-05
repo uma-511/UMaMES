@@ -64,4 +64,9 @@ public class ChemicalFiberLabelQueryCriteria{
     // 精确
     @Query
     private String color;
+
+
+    // 托板id
+    @Query
+    private String palletId;
 }
