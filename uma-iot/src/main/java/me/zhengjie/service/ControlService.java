@@ -177,9 +177,9 @@ public class ControlService {
 
         int status=0;
 
-        /*if(printIsIn){
+        if(printIsIn){
             status=1;
-        }*/
+        }
 
         ChemicalFiberLabel label = new ChemicalFiberLabel();
         label.setGrossWeight(new BigDecimal(controlPanelInfo.getGrossWeight()));

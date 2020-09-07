@@ -86,10 +86,6 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name="core_weight")
     private BigDecimal coreWeight;
 
-    // 托板id
-    @Column(name = "pallet_id")
-    private String palletId;
-
     public void copy(ChemicalFiberLabel source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
     }

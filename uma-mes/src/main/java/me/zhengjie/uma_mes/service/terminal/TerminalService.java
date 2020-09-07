@@ -71,7 +71,7 @@ public class TerminalService {
 
 
             // 添加库存
-            //saveChemicalFiberStock(chemicalFiberProduct);
+            saveChemicalFiberStock(chemicalFiberProduct);
         } else {
             ChemicalFiberProductDTO chemicalFiberProductDTO = chemicalFiberProductDTOS.get(0);
             ObjectTransfer.transValue(chemicalFiberProductDTO, chemicalFiberProduct);
