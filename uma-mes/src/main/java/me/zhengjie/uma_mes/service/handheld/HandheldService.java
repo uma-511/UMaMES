@@ -5,6 +5,7 @@ import com.lgmn.common.result.ResultEnum;
 import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.*;
 import me.zhengjie.uma_mes.repository.ChemicalFiberLabelRepository;
+import me.zhengjie.uma_mes.repository.ChemicalFiberPalletDetailRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberPalletRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberStockRepository;
 import me.zhengjie.uma_mes.service.*;
@@ -49,6 +50,9 @@ public class HandheldService {
 
     @Autowired
     private ChemicalFiberPalletRepository chemicalFiberPalletRepository;
+
+    @Autowired
+    private ChemicalFiberPalletDetailRepository chemicalFiberPalletDetailRepository;
 
     @Autowired
     private ChemicalFiberLabelRepository chemicalFiberLabelRepository;
@@ -148,6 +152,7 @@ public class HandheldService {
     public Result uploadData(UploadDataDto uploadDataDto) {
         // 需要修改的标签列表
         List<ChemicalFiberLabel> chemicalFiberLabels = new ArrayList<>();
+        List<ChemicalFiberPalletDetail> chemicalFiberPalletDetails = new ArrayList<>();
         List<ChemicalFiberStock> stockList = chemicalFiberStockRepository.findAll();
         BigDecimal sumWeight = new BigDecimal(0);
         BigDecimal sumTare = new BigDecimal(0);
@@ -204,8 +209,12 @@ public class HandheldService {
 
             ChemicalFiberLabelDTO newChemicalFiberLabelDTO = getNewChemicalFiberLabelDTO(chemicalFiberLabelDTO, uploadDataDto.getStatus(), uploadDataDto.getIsAdd());
             ChemicalFiberLabel chemicalFiberLabel = new ChemicalFiberLabel();
+            ChemicalFiberPalletDetail chemicalFiberPalletDetail = new ChemicalFiberPalletDetail();
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberLabel);
+            ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberPalletDetail);
             chemicalFiberLabels.add(chemicalFiberLabel);
+            chemicalFiberPalletDetails.add(chemicalFiberPalletDetail);
+            // 计算所有的数量和重量
             sumWeight = sumWeight.add(newChemicalFiberLabelDTO.getNetWeight());
             sumTare = sumTare.add(newChemicalFiberLabelDTO.getTare());
             sumGrossWeight = sumGrossWeight.add(newChemicalFiberLabelDTO.getGrossWeight());
@@ -254,6 +263,7 @@ public class HandheldService {
 
         if (uploadDataDto.getStatus() == 9) {
             ChemicalFiberPallet Pallet = new ChemicalFiberPallet();
+            List<ChemicalFiberPalletDetail> PalletList = new ArrayList<>();
             List<ChemicalFiberLabel> labelList = new ArrayList<>();
             Pallet.setPalletNumbar(getPalletScanNumber());
             Pallet.setNetWeight(sumWeight);
@@ -262,12 +272,14 @@ public class HandheldService {
             Pallet.setTotalNumber(sumNumber);
             Pallet.setTotalBag(sumBag);
             Pallet = chemicalFiberPalletRepository.save(Pallet);
-            for (ChemicalFiberLabel dto : chemicalFiberLabels) {
+            for (ChemicalFiberPalletDetail dto : chemicalFiberPalletDetails) {
                 dto.setPalletId(Pallet.getPalletNumbar());
+                PalletList.add(dto);
                 labelList.add(dto);
             }
             chemicalFiberLabelRepository.saveAll(labelList);
-            saveStock(labelList,stockList);
+            chemicalFiberPalletDetailRepository.saveAll(PalletList);
+            saveStock(chemicalFiberLabels,stockList);
         }
 
         if (uploadDataDto.getStatus() == 2) {
