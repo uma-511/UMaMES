@@ -52,4 +52,20 @@ public class ChemicalFiberPallet {
     @Column(name = "print_number")
     private Integer printNumber;
 
+    // 纤度
+    @Column(name = "prod_fineness")
+    private String prodFineness;
+
+    // 色号
+    @Column(name = "prod_color")
+    private String prodColor;
+
+    // 纤度
+    @Column(name = "prod_model")
+    private String prodModel;
+
+    // 色号
+    @Column(name = "prod_name")
+    private String prodName;
+
 }

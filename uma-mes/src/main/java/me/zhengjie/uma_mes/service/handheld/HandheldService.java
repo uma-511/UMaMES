@@ -3,11 +3,9 @@ package me.zhengjie.uma_mes.service.handheld;
 import com.lgmn.common.result.Result;
 import com.lgmn.common.result.ResultEnum;
 import com.lgmn.common.utils.ObjectTransfer;
+import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.*;
-import me.zhengjie.uma_mes.repository.ChemicalFiberLabelRepository;
-import me.zhengjie.uma_mes.repository.ChemicalFiberPalletDetailRepository;
-import me.zhengjie.uma_mes.repository.ChemicalFiberPalletRepository;
-import me.zhengjie.uma_mes.repository.ChemicalFiberStockRepository;
+import me.zhengjie.uma_mes.repository.*;
 import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.dto.handheld.LabelMsgDto;
@@ -20,6 +18,7 @@ import me.zhengjie.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -56,6 +55,12 @@ public class HandheldService {
 
     @Autowired
     private ChemicalFiberLabelRepository chemicalFiberLabelRepository;
+
+    @Autowired
+    private ChemicalFiberProductionRepository chemicalFiberProductionRepository;
+
+    @Autowired
+    private ViewScanRecordService viewScanRecordService;
 
     public HandheldService(
             ChemicalFiberLabelService chemicalFiberLabelService,
@@ -148,7 +153,7 @@ public class HandheldService {
 
     }
 
-//    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public Result uploadData(UploadDataDto uploadDataDto) {
         // 需要修改的标签列表
         List<ChemicalFiberLabel> chemicalFiberLabels = new ArrayList<>();
@@ -160,6 +165,8 @@ public class HandheldService {
         Integer sumNumber = 0;
         Integer sumBag = 0;
         ScanRecord scanRecord;
+        String modelAndName = "";
+        ViewScanRecord viewScanRecord = new ViewScanRecord();
         String scanNumber;
         if (uploadDataDto.getStatus() != 7) {
             // 扫描单号
@@ -172,6 +179,10 @@ public class HandheldService {
             scanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
             scanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
             scanRecordService.create(scanRecord);
+
+            viewScanRecord.setScanNumber(scanNumber);
+            viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
+            viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         } else {
             ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
             scanRecordQueryCriteria.setAccurateScanNumber(uploadDataDto.getScanNumber());
@@ -209,11 +220,31 @@ public class HandheldService {
 
             ChemicalFiberLabelDTO newChemicalFiberLabelDTO = getNewChemicalFiberLabelDTO(chemicalFiberLabelDTO, uploadDataDto.getStatus(), uploadDataDto.getIsAdd());
             ChemicalFiberLabel chemicalFiberLabel = new ChemicalFiberLabel();
-            ChemicalFiberPalletDetail chemicalFiberPalletDetail = new ChemicalFiberPalletDetail();
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberLabel);
-            ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberPalletDetail);
             chemicalFiberLabels.add(chemicalFiberLabel);
+
+            if (modelAndName.equals("")) {
+                modelAndName = newChemicalFiberLabelDTO.getColor() + "-" + newChemicalFiberLabelDTO.getFineness();
+            } else {
+                if (uploadDataDto.getStatus() == 9) {
+                   String model = newChemicalFiberLabelDTO.getColor() + "-" + newChemicalFiberLabelDTO.getFineness();
+                   if (!modelAndName.equals(model)) {
+                       //throw new BadRequestException("请统一数据");
+                       TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+                       return Result.serverError("请统一数据");
+                   }
+                }
+            }
+
+            ChemicalFiberPalletDetail chemicalFiberPalletDetail = new ChemicalFiberPalletDetail();
+            ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberPalletDetail);
             chemicalFiberPalletDetails.add(chemicalFiberPalletDetail);
+
+            ObjectTransfer.transValue(newChemicalFiberLabelDTO, viewScanRecord);
+            ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(newChemicalFiberLabelDTO.getProductionId()).orElseGet(ChemicalFiberProduction::new);
+            ObjectTransfer.transValue(production, viewScanRecord);
+            viewScanRecordService.create(viewScanRecord);
+
             // 计算所有的数量和重量
             sumWeight = sumWeight.add(newChemicalFiberLabelDTO.getNetWeight());
             sumTare = sumTare.add(newChemicalFiberLabelDTO.getTare());
@@ -266,6 +297,10 @@ public class HandheldService {
             List<ChemicalFiberPalletDetail> PalletList = new ArrayList<>();
             List<ChemicalFiberLabel> labelList = new ArrayList<>();
             Pallet.setPalletNumbar(getPalletScanNumber());
+            Pallet.setProdModel(chemicalFiberLabels.get(0).getColor() + "-" + chemicalFiberLabels.get(0).getFineness());
+            Pallet.setProdName(chemicalFiberLabels.get(0).getColor() + "-" + chemicalFiberLabels.get(0).getFineness());
+            Pallet.setProdColor(chemicalFiberLabels.get(0).getColor());
+            Pallet.setProdFineness(chemicalFiberLabels.get(0).getFineness());
             Pallet.setNetWeight(sumWeight);
             Pallet.setTare(sumTare);
             Pallet.setGrossWeight(sumGrossWeight);
@@ -275,6 +310,9 @@ public class HandheldService {
             for (ChemicalFiberPalletDetail dto : chemicalFiberPalletDetails) {
                 dto.setPalletId(Pallet.getPalletNumbar());
                 PalletList.add(dto);
+            }
+            for (ChemicalFiberLabel dto : chemicalFiberLabels) {
+                dto.setPalletId(Pallet.getPalletNumbar());
                 labelList.add(dto);
             }
             chemicalFiberLabelRepository.saveAll(labelList);
