@@ -521,11 +521,14 @@ public class HandheldService {
             Integer number = 0;
             Integer Bag = 0;
             if (stock.getId() != null) {
-                Weight = stock.getTotalNetWeight();
-                tare = stock.getTotalTare();
-                grossWeight = stock.getTotalGrossWeight();
-                number = stock.getTotalNumber();
-                Bag = stock.getTotalBag();
+                if (stock.getTotalNetWeight() != null && stock.getTotalTare() != null && stock.getTotalNumber() != null
+                && stock.getTotalBag() != null) {
+                    Weight = stock.getTotalNetWeight();
+                    tare = stock.getTotalTare();
+                    grossWeight = stock.getTotalGrossWeight();
+                    number = stock.getTotalNumber();
+                    Bag = stock.getTotalBag();
+                }
                 stock.setTotalNetWeight(Weight.add(newChemicalFiberLabelDTO.getNetWeight()));
                 stock.setTotalTare(tare.add(newChemicalFiberLabelDTO.getTare()));
                 stock.setTotalGrossWeight(grossWeight.add(newChemicalFiberLabelDTO.getGrossWeight()));
