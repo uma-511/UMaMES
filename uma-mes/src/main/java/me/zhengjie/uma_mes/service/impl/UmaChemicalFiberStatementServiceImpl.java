@@ -332,15 +332,17 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         String global = "";
         if (globalCompanyName.equals("YQ")) {
             global = "高明"+"永琪";
-        } else if (globalCompanyName.equals("XQ")) {
+            String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_yq.xls";
+        } else (globalCompanyName.equals("XQ")) {
             global = "南海" + "祥琪";
+            String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_xq.xls";
 
         }
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(id).orElseGet(UmaChemicalFiberStatement::new);
         UmaChemicalFiberStatementDetailsQueryCriteria umaChemicalFiberStatementDetailsQueryCriteria = new UmaChemicalFiberStatementDetailsQueryCriteria();
         umaChemicalFiberStatementDetailsQueryCriteria.setStatementId(umaChemicalFiberStatement.getId());
         List<UmaChemicalFiberStatementDetailsDTO> umaChemicalFiberStatementDetailsDTOS = umaChemicalFiberStatementDetailsService.queryAll(umaChemicalFiberStatementDetailsQueryCriteria);
-        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList.xls";
+
         // 加载模板
         TemplateExportParams params = new TemplateExportParams(templatePath);
         // 生成workbook 并导出
