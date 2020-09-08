@@ -330,12 +330,13 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     @Override
     public void exportStatement(HttpServletResponse response, Integer id) {
         String global = "";
+        String templatePath = "";
         if (globalCompanyName.equals("YQ")) {
             global = "高明"+"永琪";
-            String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_yq.xls";
+            templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_yq.xls";
         } else (globalCompanyName.equals("XQ")) {
             global = "南海" + "祥琪";
-            String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_xq.xls";
+            templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_xq.xls";
 
         }
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(id).orElseGet(UmaChemicalFiberStatement::new);
