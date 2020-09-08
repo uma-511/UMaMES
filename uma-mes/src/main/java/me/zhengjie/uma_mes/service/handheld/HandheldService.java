@@ -296,23 +296,25 @@ public class HandheldService {
             ChemicalFiberPallet Pallet = new ChemicalFiberPallet();
             List<ChemicalFiberPalletDetail> PalletList = new ArrayList<>();
             List<ChemicalFiberLabel> labelList = new ArrayList<>();
-            Pallet.setPalletNumbar(getPalletScanNumber());
+            Pallet.setPalletNumber(getPalletScanNumber());
             Pallet.setProdModel(chemicalFiberLabels.get(0).getColor() + "-" + chemicalFiberLabels.get(0).getFineness());
             Pallet.setProdName(chemicalFiberLabels.get(0).getColor() + "-" + chemicalFiberLabels.get(0).getFineness());
             Pallet.setProdColor(chemicalFiberLabels.get(0).getColor());
             Pallet.setProdFineness(chemicalFiberLabels.get(0).getFineness());
             Pallet.setNetWeight(sumWeight);
+            Pallet.setPacker(chemicalFiberLabels.get(0).getPacker());
+            Pallet.setPrintStatus(0);
             Pallet.setTare(sumTare);
             Pallet.setGrossWeight(sumGrossWeight);
             Pallet.setTotalNumber(sumNumber);
             Pallet.setTotalBag(sumBag);
             Pallet = chemicalFiberPalletRepository.save(Pallet);
             for (ChemicalFiberPalletDetail dto : chemicalFiberPalletDetails) {
-                dto.setPalletId(Pallet.getPalletNumbar());
+                dto.setPalletId(Pallet.getPalletNumber());
                 PalletList.add(dto);
             }
             for (ChemicalFiberLabel dto : chemicalFiberLabels) {
-                dto.setPalletId(Pallet.getPalletNumbar());
+                dto.setPalletId(Pallet.getPalletNumber());
                 labelList.add(dto);
             }
             chemicalFiberLabelRepository.saveAll(labelList);

@@ -13,7 +13,7 @@ public class ChemicalFiberPalletDTO  implements Serializable {
     private Integer id;
 
     // 托板号
-    private String palletNumbar;
+    private String palletNumber;
 
     // 总净重
     private BigDecimal netWeight;
@@ -50,4 +50,7 @@ public class ChemicalFiberPalletDTO  implements Serializable {
 
     // 色号
     private String prodName;
+
+    // 色号
+    private String packer;
 }

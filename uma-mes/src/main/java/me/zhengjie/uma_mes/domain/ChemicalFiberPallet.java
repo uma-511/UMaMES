@@ -17,8 +17,8 @@ public class ChemicalFiberPallet {
     private Integer id;
 
     // 托板号
-    @Column(name = "pallet_numbar")
-    private String palletNumbar;
+    @Column(name = "pallet_number")
+    private String palletNumber;
 
     // 总净重
     @Column(name = "net_weight")
@@ -67,5 +67,9 @@ public class ChemicalFiberPallet {
     // 色号
     @Column(name = "prod_name")
     private String prodName;
+
+    // 包装员
+    @Column(name = "packer")
+    private String packer;
 
 }
