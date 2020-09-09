@@ -33,6 +33,9 @@ public class ChemicalFiberPalletDTO  implements Serializable {
     // 打印时间
     private Timestamp printTime;
 
+    // 打印时间
+    private Timestamp printEndTime;
+
     // 打印状态
     private Integer printStatus;
 
@@ -45,12 +48,12 @@ public class ChemicalFiberPalletDTO  implements Serializable {
     // 色号
     private String prodColor;
 
-    // 纤度
+    // 料号
     private String prodModel;
 
-    // 色号
+    // 名称
     private String prodName;
 
-    // 色号
+    // 包装员
     private String packer;
 }

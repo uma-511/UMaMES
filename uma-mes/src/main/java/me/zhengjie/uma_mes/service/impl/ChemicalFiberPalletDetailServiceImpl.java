@@ -1,5 +1,7 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
+import me.zhengjie.uma_mes.domain.ChemicalFiberPallet;
 import me.zhengjie.uma_mes.domain.ChemicalFiberPalletDetail;
 import me.zhengjie.uma_mes.repository.ChemicalFiberPalletDetailRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberPalletDetailService;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,5 +32,25 @@ public class ChemicalFiberPalletDetailServiceImpl implements ChemicalFiberPallet
 
     public List<ChemicalFiberPalletDetailDTO> queryAll(ChemicalFiberPalletDetailQueryCeiteria resources) {
         return chemicalFiberPalletDetailMapper.toDto(chemicalFiberPalletDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,resources,criteriaBuilder)));
+    }
+
+
+    public void create(List<ChemicalFiberPalletDetail> chemicalFiberPalletDetails, ChemicalFiberPallet Pallet) {
+        List<ChemicalFiberPalletDetail> PalletList = new ArrayList<>();
+        for (ChemicalFiberPalletDetail dto : chemicalFiberPalletDetails) {
+            dto.setPalletId(Pallet.getPalletNumber());
+            PalletList.add(dto);
+        }
+        chemicalFiberPalletDetailRepository.saveAll(PalletList);
+    }
+
+    public void update(List<ChemicalFiberLabel> chemicalFiberLabels) {
+        for (ChemicalFiberLabel dto : chemicalFiberLabels) {
+            ChemicalFiberPalletDetail detail = chemicalFiberPalletDetailRepository.findByPalletId(dto.getPalletId(), dto.getLabelNumber());
+            if (detail != null) {
+                detail.setStatus(dto.getStatus());
+                chemicalFiberPalletDetailRepository.save(detail);
+            }
+        }
     }
 }

@@ -44,6 +44,10 @@ public class ChemicalFiberPallet {
     @Column(name = "print_time")
     private Timestamp printTime;
 
+    // 打印时间
+    @Column(name = "print_end_time")
+    private Timestamp printEndTime;
+
     // 打印状态
     @Column(name = "print_status")
     private Integer printStatus;

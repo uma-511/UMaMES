@@ -123,7 +123,16 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
 //    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(List<ChemicalFiberLabel> chemicalFiberLabels) {
-        chemicalFiberLabelRepository.saveAll(chemicalFiberLabels);
+        List<ChemicalFiberLabel> labels = new ArrayList<>();
+        for (ChemicalFiberLabel dto : chemicalFiberLabels) {
+            ChemicalFiberLabel label = new ChemicalFiberLabel();
+            ObjectTransfer.transValue(dto, label);
+            if (dto.getStatus() == 2) {
+                label.setPalletId(null);
+            }
+            labels.add(label);
+        }
+        chemicalFiberLabelRepository.saveAll(labels);
     }
 
     @Override

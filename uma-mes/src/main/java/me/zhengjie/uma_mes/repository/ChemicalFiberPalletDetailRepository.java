@@ -18,4 +18,7 @@ public interface ChemicalFiberPalletDetailRepository extends JpaRepository<Chemi
     @Query(value = "SELECT * FROM uma_chemical_fiber_pallet_detail where pallet_id = :palletNumber",nativeQuery = true)
     List<ChemicalFiberPalletDetail> getPalletDateil(@Param("palletNumber") String palletNumber);
 
+    @Query(value = "SELECT * FROM uma_chemical_fiber_pallet_detail where pallet_id = :palletNumber and label_number = :labelNumber",nativeQuery = true)
+    ChemicalFiberPalletDetail findByPalletId(@Param("palletNumber") String palletNumber, @Param("labelNumber") String labelNumber);
+
 }

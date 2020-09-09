@@ -40,10 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static cn.afterturn.easypoi.excel.ExcelExportUtil.SHEET_NAME;
 
@@ -62,10 +59,10 @@ public class ChemicalFiberPalletServiceImpl implements ChemicalFiberPalletServic
     private ChemicalFiberPalletMapper chemicalFiberPalletMapper;
 
     public Map<String, Object> queryAll(ChemicalFiberPalletQueryCeiteria criteria, Pageable pageable) {
-        /*if (criteria.getTempStartTime() != null) {
+        if (criteria.getTempStartTime() != null) {
             criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
-        }*/
+        }
         Page<ChemicalFiberPallet> page = chemicalFiberPalletRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberPalletMapper::toDto));
 
@@ -76,10 +73,14 @@ public class ChemicalFiberPalletServiceImpl implements ChemicalFiberPalletServic
         List<ChemicalFiberPalletDetail> PalletDetail = chemicalFiberPalletDetailRepository.getPalletDateil(chemicalFiberPallet.getPalletNumber());
         if ( chemicalFiberPallet.getPrintStatus() == 0 ) {
             chemicalFiberPallet.setPrintStatus(1);
-            chemicalFiberPallet.setPrintTime(new Timestamp());
+            chemicalFiberPallet.setPrintNumber(1);
+            chemicalFiberPallet.setPrintEndTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        } else {
+            chemicalFiberPallet.setPrintNumber(chemicalFiberPallet.getPrintNumber() + 1);
+            chemicalFiberPallet.setPrintTime(chemicalFiberPallet.getPrintEndTime());
+            chemicalFiberPallet.setPrintEndTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         }
-
-
+        chemicalFiberPalletRepository.save(chemicalFiberPallet);
 
         Workbook workbook = null;
 
@@ -126,13 +127,9 @@ public class ChemicalFiberPalletServiceImpl implements ChemicalFiberPalletServic
         map.put("palletNumber", chemicalFiberPallet.getPalletNumber());
         map.put("prodFineness", chemicalFiberPallet.getProdFineness());
         map.put("prodColor", chemicalFiberPallet.getProdColor());
-/*
-        for (Map<String, Object> map : list) {
-            map.put("weight", totalTotalWeights);
-        }*/
 
         String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/hqexcal.xls";
-//        // 加载模板
+        // 加载模板
         System.out.println(templatePath.toString());
         TemplateExportParams params = new TemplateExportParams(templatePath);
         workbook = ExcelExportUtil.exportExcel(params, map);

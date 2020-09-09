@@ -64,4 +64,7 @@ public class ChemicalFiberLabelDTO implements Serializable {
 
     // 芯重
     private BigDecimal coreWeight;
+
+    // 托板id
+    private String palletId;
 }
