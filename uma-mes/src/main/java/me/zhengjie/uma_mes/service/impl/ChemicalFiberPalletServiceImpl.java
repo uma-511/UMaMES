@@ -132,6 +132,7 @@ public class ChemicalFiberPalletServiceImpl implements ChemicalFiberPalletServic
         // 加载模板
         System.out.println(templatePath.toString());
         TemplateExportParams params = new TemplateExportParams(templatePath);
+        params.setReadonly(Boolean.TRUE);
         workbook = ExcelExportUtil.exportExcel(params, map);
         Sheet sheet1 = workbook.getSheet("Sheet1");
         Drawing patriarch = sheet1.createDrawingPatriarch();
