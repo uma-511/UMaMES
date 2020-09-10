@@ -346,6 +346,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
 
         // 加载模板
         TemplateExportParams params = new TemplateExportParams(templatePath);
+        params.setReadonly(Boolean.TRUE);
         // 生成workbook 并导出
         Workbook workbook = null;
         Map<String, Object> map = new HashMap<String, Object>();
