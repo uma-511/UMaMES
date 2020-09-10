@@ -369,6 +369,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             TravelExpensesQueryCriteria travelExpensesQueryCriteria = new TravelExpensesQueryCriteria();
             travelExpensesQueryCriteria.setStartPlace(startPlace);
             travelExpensesQueryCriteria.setEndPlace(endPlace);
+            travelExpensesQueryCriteria.setEnable(Boolean.TRUE);
             List<TravelExpensesDTO> travelExpensesList = travelExpensesService.queryAll(travelExpensesQueryCriteria);
             TravelExpenses travelExpenses = null;
             //司机里程费
@@ -513,9 +514,16 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
         chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
         List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
-        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/delivery_temp.xls";
+        String lastName = "";
+        if ( globalCompanyName.equals("XQ") ) {
+            lastName = "/delivery_temp_xq.xls";
+        } else {
+            lastName = "/delivery_temp_xq.xls";
+        }
+        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + lastName;
         // 加载模板
         TemplateExportParams params = new TemplateExportParams(templatePath);
+        params.setReadonly(Boolean.TRUE);
         // 生成workbook 并导出
         Workbook workbook = null;
         if (null == chemicalFiberDeliveryNote.getDeliveryDate() || chemicalFiberDeliveryNote.getDeliveryDate().equals("")) {

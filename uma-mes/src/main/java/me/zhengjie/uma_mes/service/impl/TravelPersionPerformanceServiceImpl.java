@@ -18,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
+
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
@@ -45,6 +47,13 @@ public class TravelPersionPerformanceServiceImpl implements TravelPersionPerform
 
     @Override
     public Map<String,Object> queryAll(TravelPersionPerformanceQueryCriteria criteria, Pageable pageable){
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
+        if (null != criteria.getShowUnEnable() && criteria.getShowUnEnable())
+        {
+            booleanList.add(Boolean.FALSE);
+        }
+        criteria.setEnableList(booleanList);
         Page<TravelPersionPerformance> page = travelPersionPerformanceRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(travelPersionPerformanceMapper::toDto));
     }
@@ -64,6 +73,7 @@ public class TravelPersionPerformanceServiceImpl implements TravelPersionPerform
     @Override
     @Transactional(rollbackFor = Exception.class)
     public TravelPersionPerformanceDTO create(TravelPersionPerformance resources) {
+        resources.setEnable(Boolean.TRUE);
         return travelPersionPerformanceMapper.toDto(travelPersionPerformanceRepository.save(resources));
     }
 
@@ -79,7 +89,9 @@ public class TravelPersionPerformanceServiceImpl implements TravelPersionPerform
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
-        travelPersionPerformanceRepository.deleteById(id);
+        TravelPersionPerformance travelPersionPerformance = travelPersionPerformanceRepository.findById(id).orElseGet(TravelPersionPerformance::new);
+        travelPersionPerformance.setEnable(Boolean.FALSE);
+        travelPersionPerformanceRepository.save(travelPersionPerformance);
     }
 
 

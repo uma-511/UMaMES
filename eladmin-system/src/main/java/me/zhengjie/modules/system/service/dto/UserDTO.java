@@ -33,6 +33,8 @@ public class UserDTO implements Serializable {
 
     private Boolean enabled;
 
+    private String permission;
+
     @JsonIgnore
     private String password;
 

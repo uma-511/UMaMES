@@ -130,7 +130,9 @@ public class ${className}ServiceImpl implements ${className}Service {
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(${pkColumnType?default('Integer')} ${pkChangeColName?default('id')}) {
-        ${changeClassName}Repository.deleteById(${pkChangeColName?default('id')});
+        ${className} ${changeClassName} = ${changeClassName}Repository.findById(id).orElseGet(${className}::new);
+        ${changeClassName}.setEnable(Boolean.FALSE);
+        ${changeClassName}Repository.save(${changeClassName});
     }
 
 

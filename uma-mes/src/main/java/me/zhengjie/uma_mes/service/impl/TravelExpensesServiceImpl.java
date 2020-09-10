@@ -48,20 +48,24 @@ public class TravelExpensesServiceImpl implements TravelExpensesService {
     }
 
     @Override
-    @Cacheable
     public Map<String,Object> queryAll(TravelExpensesQueryCriteria criteria, Pageable pageable){
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
+        if (null != criteria.getShowUnEnable() && criteria.getShowUnEnable())
+        {
+            booleanList.add(Boolean.FALSE);
+        }
+        criteria.setEnableList(booleanList);
         Page<TravelExpenses> page = travelExpensesRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(travelExpensesMapper::toDto));
     }
 
     @Override
-    @Cacheable
     public List<TravelExpensesDTO> queryAll(TravelExpensesQueryCriteria criteria){
         return travelExpensesMapper.toDto(travelExpensesRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
     public TravelExpensesDTO findById(Integer id) {
         TravelExpenses travelExpenses = travelExpensesRepository.findById(id).orElseGet(TravelExpenses::new);
         ValidationUtil.isNull(travelExpenses.getId(),"TravelExpenses","id",id);
@@ -69,9 +73,28 @@ public class TravelExpensesServiceImpl implements TravelExpensesService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public TravelExpensesDTO create(TravelExpenses resources) {
+        TravelExpensesQueryCriteria travelExpensesQueryCriteria = new TravelExpensesQueryCriteria();
+        travelExpensesQueryCriteria.setStartPlaceAccurate(resources.getStartPlace());
+        travelExpensesQueryCriteria.setEndPlaceAccurate(resources.getEndPlace());
+        List<TravelExpenses> travelExpensesList = travelExpensesRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,travelExpensesQueryCriteria,criteriaBuilder));
+        if ( null != travelExpensesList ) {
+            for ( TravelExpenses t:travelExpensesList ) {
+                if( null != resources.getTractorPrice() && !resources.getTractorPrice().equals(new BigDecimal(0))){
+                    t.setTractorPrice(resources.getTractorPrice());
+                }
+                if( null != resources.getTankPrice() && !resources.getTankPrice().equals(new BigDecimal(0))){
+                    t.setTankPrice(resources.getTankPrice());
+                }
+                if( null != resources.getVanPrice() && !resources.getVanPrice().equals(new BigDecimal(0))){
+                    t.setVanPrice(resources.getVanPrice());
+                }
+                t.setEnable(Boolean.TRUE);
+                travelExpensesRepository.save(t);
+                return travelExpensesMapper.toDto(t);
+            }
+        }
         resources.setCreateTime(new Timestamp(System.currentTimeMillis()));
         resources.setCreateUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
         resources.setEnable(Boolean.TRUE);
@@ -92,7 +115,6 @@ public class TravelExpensesServiceImpl implements TravelExpensesService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(TravelExpenses resources) {
         TravelExpenses travelExpenses = travelExpensesRepository.findById(resources.getId()).orElseGet(TravelExpenses::new);
@@ -103,10 +125,11 @@ public class TravelExpensesServiceImpl implements TravelExpensesService {
     }
 
     @Override
-    @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
-        travelExpensesRepository.deleteById(id);
+        TravelExpenses travelExpenses = travelExpensesRepository.findById(id).orElseGet(TravelExpenses::new);
+        travelExpenses.setEnable(Boolean.FALSE);
+        travelExpensesRepository.save(travelExpenses);
     }
 
 }

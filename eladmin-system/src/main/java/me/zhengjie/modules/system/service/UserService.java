@@ -40,6 +40,8 @@ public interface UserService {
 
     List<UserDTO> getUserListByDept(List<Long> deptId, String username);
 
+    List<UserDTO> getUserListByRealName(String username);
+
     String getPermissionByUserId(Long id);
 
     void download(List<UserDTO> queryAll, HttpServletResponse response) throws IOException;

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
@@ -29,6 +30,8 @@ public class JobDTO implements Serializable {
     private String deptSuperiorName;
 
     private Timestamp createTime;
+
+    private BigDecimal basicSalary;
 
     public JobDTO(String name, Boolean enabled) {
         this.name = name;
