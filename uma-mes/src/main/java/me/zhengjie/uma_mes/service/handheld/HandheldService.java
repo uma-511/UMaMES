@@ -91,6 +91,9 @@ public class HandheldService {
         } else {
             chemicalFiberLabelList = getLabelNumbers(labelMsgDto.getLabelNumber());
         }
+        if (chemicalFiberLabelList == null) {
+            return Result.serverError("此标签为信息为空");
+        }
         for (ChemicalFiberLabelDTO chemicalFiberLabelDTO : chemicalFiberLabelList) {
             if (chemicalFiberLabelDTO == null) {
                 return Result.error(ResultEnum.DATA_NOT_EXISTS);
@@ -413,7 +416,7 @@ public class HandheldService {
             scanNumber = type + year + month + "001";
         } else {
             ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(scanRecordDTOS.size() - 1);
-            String tempScanNumber = scanRecordDTO.getScanNumber().substring(7);
+            String tempScanNumber = scanRecordDTO.getScanNumber().substring(8);
             Integer number = Integer.parseInt(tempScanNumber) + 1;
             String tempNumberStr = String.format("%3d", number++).replace(" ", "0");
             scanNumber = type + year + month + tempNumberStr;
