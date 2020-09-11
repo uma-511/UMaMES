@@ -58,7 +58,7 @@ public class CycleLabelServiceImpl implements CycleLabelService {
 
     @Override
     @Cacheable(key = "#p0")
-    public CycleLabelDTO findById(Integer id) {
+    public CycleLabelDTO findById(Long id) {
         CycleLabel cycleLabel = cycleLabelRepository.findById(id).orElseGet(CycleLabel::new);
         ValidationUtil.isNull(cycleLabel.getId(),"CycleLabel","id",id);
         return cycleLabelMapper.toDto(cycleLabel);
@@ -84,7 +84,7 @@ public class CycleLabelServiceImpl implements CycleLabelService {
     @Override
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public void delete(Integer id) {
+    public void delete(Long id) {
         CycleLabel cycleLabel = cycleLabelRepository.findById(id).orElseGet(CycleLabel::new);
         cycleLabelRepository.save(cycleLabel);
     }

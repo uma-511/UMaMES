@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 * @author wave
 * @date 2020-09-09
 */
-public interface CycleLabelRepository extends JpaRepository<CycleLabel, Integer>, JpaSpecificationExecutor<CycleLabel> {
+public interface CycleLabelRepository extends JpaRepository<CycleLabel, Long>, JpaSpecificationExecutor<CycleLabel> {
 }

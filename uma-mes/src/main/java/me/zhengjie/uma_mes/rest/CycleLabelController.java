@@ -66,7 +66,7 @@ public class CycleLabelController {
     @Log("删除CycleLabel")
     @ApiOperation("删除CycleLabel")
     @PreAuthorize("@el.check('cycleLabel:del')")
-    public ResponseEntity delete(@PathVariable Integer id){
+    public ResponseEntity delete(@PathVariable Long id){
         cycleLabelService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
     }

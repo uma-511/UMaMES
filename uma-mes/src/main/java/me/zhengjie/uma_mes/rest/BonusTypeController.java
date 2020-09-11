@@ -37,6 +37,13 @@ public class BonusTypeController {
         this.bonusTypeService = bonusTypeService;
     }
 
+
+    @ApiOperation("获取单个bonusType")
+    @GetMapping(value = "/{id}")
+    public ResponseEntity getBonusType(@PathVariable Long id){
+        return new ResponseEntity<>(bonusTypeService.findById(id), HttpStatus.OK);
+    }
+
     @Log("导出数据")
     @ApiOperation("导出数据")
     @GetMapping(value = "/download")
@@ -58,12 +65,32 @@ public class BonusTypeController {
         return new ResponseEntity<>(bonusTypeService.create(resources),HttpStatus.CREATED);
     }
 
+    @Log("修改周期菜单")
+    @ApiOperation("修改周期菜单")
+    @PutMapping(value = "/cycle")
+    public ResponseEntity updateCycle(@RequestBody BonusType resources){
+        bonusTypeService.updateCycle(resources,bonusTypeService.findById(resources.getId()));
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 
+    @Log("修改周期菜单")
+    @ApiOperation("修改周期菜单")
+    @PutMapping(value = "/job")
+    public ResponseEntity updateJob(@RequestBody BonusType resources){
+        bonusTypeService.updateJob(resources,bonusTypeService.findById(resources.getId()));
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 
-    @ApiOperation("返回全部的菜单")
+    @ApiOperation("返回周期菜单")
     @GetMapping(value = "/getCycleMenusTree")
     public ResponseEntity getCycleMenusTree(){
         return new ResponseEntity<>(bonusTypeService.getCycleMenusTree(),HttpStatus.OK);
+    }
+
+    @ApiOperation("返回岗位菜单")
+        @GetMapping(value = "/getBonusJobsTree")
+    public ResponseEntity getBonusJobsTree(){
+        return new ResponseEntity<>(bonusTypeService.getBonusJobsTree(),HttpStatus.OK);
     }
 
     @PutMapping
@@ -77,7 +104,6 @@ public class BonusTypeController {
     @Log("修改周期菜单")
     @ApiOperation("修改周期菜单")
     @PutMapping(value = "/cycleMenu")
-    @PreAuthorize("@el.check('roles:edit')")
     public ResponseEntity updateCycleMenu(@RequestBody BonusType resources){
         bonusTypeService.updateCycleMenu(resources,bonusTypeService.findById(resources.getId()));
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -86,7 +112,7 @@ public class BonusTypeController {
     @DeleteMapping(value = "/{id}")
     @Log("删除BonusType")
     @ApiOperation("删除BonusType")
-    public ResponseEntity delete(@PathVariable Integer id){
+    public ResponseEntity delete(@PathVariable Long id){
         bonusTypeService.delete(id);
         return new ResponseEntity(HttpStatus.OK);
     }

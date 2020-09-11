@@ -14,7 +14,7 @@ import java.util.List;
 * @author wave
 * @date 2020-09-09
 */
-public interface BonusTypeRepository extends JpaRepository<BonusType, Integer>, JpaSpecificationExecutor<BonusType> {
+public interface BonusTypeRepository extends JpaRepository<BonusType, Long>, JpaSpecificationExecutor<BonusType> {
 
     @Query(value = "SELECT id,name FROM uma_cycle_label", nativeQuery = true)
     List<CycleLabel> getCycleMenusTree();

@@ -1,7 +1,9 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import me.zhengjie.uma_mes.domain.BonusJob;
 import me.zhengjie.uma_mes.domain.BonusType;
 import me.zhengjie.uma_mes.domain.CycleLabel;
+import me.zhengjie.uma_mes.repository.BonusJobRepository;
 import me.zhengjie.uma_mes.repository.CycleLabelRepository;
 import me.zhengjie.utils.ValidationUtil;
 import me.zhengjie.utils.FileUtil;
@@ -38,16 +40,18 @@ public class BonusTypeServiceImpl implements BonusTypeService {
 
     private final CycleLabelRepository cycleLabelRepository;
 
+    private final BonusJobRepository bonusJobRepository;
+
     private final BonusTypeMapper bonusTypeMapper;
 
-    public BonusTypeServiceImpl(BonusTypeRepository bonusTypeRepository, CycleLabelRepository cycleLabelRepository, BonusTypeMapper bonusTypeMapper) {
+    public BonusTypeServiceImpl(BonusTypeRepository bonusTypeRepository, CycleLabelRepository cycleLabelRepository, BonusJobRepository bonusJobRepository, BonusTypeMapper bonusTypeMapper) {
         this.bonusTypeRepository = bonusTypeRepository;
         this.cycleLabelRepository = cycleLabelRepository;
+        this.bonusJobRepository = bonusJobRepository;
         this.bonusTypeMapper = bonusTypeMapper;
     }
 
     @Override
-    @Cacheable
     public Map<String,Object> queryAll(BonusTypeQueryCriteria criteria, Pageable pageable){
         Page<BonusType> page = bonusTypeRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(bonusTypeMapper::toDto));
@@ -60,8 +64,7 @@ public class BonusTypeServiceImpl implements BonusTypeService {
     }
 
     @Override
-    @Cacheable(key = "#p0")
-    public BonusTypeDTO findById(Integer id) {
+    public BonusTypeDTO findById(Long id) {
         BonusType bonusType = bonusTypeRepository.findById(id).orElseGet(BonusType::new);
         ValidationUtil.isNull(bonusType.getId(),"BonusType","id",id);
         return bonusTypeMapper.toDto(bonusType);
@@ -87,7 +90,7 @@ public class BonusTypeServiceImpl implements BonusTypeService {
     @Override
     @CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
-    public void delete(Integer id) {
+    public void delete(Long id) {
         BonusType bonusType = bonusTypeRepository.findById(id).orElseGet(BonusType::new);
         bonusType.setEnable(Boolean.FALSE);
         bonusTypeRepository.save(bonusType);
@@ -99,15 +102,13 @@ public class BonusTypeServiceImpl implements BonusTypeService {
     @CacheEvict(allEntries = true)
     public void updateCycleMenu(BonusType resources, BonusTypeDTO bonusTypeDTO) {
         BonusType bonusType = bonusTypeMapper.toEntity(bonusTypeDTO);
-        bonusType.setCycleMenus(resources.getCycleMenus());
+        bonusType.setCycles(resources.getCycles());
         bonusTypeRepository.save(bonusType);
     }
 
     @Override
-    @Cacheable(key = "'cycleTree'")
     public Object getCycleMenusTree() {
         List<Map<String,Object>> list = new LinkedList<>();
-
         List<CycleLabel> cycleList = cycleLabelRepository.findAll();
         for (CycleLabel c: cycleList) {
             Map<String,Object> map = new HashMap<>();
@@ -118,6 +119,32 @@ public class BonusTypeServiceImpl implements BonusTypeService {
         return list;
     }
 
+    @Override
+    public Object getBonusJobsTree() {
+        List<Map<String,Object>> list = new LinkedList<>();
+        List<BonusJob> bonusJobList = bonusJobRepository.findAll();
+        for (BonusJob b: bonusJobList) {
+            Map<String,Object> map = new HashMap<>();
+            map.put("id",b.getId());
+            map.put("label",b.getName());
+            list.add(map);
+        }
+        return list;
+    }
+
+    @Override
+    public void updateCycle(BonusType resources, BonusTypeDTO bonusTypeDTO) {
+        BonusType bonusType = bonusTypeMapper.toEntity(bonusTypeDTO);
+        bonusType.setCycles(resources.getCycles());
+        bonusTypeRepository.save(bonusType);
+    }
+
+    @Override
+    public void updateJob(BonusType resources, BonusTypeDTO bonusTypeDTO) {
+        BonusType bonusType = bonusTypeMapper.toEntity(bonusTypeDTO);
+        bonusType.setBonusJobs(resources.getBonusJobs());
+        bonusTypeRepository.save(bonusType);
+    }
 
     @Override
     public void download(List<BonusTypeDTO> all, HttpServletResponse response) throws IOException {

@@ -2,6 +2,8 @@ package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
 import me.zhengjie.uma_mes.domain.BonusCycle;
+import me.zhengjie.uma_mes.domain.BonusJob;
+import me.zhengjie.uma_mes.domain.CycleLabel;
 
 import java.sql.Timestamp;
 import java.math.BigDecimal;
@@ -16,7 +18,7 @@ import java.util.Set;
 @Data
 public class BonusTypeDTO implements Serializable {
 
-    private Integer id;
+    private Long id;
 
     /**
      * 奖金类别
@@ -28,7 +30,9 @@ public class BonusTypeDTO implements Serializable {
      */
     private BigDecimal price;
 
-    private Set<BonusCycle> cycleMenus;
+    private Set<CycleLabel> cycles;
+
+    private Set<BonusJob> bonusJobs;
 
     /**
      * 创建日期

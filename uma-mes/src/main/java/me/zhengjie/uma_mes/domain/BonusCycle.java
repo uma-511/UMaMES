@@ -21,15 +21,15 @@ public class BonusCycle implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "bonus_type_id")
-    private Integer bonusTypeId;
+    private Long bonusTypeId;
 
     /**
      * 周期id
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "bonus_cycle")
-    private Integer bonusCycle;
+    @Column(name = "bonus_cycle_id")
+    private Long bonusCycleId;
 
     public void copy(BonusCycle source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

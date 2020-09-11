@@ -14,10 +14,10 @@ public class BonusCycleDTO implements Serializable {
     /**
      * 奖金类型id
      */
-    private Integer bonusTypeId;
+    private Long bonusTypeId;
 
     /**
      * 周期id
      */
-    private Integer bonusCycle;
+    private Long bonusCycleId;
 }

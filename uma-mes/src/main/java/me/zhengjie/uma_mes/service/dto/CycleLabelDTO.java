@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Data
 public class CycleLabelDTO implements Serializable {
 
-    private Integer id;
+    private Long id;
 
     /**
      * 周期

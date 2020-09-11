@@ -35,13 +35,13 @@ public interface CycleLabelService {
      * @param id ID
      * @return CycleLabelDTO
      */
-    CycleLabelDTO findById(Integer id);
+    CycleLabelDTO findById(Long id);
 
     CycleLabelDTO create(CycleLabel resources);
 
     void update(CycleLabel resources);
 
-    void delete(Integer id);
+    void delete(Long id);
 
     void download(List<CycleLabelDTO> all, HttpServletResponse response) throws IOException;
 }

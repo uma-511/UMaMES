@@ -36,17 +36,23 @@ public interface BonusTypeService {
      * @param id ID
      * @return BonusTypeDTO
      */
-    BonusTypeDTO findById(Integer id);
+    BonusTypeDTO findById(Long id);
 
     BonusTypeDTO create(BonusType resources);
 
     void update(BonusType resources);
 
-    void delete(Integer id);
+    void delete(Long id);
 
     void updateCycleMenu(BonusType resources, BonusTypeDTO bonusTypeDTO);
 
     Object getCycleMenusTree();
+
+    Object getBonusJobsTree();
+
+    void updateCycle(BonusType resources, BonusTypeDTO bonusTypeDTO);
+
+    void updateJob(BonusType resources, BonusTypeDTO bonusTypeDTO);
 
     void download(List<BonusTypeDTO> all, HttpServletResponse response) throws IOException;
 }
