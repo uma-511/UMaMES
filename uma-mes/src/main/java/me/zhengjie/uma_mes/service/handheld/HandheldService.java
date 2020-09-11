@@ -87,6 +87,7 @@ public class HandheldService {
         List<LabelMsgVo> list = new ArrayList<>();
         List<ChemicalFiberLabelDTO> chemicalFiberLabelList = new ArrayList<>();
         char pallet = labelMsgDto.getLabelNumber().charAt(0);
+        // 区分扫描托板还是扫描标签
         if (pallet == '2') {
             chemicalFiberLabelList = getPalletNumber(labelMsgDto.getLabelNumber());
         } else {
@@ -290,8 +291,10 @@ public class HandheldService {
         if (uploadDataDto.getStatus() != 6) {
             // 修改标签
             if (uploadDataDto.getStatus() != 7) {
+                // 修改托板标签记录
                 chemicalFiberPalletDetailService.update(chemicalFiberLabels);
             }
+            // 修改标签记录
             chemicalFiberLabelService.update(chemicalFiberLabels);
         }
 
@@ -301,6 +304,7 @@ public class HandheldService {
         }
 
         if (uploadDataDto.getStatus() == 1) {
+            // 新增库存
             saveStock(chemicalFiberLabels, stockList);
         }
 
@@ -337,6 +341,7 @@ public class HandheldService {
             chemicalFiberDeliveryNote.setCreateDate(new Timestamp(System.currentTimeMillis()));
             chemicalFiberDeliveryNoteService.create(chemicalFiberDeliveryNote);
             chemicalFiberDeliveryNoteService.deliveryNoteStoredProcedure(scanNumber);
+            // 更新托板记录
             updatePallet(chemicalFiberLabels);
         }
 
@@ -349,6 +354,7 @@ public class HandheldService {
             for(ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
                 chemicalFiberDeliveryDetailService.delete(chemicalFiberDeliveryDetailDTO.getId());
             }
+            // 更新送货单
             chemicalFiberDeliveryNoteService.deliveryNoteStoredProcedure(scanNumber);
         }
 
@@ -560,6 +566,12 @@ public class HandheldService {
         return map;
     }
 
+    /**
+     * 判断库存里面是否有这个产品
+     * @param loadProdId 产品id
+     * @param stockList 新增的产品数据
+     * @return
+     */
     public ChemicalFiberStock isProdId(Integer loadProdId, List<ChemicalFiberStock> stockList) {
         ChemicalFiberStock stock = new ChemicalFiberStock();
         for (int i = 0; i < stockList.size(); i++) {
@@ -571,6 +583,10 @@ public class HandheldService {
         return stock;
     }
 
+    /**
+     * 更新托板记录数据
+     * @param chemicalFiberLabels 标签数据
+     */
     public void updatePallet(List<ChemicalFiberLabel> chemicalFiberLabels) {
         List<ChemicalFiberPallet> PalletList = chemicalFiberPalletRepository.findAll();
         for (ChemicalFiberLabel dto : chemicalFiberLabels) {
@@ -590,6 +606,12 @@ public class HandheldService {
         }
     }
 
+    /**
+     * 判断托板记录详细信息是否有这个记录
+     * @param palletId 托板记录id
+     * @param palletList 托板记录详细信息
+     * @return
+     */
     public ChemicalFiberPallet isPalletId(String palletId, List<ChemicalFiberPallet> palletList) {
         ChemicalFiberPallet pallet = new ChemicalFiberPallet();
         for (int i = 0; i < palletList.size(); i++) {
@@ -601,6 +623,11 @@ public class HandheldService {
         return pallet;
     }
 
+    /**
+     * 新增库存
+     * @param chemicalFiberLabels 标签信息
+     * @param stockList 库存列表
+     */
     public void saveStock(List<ChemicalFiberLabel> chemicalFiberLabels, List<ChemicalFiberStock> stockList) {
         for (ChemicalFiberLabel newChemicalFiberLabelDTO : chemicalFiberLabels ) {
             ChemicalFiberStock stock = new ChemicalFiberStock();
@@ -642,6 +669,10 @@ public class HandheldService {
         }
     }
 
+    /**
+     *生成托板记录的单号
+     * @return
+     */
     public String getPalletScanNumber () {
         String scanNumber;
         String type = "2";
