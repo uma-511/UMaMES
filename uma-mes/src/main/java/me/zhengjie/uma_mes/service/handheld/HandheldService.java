@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.service.handheld;
 
+import cn.hutool.core.thread.ThreadUtil;
 import com.lgmn.common.result.Result;
 import com.lgmn.common.result.ResultEnum;
 import com.lgmn.common.utils.ObjectTransfer;
@@ -156,7 +157,7 @@ public class HandheldService {
 
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    //@Transactional(rollbackFor = Exception.class)
     public Result uploadData(UploadDataDto uploadDataDto) {
         // 需要修改的标签列表
         List<ChemicalFiberLabel> chemicalFiberLabels = new ArrayList<>();
@@ -168,7 +169,7 @@ public class HandheldService {
         Integer sumNumber = 0;
         Integer sumBag = 0;
         ScanRecord scanRecord;
-        String modelAndName = "";
+        /*String modelAndName = "";*/
         ViewScanRecord viewScanRecord = new ViewScanRecord();
         String scanNumber;
         if (uploadDataDto.getStatus() != 7) {
@@ -198,6 +199,10 @@ public class HandheldService {
             ObjectTransfer.transValue(scanRecordDTO, tempScanRecord);
             scanRecord = tempScanRecord;
             scanNumber = uploadDataDto.getScanNumber();
+
+            viewScanRecord.setScanNumber(scanNumber);
+            viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
+            viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         }
 
         List<ScanRecordLabel> scanRecordLabels = new ArrayList<>();
@@ -226,7 +231,7 @@ public class HandheldService {
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberLabel);
             chemicalFiberLabels.add(chemicalFiberLabel);
 
-            if (modelAndName.equals("")) {
+            /*if (modelAndName.equals("")) {
                 modelAndName = newChemicalFiberLabelDTO.getColor() + "-" + newChemicalFiberLabelDTO.getFineness();
             } else {
                 if (uploadDataDto.getStatus() == 9) {
@@ -237,7 +242,7 @@ public class HandheldService {
                        return Result.serverError("请统一数据");
                    }
                 }
-            }
+            }*/
 
             ChemicalFiberPalletDetail chemicalFiberPalletDetail = new ChemicalFiberPalletDetail();
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberPalletDetail);
@@ -246,6 +251,7 @@ public class HandheldService {
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, viewScanRecord);
             ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(newChemicalFiberLabelDTO.getProductionId()).orElseGet(ChemicalFiberProduction::new);
             ObjectTransfer.transValue(production, viewScanRecord);
+            viewScanRecord.setId(null);
             viewScanRecordService.create(viewScanRecord);
 
             // 计算所有的数量和重量
@@ -283,7 +289,9 @@ public class HandheldService {
 
         if (uploadDataDto.getStatus() != 6) {
             // 修改标签
-            chemicalFiberPalletDetailService.update(chemicalFiberLabels);
+            if (uploadDataDto.getStatus() != 7) {
+                chemicalFiberPalletDetailService.update(chemicalFiberLabels);
+            }
             chemicalFiberLabelService.update(chemicalFiberLabels);
         }
 
@@ -643,6 +651,7 @@ public class HandheldService {
         String day = timeMap.get("day").toString();
 
         Integer size = chemicalFiberPalletRepository.getSize("2" + year + month + day);
+
 
         if (size == 0) {
             scanNumber = type + year + month + day + "000001";

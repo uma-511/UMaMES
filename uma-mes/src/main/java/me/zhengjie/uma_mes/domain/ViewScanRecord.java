@@ -20,7 +20,7 @@ public class ViewScanRecord implements Serializable {
 
     @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id",nullable = false)
+    @Column(name = "id")
     private Integer id;
 
     // 扫描时间
