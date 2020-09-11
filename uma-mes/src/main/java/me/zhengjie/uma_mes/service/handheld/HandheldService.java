@@ -260,7 +260,7 @@ public class HandheldService {
             sumTare = sumTare.add(newChemicalFiberLabelDTO.getTare());
             sumGrossWeight = sumGrossWeight.add(newChemicalFiberLabelDTO.getGrossWeight());
             sumNumber = sumNumber.intValue() + newChemicalFiberLabelDTO.getFactPerBagNumber();
-            ++sumBag;
+            sumBag += 1;
 
 
             if (uploadDataDto.getIsAdd()) {
@@ -595,12 +595,17 @@ public class HandheldService {
                 BigDecimal netWeight = pallet.getNetWeight();
                 BigDecimal tare = pallet.getTare();
                 BigDecimal grossWeight = pallet.getGrossWeight();
+                Integer factPerBagNumber = pallet.getTotalNumber();
+                Integer totalBag = pallet.getTotalBag();
                 netWeight = netWeight.subtract(dto.getNetWeight());
                 tare = tare.subtract(dto.getTare());
                 grossWeight = grossWeight.subtract(dto.getGrossWeight());
+                factPerBagNumber -=  dto.getFactPerBagNumber();
                 pallet.setNetWeight(netWeight);
                 pallet.setTare(tare);
                 pallet.setGrossWeight(grossWeight);
+                pallet.setTotalNumber(factPerBagNumber);
+                pallet.setTotalNumber(--totalBag);
                 chemicalFiberPalletRepository.save(pallet);
             }
         }

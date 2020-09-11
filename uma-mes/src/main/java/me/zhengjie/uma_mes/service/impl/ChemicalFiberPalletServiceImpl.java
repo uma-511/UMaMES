@@ -74,10 +74,9 @@ public class ChemicalFiberPalletServiceImpl implements ChemicalFiberPalletServic
         if ( chemicalFiberPallet.getPrintStatus() == 0 ) {
             chemicalFiberPallet.setPrintStatus(1);
             chemicalFiberPallet.setPrintNumber(1);
-            chemicalFiberPallet.setPrintEndTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+            chemicalFiberPallet.setPrintTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         } else {
             chemicalFiberPallet.setPrintNumber(chemicalFiberPallet.getPrintNumber() + 1);
-            chemicalFiberPallet.setPrintTime(chemicalFiberPallet.getPrintEndTime());
             chemicalFiberPallet.setPrintEndTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         }
         chemicalFiberPalletRepository.save(chemicalFiberPallet);
