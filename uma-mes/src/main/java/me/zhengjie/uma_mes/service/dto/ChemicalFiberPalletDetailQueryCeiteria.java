@@ -9,4 +9,8 @@ public class ChemicalFiberPalletDetailQueryCeiteria {
     // 托板id
     @Query
     private String palletId;
+
+    // 托板id
+    @Query
+    private String labelNumber;
 }

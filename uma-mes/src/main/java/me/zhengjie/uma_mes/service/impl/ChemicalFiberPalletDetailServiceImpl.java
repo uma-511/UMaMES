@@ -35,13 +35,22 @@ public class ChemicalFiberPalletDetailServiceImpl implements ChemicalFiberPallet
     }
 
 
-    public void create(List<ChemicalFiberPalletDetail> chemicalFiberPalletDetails, ChemicalFiberPallet Pallet) {
+    public void create(List<ChemicalFiberPalletDetail> chemicalFiberPalletDetails, String Pallet) {
         List<ChemicalFiberPalletDetail> PalletList = new ArrayList<>();
         for (ChemicalFiberPalletDetail dto : chemicalFiberPalletDetails) {
-            dto.setPalletId(Pallet.getPalletNumber());
+            dto.setPalletId(Pallet);
             PalletList.add(dto);
         }
         chemicalFiberPalletDetailRepository.saveAll(PalletList);
+    }
+
+    public List<ChemicalFiberPalletDetail> createPallet(List<ChemicalFiberPalletDetail> chemicalFiberPalletDetails, String Pallet) {
+        List<ChemicalFiberPalletDetail> PalletList = new ArrayList<>();
+        for (ChemicalFiberPalletDetail dto : chemicalFiberPalletDetails) {
+            dto.setPalletId(Pallet);
+            PalletList.add(dto);
+        }
+        return chemicalFiberPalletDetailRepository.saveAll(PalletList);
     }
 
     public void update(List<ChemicalFiberLabel> chemicalFiberLabels) {
@@ -51,6 +60,16 @@ public class ChemicalFiberPalletDetailServiceImpl implements ChemicalFiberPallet
                 detail.setStatus(dto.getStatus());
                 chemicalFiberPalletDetailRepository.save(detail);
             }
+        }
+    }
+
+    public void delectDetail(String scanNumber, String labelNumber){
+        ChemicalFiberPalletDetailQueryCeiteria criteria = new ChemicalFiberPalletDetailQueryCeiteria();
+        criteria.setPalletId(scanNumber);
+        criteria.setLabelNumber(labelNumber);
+        List<ChemicalFiberPalletDetail> palletDetail = chemicalFiberPalletDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+        for (ChemicalFiberPalletDetail dto : palletDetail) {
+            chemicalFiberPalletDetailRepository.delete(dto);
         }
     }
 }

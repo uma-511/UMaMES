@@ -183,4 +183,10 @@ public class ChemicalFiberPalletServiceImpl implements ChemicalFiberPalletServic
 
         return ous.toByteArray();
     }
+
+    public List<ChemicalFiberPallet> getPallet(String palletNumber){
+        ChemicalFiberPalletQueryCeiteria pallet = new ChemicalFiberPalletQueryCeiteria();
+        pallet.setPalletNumber(palletNumber);
+        return chemicalFiberPalletRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,pallet,criteriaBuilder));
+    }
 }

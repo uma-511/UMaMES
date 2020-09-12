@@ -5,6 +5,7 @@ import me.zhengjie.uma_mes.service.dto.ChemicalFiberPalletQueryCeiteria;
 import org.springframework.data.domain.Pageable;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Map;
 
 public interface ChemicalFiberPalletService {
@@ -14,4 +15,6 @@ public interface ChemicalFiberPalletService {
 
 
     void exportPoundExcel(ChemicalFiberPallet chemicalFiberPallet, HttpServletResponse response);
+
+    List<ChemicalFiberPallet> getPallet(String palletNumber);
 }

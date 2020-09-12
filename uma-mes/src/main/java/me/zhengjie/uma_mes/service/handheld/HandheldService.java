@@ -52,6 +52,9 @@ public class HandheldService {
     private ChemicalFiberPalletRepository chemicalFiberPalletRepository;
 
     @Autowired
+    private ChemicalFiberPalletService chemicalFiberPalletService;
+
+    @Autowired
     private ChemicalFiberPalletDetailService chemicalFiberPalletDetailService;
 
     @Autowired
@@ -96,12 +99,14 @@ public class HandheldService {
         if (chemicalFiberLabelList == null) {
             return Result.serverError("此标签为信息为空");
         }
+
         for (ChemicalFiberLabelDTO chemicalFiberLabelDTO : chemicalFiberLabelList) {
             if (chemicalFiberLabelDTO == null) {
                 return Result.error(ResultEnum.DATA_NOT_EXISTS);
             }
 
             if (labelMsgDto.getIsCheckLabel()) {
+                // 添加时判断各个标签的状态
                 if (labelMsgDto.getStatus() != 6) {
                     // 标签信息
                     String checkLabelStatusStr = checkLabelStatus(chemicalFiberLabelDTO, labelMsgDto.getStatus());
@@ -109,36 +114,83 @@ public class HandheldService {
                         return Result.error(ResultEnum.NOT_SCHEDULED_ERROR.getCode(), checkLabelStatusStr);
                     }
                 }
+                if (labelMsgDto.getStatus() == 10) {
+                    List<ChemicalFiberPallet> palletList = chemicalFiberPalletService.getPallet(labelMsgDto.getScanNumber());
+                    if (palletList.size() <= 0) {
+                        return Result.serverError("[" + labelMsgDto.getScanNumber() +"]托板单号不存在");
+                    }
+                    ChemicalFiberLabelQueryCriteria label = new ChemicalFiberLabelQueryCriteria();
+                    label.setLabelNumber(labelMsgDto.getLabelNumber());
+                    List<ChemicalFiberLabelDTO> labelList = chemicalFiberLabelService.queryAll(label);
+                    if (!palletList.get(0).getProdFineness().equals(labelList.get(0).getFineness()) || !palletList.get(0).getProdColor().equals(labelList.get(0).getColor())) {
+                        return Result.serverError("[" + labelMsgDto.getLabelNumber() +"]数据不统一");
+                    }
+                }
             } else {
-                ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
-                scanRecordQueryCriteria.setAccurateScanNumber(labelMsgDto.getScanNumber());
-                List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
-                if (scanRecordDTOS.size() <= 0) {
-                    return Result.serverError("[" + labelMsgDto.getScanNumber() +"]出库单号不存在");
+                if (labelMsgDto.getStatus() == 7) {
+                    // 减少时判断这个标签是否存在和单号是否存在
+                    ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
+                    scanRecordQueryCriteria.setAccurateScanNumber(labelMsgDto.getScanNumber());
+                    List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
+                    if (scanRecordDTOS.size() <= 0) {
+                        return Result.serverError("[" + labelMsgDto.getScanNumber() +"]出库单号不存在");
+                    }
+                    ScanRecordLabelQueryCriteria scanRecordLabelQueryCriteria = new ScanRecordLabelQueryCriteria();
+                    scanRecordLabelQueryCriteria.setScanRecordId(scanRecordDTOS.get(0).getId());
+                    scanRecordLabelQueryCriteria.setLabelId(chemicalFiberLabelDTO.getId());
+                    List<ScanRecordLabelDTO> scanRecordLabelDTOS = scanRecordLabelService.queryAll(scanRecordLabelQueryCriteria);
+                    if (scanRecordLabelDTOS.size() <= 0) {
+                        return Result.serverError("此标签不存在于 [" + labelMsgDto.getScanNumber() + "] 出库号内");
+                    }
                 }
-                ScanRecordLabelQueryCriteria scanRecordLabelQueryCriteria = new ScanRecordLabelQueryCriteria();
-                scanRecordLabelQueryCriteria.setScanRecordId(scanRecordDTOS.get(0).getId());
-                scanRecordLabelQueryCriteria.setLabelId(chemicalFiberLabelDTO.getId());
-                List<ScanRecordLabelDTO> scanRecordLabelDTOS = scanRecordLabelService.queryAll(scanRecordLabelQueryCriteria);
-                if (scanRecordLabelDTOS.size() <= 0) {
-                    return Result.serverError("此标签不存在于 [" + labelMsgDto.getScanNumber() + "] 出库号内");
+                if (labelMsgDto.getStatus() == 10) {
+                    List<ChemicalFiberPallet> palletList = chemicalFiberPalletService.getPallet(labelMsgDto.getScanNumber());
+                    if (palletList.size() <= 0) {
+                        return Result.serverError("[" + labelMsgDto.getScanNumber() +"]托板单号不存在");
+                    }
+                    ChemicalFiberLabelQueryCriteria label = new ChemicalFiberLabelQueryCriteria();
+                    label.setPalletId(labelMsgDto.getScanNumber());
+                    label.setLabelNumber(labelMsgDto.getLabelNumber());
+                    List<ChemicalFiberLabelDTO> labelList = chemicalFiberLabelService.queryAll(label);
+                    if (labelList.size() <= 0) {
+                        return Result.serverError("此标签不存在于 [" + labelMsgDto.getScanNumber() + "] 出库号内");
+                    }
+                    if (!palletList.get(0).getProdFineness().equals(labelList.get(0).getFineness()) && !palletList.get(0).getProdColor().equals(labelList.get(0).getColor())) {
+                        return Result.serverError("[" + chemicalFiberLabelDTO.getLabelNumber() +"]数据不统一");
+                    }
+                }
+
+            }
+            if (labelMsgDto.getStatus() == 7) {
+                // 出仓添加时判断这个标签是否已经在单号内
+                if (!StringUtils.isEmpty(labelMsgDto.getScanNumber()) && labelMsgDto.getIsAdd()) {
+                    ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
+                    scanRecordQueryCriteria.setScanNumber(labelMsgDto.getScanNumber());
+                    List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
+                    ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(0);
+
+                    ScanRecordLabelQueryCriteria scanRecordLabelQueryCriteria = new ScanRecordLabelQueryCriteria();
+                    scanRecordLabelQueryCriteria.setScanRecordId(scanRecordDTO.getId());
+                    scanRecordLabelQueryCriteria.setLabelId(chemicalFiberLabelDTO.getId());
+                    List<ScanRecordLabelDTO> scanRecordLabelDTOS = scanRecordLabelService.queryAll(scanRecordLabelQueryCriteria);
+                    if (scanRecordLabelDTOS.size() > 0) {
+                        return Result.serverError("此标签已存在 [" + labelMsgDto.getScanNumber() + "] 出库号内");
+                    }
                 }
             }
 
-            if (!StringUtils.isEmpty(labelMsgDto.getScanNumber()) && labelMsgDto.getIsAdd()) {
-                ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
-                scanRecordQueryCriteria.setScanNumber(labelMsgDto.getScanNumber());
-                List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
-                ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(0);
-
-                ScanRecordLabelQueryCriteria scanRecordLabelQueryCriteria = new ScanRecordLabelQueryCriteria();
-                scanRecordLabelQueryCriteria.setScanRecordId(scanRecordDTO.getId());
-                scanRecordLabelQueryCriteria.setLabelId(chemicalFiberLabelDTO.getId());
-                List<ScanRecordLabelDTO> scanRecordLabelDTOS = scanRecordLabelService.queryAll(scanRecordLabelQueryCriteria);
-                if (scanRecordLabelDTOS.size() > 0) {
-                    return Result.serverError("此标签已存在 [" + labelMsgDto.getScanNumber() + "] 出库号内");
+            if (labelMsgDto.getStatus() == 10) {
+                if (!StringUtils.isEmpty(labelMsgDto.getScanNumber()) && labelMsgDto.getIsAdd()) {
+                    ChemicalFiberLabelQueryCriteria label = new ChemicalFiberLabelQueryCriteria();
+                    label.setPalletId(labelMsgDto.getScanNumber());
+                    label.setLabelNumber(labelMsgDto.getLabelNumber());
+                    List<ChemicalFiberLabelDTO> labelList = chemicalFiberLabelService.queryAll(label);
+                    if (labelList.size() > 0) {
+                        return Result.serverError("此标签已存在 [" + labelMsgDto.getScanNumber() + "] 出库号内");
+                    }
                 }
             }
+
 
             ChemicalFiberLabelInfoVo chemicalFiberLabelInfoVo = new ChemicalFiberLabelInfoVo();
             ObjectTransfer.transValue(chemicalFiberLabelDTO, chemicalFiberLabelInfoVo);
@@ -172,8 +224,8 @@ public class HandheldService {
         ScanRecord scanRecord;
         /*String modelAndName = "";*/
         ViewScanRecord viewScanRecord = new ViewScanRecord();
-        String scanNumber;
-        if (uploadDataDto.getStatus() != 7) {
+        String scanNumber = "";
+        if (uploadDataDto.getStatus() != 7 && uploadDataDto.getStatus() != 10) {
             // 扫描单号
             scanNumber = getScanNumber(uploadDataDto.getStatus());
 
@@ -189,17 +241,34 @@ public class HandheldService {
             viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
             viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         } else {
-            ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
-            scanRecordQueryCriteria.setAccurateScanNumber(uploadDataDto.getScanNumber());
-            List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
-            if (scanRecordDTOS.size() <= 0) {
-                return Result.serverError("[" + uploadDataDto.getScanNumber() +"]出库单号不存在");
+            scanRecord = new ScanRecord();
+            if (uploadDataDto.getStatus() == 7) {
+                ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
+                scanRecordQueryCriteria.setAccurateScanNumber(uploadDataDto.getScanNumber());
+                List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
+                if (scanRecordDTOS.size() <= 0) {
+                    return Result.serverError("[" + uploadDataDto.getScanNumber() +"]出库单号不存在");
+                }
+                ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(0);
+                ScanRecord tempScanRecord = new ScanRecord();
+                ObjectTransfer.transValue(scanRecordDTO, tempScanRecord);
+                scanRecord = tempScanRecord;
+                scanNumber = uploadDataDto.getScanNumber();
             }
-            ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(0);
-            ScanRecord tempScanRecord = new ScanRecord();
-            ObjectTransfer.transValue(scanRecordDTO, tempScanRecord);
-            scanRecord = tempScanRecord;
-            scanNumber = uploadDataDto.getScanNumber();
+
+            if (uploadDataDto.getStatus() == 10) {
+                List<ChemicalFiberPallet> palletList = chemicalFiberPalletService.getPallet(uploadDataDto.getScanNumber());
+                if (palletList.size() <= 0) {
+                    return Result.serverError("[" + uploadDataDto.getScanNumber() +"]托板单号不存在");
+                }
+                scanNumber = getScanNumber(uploadDataDto.getStatus());
+                scanRecord.setScanNumber(scanNumber);
+                scanRecord.setScanUser(uploadDataDto.getScanUser());
+                scanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
+                scanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
+                scanRecordService.create(scanRecord);
+            }
+
 
             viewScanRecord.setScanNumber(scanNumber);
             viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
@@ -227,7 +296,7 @@ public class HandheldService {
                 }
             }
 
-            ChemicalFiberLabelDTO newChemicalFiberLabelDTO = getNewChemicalFiberLabelDTO(chemicalFiberLabelDTO, uploadDataDto.getStatus(), uploadDataDto.getIsAdd());
+            ChemicalFiberLabelDTO newChemicalFiberLabelDTO = getNewChemicalFiberLabelDTO(chemicalFiberLabelDTO, uploadDataDto.getStatus(), uploadDataDto.getIsAdd(), uploadDataDto.getScanNumber());
             ChemicalFiberLabel chemicalFiberLabel = new ChemicalFiberLabel();
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberLabel);
             chemicalFiberLabels.add(chemicalFiberLabel);
@@ -283,6 +352,26 @@ public class HandheldService {
                         scanRecordLabelService.delete(scanRecordLabelDTO.getId());
                     }
                 }
+                if (!uploadDataDto.getIsAdd() && uploadDataDto.getStatus() == 10) {
+                    ChemicalFiberLabelQueryCriteria label = new ChemicalFiberLabelQueryCriteria();
+                    label.setPalletId(uploadDataDto.getScanNumber());
+                    label.setLabelNumber(labelNumber);
+                    List<ChemicalFiberLabelDTO> labelList = chemicalFiberLabelService.queryAll(label);
+                    if (labelList.size() <= 0) {
+                        return Result.serverError("此标签不存在于 [" + uploadDataDto.getScanNumber() + "] 出库号内");
+                    }
+                    /*List<ChemicalFiberLabel> laberUpdateList = new ArrayList<>();
+                    for (ChemicalFiberLabelDTO dto : labelList) {
+                        ChemicalFiberLabel laberUpdate = new ChemicalFiberLabel();
+                        dto.setPalletId(null);
+                        dto.setStatus(0);
+                        ObjectTransfer.transValue(dto, laberUpdate);
+                        laberUpdateList.add(laberUpdate);
+                    }
+                    chemicalFiberLabelRepository.saveAll(laberUpdateList);*/
+                    chemicalFiberPalletDetailService.delectDetail(uploadDataDto.getScanNumber(), labelNumber);
+                }
+
             }
 
 
@@ -290,7 +379,7 @@ public class HandheldService {
 
         if (uploadDataDto.getStatus() != 6) {
             // 修改标签
-            if (uploadDataDto.getStatus() != 7) {
+            if (uploadDataDto.getStatus() != 7 && uploadDataDto.getStatus() != 10) {
                 // 修改托板标签记录
                 chemicalFiberPalletDetailService.update(chemicalFiberLabels);
             }
@@ -306,6 +395,39 @@ public class HandheldService {
         if (uploadDataDto.getStatus() == 1) {
             // 新增库存
             saveStock(chemicalFiberLabels, stockList);
+        }
+
+        if (uploadDataDto.getStatus() == 10) {
+            if (!uploadDataDto.getIsAdd()) {
+                updatePallet(chemicalFiberLabels);
+            } else {
+                List<ChemicalFiberPalletDetail> palletList = chemicalFiberPalletDetailService.createPallet(chemicalFiberPalletDetails, uploadDataDto.getScanNumber());
+                List<ChemicalFiberPallet> PalletList = chemicalFiberPalletRepository.findAll();
+                for (ChemicalFiberPalletDetail dto : palletList) {
+                    if (dto.getPalletId() != null) {
+                        ChemicalFiberPallet pallet = isPalletId(dto.getPalletId(), PalletList);
+                        BigDecimal netWeight = pallet.getNetWeight();
+                        BigDecimal tare = pallet.getTare();
+                        BigDecimal grossWeight = pallet.getGrossWeight();
+                        Integer factPerBagNumber = pallet.getTotalNumber();
+                        Integer totalBag = pallet.getTotalBag();
+
+                        netWeight = netWeight.add(dto.getNetWeight());
+                        tare = tare.add(dto.getTare());
+                        grossWeight = grossWeight.add(dto.getGrossWeight());
+                        factPerBagNumber = factPerBagNumber + dto.getFactPerBagNumber();
+                        totalBag = totalBag + 1;
+
+                        pallet.setNetWeight(netWeight);
+                        pallet.setTare(tare);
+                        pallet.setGrossWeight(grossWeight);
+                        pallet.setTotalNumber(factPerBagNumber);
+                        pallet.setTotalBag(totalBag);
+                        chemicalFiberPalletRepository.save(pallet);
+                    }
+
+                }
+            }
         }
 
         if (uploadDataDto.getStatus() == 9) {
@@ -329,7 +451,7 @@ public class HandheldService {
                 labelList.add(dto);
             }
             chemicalFiberLabelRepository.saveAll(labelList);
-            chemicalFiberPalletDetailService.create(chemicalFiberPalletDetails, Pallet);
+            chemicalFiberPalletDetailService.create(chemicalFiberPalletDetails, Pallet.getPalletNumber());
             saveStock(chemicalFiberLabels,stockList);
         }
 
@@ -378,7 +500,7 @@ public class HandheldService {
      *               便签状态 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货 6：盘点 9：托板入库
      * @return
      */
-    private ChemicalFiberLabelDTO getNewChemicalFiberLabelDTO(ChemicalFiberLabelDTO chemicalFiberLabelDTO, Integer status, boolean isAdd) {
+    private ChemicalFiberLabelDTO getNewChemicalFiberLabelDTO(ChemicalFiberLabelDTO chemicalFiberLabelDTO, Integer status, boolean isAdd, String palletId) {
         switch (status) {
             case 1:
                 chemicalFiberLabelDTO.setStatus(1);
@@ -394,6 +516,15 @@ public class HandheldService {
                 break;
             case 9:
                 chemicalFiberLabelDTO.setStatus(9);
+                break;
+            case 10:
+                if (isAdd) {
+                    chemicalFiberLabelDTO.setStatus(11);
+                    chemicalFiberLabelDTO.setPalletId(palletId);
+                } else {
+
+                    chemicalFiberLabelDTO.setStatus(10);
+                }
                 break;
             case 7:
                 if (isAdd) {
@@ -455,6 +586,9 @@ public class HandheldService {
                 break;
             case 9:
                 type = "TB";
+                break;
+            case 10:
+                type = "TZ";
                 break;
             default:
                 type = "PD";
@@ -521,7 +655,7 @@ public class HandheldService {
                 checkLabelStatusStr = status != 1 && status != 9? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【待入仓】，请先入仓" : "";
                 break;
             case 1:
-                checkLabelStatusStr = status != 2 && status != 7 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已入仓】，请出仓" : "";
+                checkLabelStatusStr = status != 2 && status != 7 && status != 10 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已入仓】，请出仓" : "";
                 break;
             case 2:
                 checkLabelStatusStr = status != 4 && status != 5 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已出仓】，请返仓或退货" : "";
@@ -533,7 +667,7 @@ public class HandheldService {
                 checkLabelStatusStr = status != 2 && status != 7 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已返仓】，请出仓" : "";
                 break;
             case 9:
-                checkLabelStatusStr = status != 2 && status != 7 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已入仓】，请出仓" : "";
+                checkLabelStatusStr = status != 2 && status != 7 && status != 10 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已托板入仓】，请出仓" : "";
                 break;
             default:
                 checkLabelStatusStr = status != 1 && status != 3 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已退货】，请入仓或作废" : "";
@@ -588,8 +722,8 @@ public class HandheldService {
      * @param chemicalFiberLabels 标签数据
      */
     public void updatePallet(List<ChemicalFiberLabel> chemicalFiberLabels) {
-        List<ChemicalFiberPallet> PalletList = chemicalFiberPalletRepository.findAll();
         for (ChemicalFiberLabel dto : chemicalFiberLabels) {
+            List<ChemicalFiberPallet> PalletList = chemicalFiberPalletRepository.findAll();
             if (dto.getPalletId() != null) {
                 ChemicalFiberPallet pallet = isPalletId(dto.getPalletId(), PalletList);
                 BigDecimal netWeight = pallet.getNetWeight();
@@ -600,12 +734,13 @@ public class HandheldService {
                 netWeight = netWeight.subtract(dto.getNetWeight());
                 tare = tare.subtract(dto.getTare());
                 grossWeight = grossWeight.subtract(dto.getGrossWeight());
-                factPerBagNumber -=  dto.getFactPerBagNumber();
+                factPerBagNumber = factPerBagNumber - dto.getFactPerBagNumber();
+                totalBag = totalBag - 1;
                 pallet.setNetWeight(netWeight);
                 pallet.setTare(tare);
                 pallet.setGrossWeight(grossWeight);
                 pallet.setTotalNumber(factPerBagNumber);
-                pallet.setTotalNumber(--totalBag);
+                pallet.setTotalBag(totalBag);
                 chemicalFiberPalletRepository.save(pallet);
             }
         }
@@ -698,4 +833,6 @@ public class HandheldService {
         }
         return scanNumber;
     }
+
+
 }

@@ -14,5 +14,9 @@ public interface ChemicalFiberPalletDetailService {
 
     void update(List<ChemicalFiberLabel> chemicalFiberLabels);
 
-    void create(List<ChemicalFiberPalletDetail> chemicalFiberPalletDetails, ChemicalFiberPallet Pallet);
+    void create(List<ChemicalFiberPalletDetail> chemicalFiberPalletDetails, String Pallet);
+
+    List<ChemicalFiberPalletDetail> createPallet(List<ChemicalFiberPalletDetail> chemicalFiberPalletDetails, String Pallet);
+
+    void delectDetail(String scanNumber, String labelNumber);
 }

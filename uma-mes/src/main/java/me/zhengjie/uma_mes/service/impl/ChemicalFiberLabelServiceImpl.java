@@ -130,6 +130,13 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
             if (dto.getStatus() == 2) {
                 label.setPalletId(null);
             }
+            if (dto.getStatus() == 10) {
+                label.setPalletId(null);
+                label.setStatus(0);
+            }
+            if (dto.getStatus() == 11) {
+                label.setStatus(9);
+            }
             labels.add(label);
         }
         chemicalFiberLabelRepository.saveAll(labels);
