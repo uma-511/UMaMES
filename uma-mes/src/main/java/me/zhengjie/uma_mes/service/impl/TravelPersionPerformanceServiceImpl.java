@@ -1,6 +1,7 @@
 package me.zhengjie.uma_mes.service.impl;
 
 import me.zhengjie.uma_mes.domain.TravelPersionPerformance;
+import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
 import me.zhengjie.utils.ValidationUtil;
 import me.zhengjie.utils.FileUtil;
 import me.zhengjie.uma_mes.repository.TravelPersionPerformanceRepository;
@@ -12,15 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
@@ -41,9 +39,12 @@ public class TravelPersionPerformanceServiceImpl implements TravelPersionPerform
 
     private final TravelPersionPerformanceMapper travelPersionPerformanceMapper;
 
-    public TravelPersionPerformanceServiceImpl(TravelPersionPerformanceRepository travelPersionPerformanceRepository, TravelPersionPerformanceMapper travelPersionPerformanceMapper) {
+    private final ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository;
+
+    public TravelPersionPerformanceServiceImpl(TravelPersionPerformanceRepository travelPersionPerformanceRepository, TravelPersionPerformanceMapper travelPersionPerformanceMapper, ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository) {
         this.travelPersionPerformanceRepository = travelPersionPerformanceRepository;
         this.travelPersionPerformanceMapper = travelPersionPerformanceMapper;
+        this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
     }
 
     @Override
@@ -95,6 +96,9 @@ public class TravelPersionPerformanceServiceImpl implements TravelPersionPerform
     @Transactional(rollbackFor = Exception.class)
     public TravelPersionPerformanceDTO create(TravelPersionPerformance resources) {
         resources.setEnable(Boolean.TRUE);
+        if(null != resources.getScanNumber()){
+            resources.setCustomerName(resources.getScanNumber());
+        }
         return travelPersionPerformanceMapper.toDto(travelPersionPerformanceRepository.save(resources));
     }
 

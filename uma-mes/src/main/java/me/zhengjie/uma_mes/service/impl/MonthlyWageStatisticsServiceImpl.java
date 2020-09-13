@@ -155,39 +155,39 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         calendar.setTime(date);
         return new Timestamp(calendar.getTimeInMillis());
     }
-
-    public Timestamp getQuarterStartTime() throws ParseException {
-        Calendar calendar = Calendar.getInstance();
+    public String getQuarterStartDate() {
+        SimpleDateFormat sdf;
+        Date date = new Date();
         if (getMonthCn().equals("三月")) {
-            calendar.set(calendar.get(Calendar.YEAR), Calendar.JANUARY, 1);
+            sdf = new SimpleDateFormat("yyyy-01-01 00:00:00");
         }
         if (getMonthCn().equals("六月")) {
-            calendar.set(calendar.get(Calendar.YEAR), Calendar.APRIL, 1);
+            sdf = new SimpleDateFormat("yyyy-04-01 00:00:00");
         }
         if (getMonthCn().equals("九月")) {
-            calendar.set(calendar.get(Calendar.YEAR), Calendar.JULY, 1);
+            sdf = new SimpleDateFormat("yyyy-07-01 00:00:00");
+        }else{
+            sdf = new SimpleDateFormat("yyyy-10-01 00:00:00");
         }
-        if (getMonthCn().equals("十月")) {
-            calendar.set(calendar.get(Calendar.YEAR), Calendar.OCTOBER, 1);
-        }
-        return new Timestamp(calendar.getTimeInMillis());
+        return sdf.format(date);
     }
 
-    public Timestamp getQuarterEndTime() {
-        Calendar calendar = Calendar.getInstance();
+    public String getQuarterEndDate() {
+        SimpleDateFormat sdf;
+        Date date = new Date();
         if (getMonthCn().equals("三月")) {
-            calendar.set(calendar.get(Calendar.YEAR), Calendar.MARCH, 1);
+            sdf = new SimpleDateFormat("yyyy-03-31 23:59:59");
         }
         if (getMonthCn().equals("六月")) {
-            calendar.set(calendar.get(Calendar.YEAR), Calendar.JUNE, 1);
+            sdf = new SimpleDateFormat("yyyy-06-30 23:59:59");
         }
         if (getMonthCn().equals("九月")) {
-            calendar.set(calendar.get(Calendar.YEAR), Calendar.SEPTEMBER, 1);
+            sdf = new SimpleDateFormat("yyyy-09-30 23:59:59");
         }
-        if (getMonthCn().equals("十二月")) {
-            calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 1);
+        else{
+            sdf = new SimpleDateFormat("yyyy-12-31 23:59:59");
         }
-        return new Timestamp(calendar.getTimeInMillis());
+        return sdf.format(date);
     }
 
     public int getDaysOfMonth() {
@@ -307,8 +307,19 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         }
         List<WorkAttendanceDTO> workAttendanceDTOS = workAttendanceService.queryAll(workAttendanceQueryCriteria);
 
+
+        WorkAttendanceQueryCriteria workAttendanceQueryCriteriaForSafe = new WorkAttendanceQueryCriteria();
+        String startDate = getQuarterStartDate();
+        String endDate = getQuarterEndDate();
+        workAttendanceQueryCriteriaForSafe.setEnableList(booleanList);
+        workAttendanceQueryCriteriaForSafe.setAttenceType("安全问题");
+        workAttendanceQueryCriteriaForSafe.setStartDate(startDate);
+        workAttendanceQueryCriteriaForSafe.setEndDate(endDate);
+        List<WorkAttendanceDTO> attendancesForSafe  =  workAttendanceService.queryAll(workAttendanceQueryCriteriaForSafe);
+
         List<WageUser> wageUserList = wageUserRepository.getWageUser(Boolean.TRUE);
         for(WageUser w : wageUserList) {
+            // 排除掉已生成的人员
             Boolean isGen = Boolean.FALSE;
             for(MonthlyWageStatisticsDTO m : monthlyWageStatisticsDTOS){
                 if(w.getRealName().equals(m.getPersonName())){
@@ -332,30 +343,30 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
                 w.setBasicSalary(new BigDecimal(0));
             }
             monthlyWageStatistics.setBasicSalary(w.getBasicSalary());
-            if(w.getRealName().equals("拖头车司机") && w.getRealName().equals("槽罐车司机")) {
-
-                // 绩效统计
-                // 出车绩效
-                for (TravelPersionPerformanceDTO travelPersionPerformanceDTO : travelPersionPerformanceDTOList) {
-                    if (travelPersionPerformanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
-                        performance = performance.add(travelPersionPerformanceDTO.getTotalPerformance());
-                    }
+            // 出车绩效
+            for (TravelPersionPerformanceDTO travelPersionPerformanceDTO : travelPersionPerformanceDTOList) {
+                if (travelPersionPerformanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
+                    performance = performance.add(travelPersionPerformanceDTO.getTotalPerformance());
                 }
-                //放酸绩效
-                for (AcidPersionPerformanceDTO acidPersionPerformanceDTO : acidPersonPerformanceDTOS) {
-                    if (acidPersionPerformanceDTO.getPerson().equals(monthlyWageStatistics.getPersonName())) {
-                        performance = performance.add(acidPersionPerformanceDTO.getPrice());
-                    }
-                }
-                monthlyWageStatistics.setPerformance(performance.equals(zero) ? null : performance);
-
             }
+            //放酸绩效
+            for (AcidPersionPerformanceDTO acidPersionPerformanceDTO : acidPersonPerformanceDTOS) {
+                if (acidPersionPerformanceDTO.getPerson().equals(monthlyWageStatistics.getPersonName())) {
+                    performance = performance.add(acidPersionPerformanceDTO.getPrice());
+                }
+            }
+            monthlyWageStatistics.setPerformance(performance.equals(zero) ? null : performance);
+
             // 打卡奖
             BigDecimal cardPrize = zero;
             // 安全奖
             BigDecimal safePrize = zero;
             // 全勤奖
             BigDecimal fullPrize = zero;
+            // 加班费
+            BigDecimal overTimePrice = zero;
+            // 其他
+            BigDecimal otherPrice = zero;
             // 高温津贴
             BigDecimal highTemperatureSubsidy = zero;
             for (BonusTypeDTO bonusTypeDTO : bonusTypeDTOList) {
@@ -392,14 +403,59 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
             monthlyWageStatistics.setSafePrize(safePrize.equals(zero)? null : safePrize);
             monthlyWageStatistics.setFullPrize(fullPrize.equals(zero)? null : fullPrize);
             monthlyWageStatistics.setHighTemperatureSubsidy(highTemperatureSubsidy.equals(zero)? null : highTemperatureSubsidy);
+            // 加班费
+            for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
+                if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
+                    if(workAttendanceDTO.getAttenceType().equals("加班费")) {
+                        overTimePrice = otherPrice.add(workAttendanceDTO.getPrice());
+                    }
+                }
+            }
+            // 其他
+            for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
+                if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
+                    if(workAttendanceDTO.getAttenceType().equals("其他")) {
+                        otherPrice = otherPrice.add(workAttendanceDTO.getPrice());
+                    }
+                }
+            }
+            monthlyWageStatistics.setOvertimePay(overTimePrice.equals(zero)? null : overTimePrice);
+            monthlyWageStatistics.setOtherPrize(otherPrice.equals(zero)? null : otherPrice);
 
+            // 请假(金额)
+            BigDecimal leaveDay = zero;
+            BigDecimal leavePrice = zero;
+            for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
+                if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
+                    if(workAttendanceDTO.getAttenceType().equals("请假")) {
+                        leaveDay = leaveDay.add(workAttendanceDTO.getDay());
+                        leavePrice = leavePrice.add(workAttendanceDTO.getPrice());
+                    }
+                }
+            }
+
+            // 司机请假满7天，取消基本工资
+            if(leaveDay.compareTo(new BigDecimal(7)) >= 0) {
+                if(w.getJob().equals("拖头车司机") || w.getJob().equals("槽罐车司机") || w.getJob().equals("厢式车司机")) {
+                    monthlyWageStatistics.setBasicSalary(null);
+                }
+            }
+
+            if (leaveDay.compareTo(zero) > 0) {
+                // 请假扣除 = 全勤奖扣除+考勤记录金额
+                monthlyWageStatistics.setLeaveCount(fullPrize.add(leavePrice));
+            }
 
             BigDecimal payable = zero;
-            payable = payable.add(monthlyWageStatistics.getBasicSalary());
+            if(null != monthlyWageStatistics.getBasicSalary()){
+                payable = payable.add(monthlyWageStatistics.getBasicSalary());
+            }
             payable = payable.add(performance);
             payable = payable.add(cardPrize);
             payable = payable.add(safePrize);
             payable = payable.add(fullPrize);
+            payable = payable.add(overTimePrice);
+            payable = payable.add(otherPrice);
             payable = payable.add(highTemperatureSubsidy);
             monthlyWageStatistics.setWagesPayable(payable.equals(zero)? null : payable);
 
@@ -415,29 +471,19 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
             monthlyWageStatistics.setAttendance(new BigDecimal(getDaysOfMonth()).subtract(restDay));
             monthlyWageStatistics.setRestDay(fullPrize.equals(zero)? null : fullPrize);
 
-            // 请假(金额)
-            BigDecimal leaveDay = zero;
-            for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
-                if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
-                    if(workAttendanceDTO.getAttenceType().equals("请假")) {
-                        leaveDay = leaveDay.add(workAttendanceDTO.getDay());
-                    }
-                }
-            }
-
-            if (leaveDay.compareTo(zero) > 0) {
-                monthlyWageStatistics.setLeaveCount(fullPrize);
-            }
-
             // 缺卡/迟到满7次 取消打卡奖
             BigDecimal lackCount = zero;
             for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
                 if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
                     if(workAttendanceDTO.getAttenceType().equals("缺卡")) {
-                        lackCount = lackCount.add(workAttendanceDTO.getDay());
+                        if(null != workAttendanceDTO.getDay()) {
+                            lackCount = lackCount.add(workAttendanceDTO.getDay());
+                        }
                     }
                     if(workAttendanceDTO.getAttenceType().equals("迟到")) {
-                        lackCount = lackCount.add(workAttendanceDTO.getDay());
+                        if(null != workAttendanceDTO.getDay()) {
+                            lackCount = lackCount.add(workAttendanceDTO.getDay());
+                        }
                     }
                 }
             }
@@ -446,33 +492,34 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
             }
 
             // 实际出勤天数
-            monthlyWageStatistics.setAttendanceReal(new BigDecimal(getDaysOfMonth()).subtract(restDay).subtract(leaveDay));
+            monthlyWageStatistics.setAttendanceReal((new BigDecimal(getDaysOfMonth()).subtract(restDay)).subtract(leaveDay));
 
             // 违反安全(金额) 统计近三个月的总违反安全记录
-            BigDecimal safePrice = zero;
+            BigDecimal violationsafePrice = zero;
             if (isQuarter) {
                 // 考勤统计
-                workAttendanceQueryCriteria.setEnableList(booleanList);
-                try {
-                    workAttendanceQueryCriteria.setStartTime(getQuarterStartTime());
-                    workAttendanceQueryCriteria.setEndTime(getQuarterEndTime());
-                }catch (Exception e){
-                    throw new BadRequestException("查询违反安全记录失败");
-                }
-
-                workAttendanceDTOS = workAttendanceService.queryAll(workAttendanceQueryCriteria);
-                for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
+                for (WorkAttendanceDTO workAttendanceDTO : attendancesForSafe) {
                     if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
-                        if(workAttendanceDTO.getAttenceType().equals("安全问题")) {
-                            safePrice = safePrice.add(workAttendanceDTO.getPrice());
-                        }
+                        violationsafePrice = violationsafePrice.add(workAttendanceDTO.getPrice());
                     }
                 }
-                monthlyWageStatistics.setViolationOfSafety(safePrice.equals(zero)? null : safePrice);
+                monthlyWageStatistics.setViolationOfSafety(violationsafePrice.equals(zero)? null : violationsafePrice);
             }
 
             // 实发工资
-            BigDecimal netSalary = monthlyWageStatistics.getWagesPayable().subtract(leaveDay).subtract(lackCount).subtract(safePrice);
+            BigDecimal netSalary = monthlyWageStatistics.getWagesPayable();
+            // 扣除请假
+            if(null != monthlyWageStatistics.getLeaveCount()){
+                netSalary = netSalary.subtract(monthlyWageStatistics.getLeaveCount());
+            }
+            // 扣除缺卡
+            if(null != monthlyWageStatistics.getLackCard()){
+                netSalary = netSalary.subtract(monthlyWageStatistics.getLackCard());
+            }
+            // 扣除安全
+            if(null != monthlyWageStatistics.getViolationOfSafety()){
+                netSalary = netSalary.subtract(monthlyWageStatistics.getViolationOfSafety());
+            }
             monthlyWageStatistics.setNetSalary(netSalary);
 
             // 日期

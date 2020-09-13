@@ -2,6 +2,7 @@ package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import me.zhengjie.annotation.Query;
@@ -42,7 +43,17 @@ public class WorkAttendanceQueryCriteria{
      * 小于等于
      */
     @Query(type = Query.Type.LESS_THAN, propName = "attenceDate")
-    private Timestamp endTime;
+    private Timestamp endTime; /**
+     * 大于等于
+     */
+    @Query(type = Query.Type.GREATER_THAN, propName = "attenceDate")
+    private String startDate;
+
+    /**
+     * 小于等于
+     */
+    @Query(type = Query.Type.LESS_THAN, propName = "attenceDate")
+    private String endDate;
 
     /**
      * 是否可用

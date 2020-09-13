@@ -347,7 +347,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             chemicalFiberDeliveryNote.setTotalPrice(realTotalPrise);
             update(chemicalFiberDeliveryNote);
             // 生成司机绩效
-            generatePerformanceByCar(chemicalFiberDeliveryNote.getCarNumber(),chemicalFiberDeliveryNote.getStartPlace(),chemicalFiberDeliveryNote.getEndPlace(),chemicalFiberDeliveryNote.getDriverMain(),chemicalFiberDeliveryNote.getDriverDeputy(), chemicalFiberDeliveryNote.getLoaderOne(), chemicalFiberDeliveryNote.getLoaderTwo(),totalWeight,chemicalFiberDeliveryNote.getScanNumber());
+            generatePerformanceByCar(chemicalFiberDeliveryNote.getDeliveryDate(),chemicalFiberDeliveryNote.getCarNumber(),chemicalFiberDeliveryNote.getStartPlace(),chemicalFiberDeliveryNote.getEndPlace(),chemicalFiberDeliveryNote.getDriverMain(),chemicalFiberDeliveryNote.getDriverDeputy(), chemicalFiberDeliveryNote.getLoaderOne(), chemicalFiberDeliveryNote.getLoaderTwo(),totalWeight,chemicalFiberDeliveryNote.getScanNumber());
 
             umaChemicalFiberStatementService.StatementUp(id);
         }catch (Exception e) {
@@ -412,7 +412,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         umaChemicalFiberStatementService.delectStatemen(id);
     }
 
-    public void generatePerformanceByCar(String carNumber,String startPlace,String endPlace,String driverMain,String driverDeputy,String loaderOne,String loaderTwo,BigDecimal totalWeight,String scanNumber) {
+    public void generatePerformanceByCar(Timestamp deliveryDate,String carNumber,String startPlace,String endPlace,String driverMain,String driverDeputy,String loaderOne,String loaderTwo,BigDecimal totalWeight,String scanNumber) {
         CarQueryCriteria carQueryCriteria = new CarQueryCriteria();
         carQueryCriteria.setCarNumber(carNumber);
         if ( null == carNumber || carNumber.equals("") ) {
@@ -444,8 +444,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 }else{
                     travelExpensesPrice = new BigDecimal(0);
                 }
-                generateDriverPermission(driverMain,totalWeight,travelExpensesPrice,scanNumber);
-                generateDriverPermission(driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
+                generateDriverPermission(deliveryDate,driverMain,totalWeight,travelExpensesPrice,scanNumber);
+                generateDriverPermission(deliveryDate,driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
             }
             if ( car.getCarType().equals("槽罐车") ) {
                 if( null != travelExpenses) {
@@ -453,8 +453,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 }else{
                     travelExpensesPrice = new BigDecimal(0);
                 }
-                generateDriverPermission(driverMain,totalWeight,travelExpensesPrice,scanNumber);
-                generateDriverPermission(driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
+                generateDriverPermission(deliveryDate,driverMain,totalWeight,travelExpensesPrice,scanNumber);
+                generateDriverPermission(deliveryDate,driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
             }
             if ( car.getCarType().equals("拖头车") ) {
                 if( null != travelExpenses) {
@@ -462,16 +462,16 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 }else{
                     travelExpensesPrice = new BigDecimal(0);
                 }
-                generateDriverPermission(driverMain,totalWeight,travelExpensesPrice,scanNumber);
-                generateDriverPermission(driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
+                generateDriverPermission(deliveryDate,driverMain,totalWeight,travelExpensesPrice,scanNumber);
+                generateDriverPermission(deliveryDate,driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
             }
             // 生成放酸人员绩效
-            generateDriverPermission(loaderOne,BigDecimal.ZERO,BigDecimal.ZERO,scanNumber);
-            generateDriverPermission(loaderTwo,BigDecimal.ZERO,BigDecimal.ZERO,scanNumber);
+            generateDriverPermission(deliveryDate,loaderOne,BigDecimal.ZERO,BigDecimal.ZERO,scanNumber);
+            generateDriverPermission(deliveryDate,loaderTwo,BigDecimal.ZERO,BigDecimal.ZERO,scanNumber);
         }
     }
 
-    private void generateDriverPermission(String driverRealName,BigDecimal totalWeight,BigDecimal travelExpensesPrice,String scanNumber){
+    private void generateDriverPermission(Timestamp deliveryDate,String driverRealName,BigDecimal totalWeight,BigDecimal travelExpensesPrice,String scanNumber){
         if(null == driverRealName || driverRealName.equals("")) {
             return;
         }
@@ -481,18 +481,22 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             throw new BadRequestException("签收失败，获取人员id异常");
         }
         String driverPermission = null;
-        driverPermission = chemicalFiberDeliveryNoteRepository.getPermissionByRealName(driverRealName);
+        driverPermission = chemicalFiberDeliveryNoteRepository.getPermissionByUserId(driverId.longValue());
         if ( null == driverPermission ) {
             throw new BadRequestException("签收失败，获取人员职位异常");
         }
-        createPermission(driverRealName,driverId,driverPermission,travelExpensesPrice,scanNumber);
+        createPermission(deliveryDate,driverRealName,driverId,driverPermission,travelExpensesPrice,scanNumber);
     }
 
 
-    private void createPermission(String user,Integer userId,String userPermission,BigDecimal expensesPrice,String scanNumber) {
+    private void createPermission(Timestamp deliveryDate,String user,Integer userId,String userPermission,BigDecimal expensesPrice,String scanNumber) {
         TravelPersionPerformance travelPersionPerformance = new TravelPersionPerformance();
         travelPersionPerformance.setEnable(Boolean.TRUE);
-        travelPersionPerformance.setCreateTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        if(null != deliveryDate){
+            travelPersionPerformance.setCreateTime(deliveryDate);
+        }else {
+            travelPersionPerformance.setCreateTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        }
         travelPersionPerformance.setMileageFee(expensesPrice);
         travelPersionPerformance.setTotalPerformance(expensesPrice);
         travelPersionPerformance.setPersonId(userId);
@@ -502,6 +506,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         travelPersionPerformance.setHandlingCost(new BigDecimal(0));
         travelPersionPerformance.setPersonName(user);
         travelPersionPerformance.setScanNumber(scanNumber);
+        travelPersionPerformance.setCustomerName(chemicalFiberDeliveryNoteRepository.getCusotmerNameByScanNumber(scanNumber));
         travelPersionPerformanceRepository.save(travelPersionPerformance);
     }
 

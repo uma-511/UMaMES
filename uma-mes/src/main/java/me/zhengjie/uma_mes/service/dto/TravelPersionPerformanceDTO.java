@@ -60,6 +60,11 @@ public class TravelPersionPerformanceDTO implements Serializable {
     // 日期
     private Timestamp createTime;
 
+    /**
+     * 客户名称
+     */
+    private String customerName;
+
     // 是否可用
     private Boolean enable;
 }
