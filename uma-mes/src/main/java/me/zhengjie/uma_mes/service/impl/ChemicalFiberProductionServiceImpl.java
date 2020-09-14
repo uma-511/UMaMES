@@ -320,6 +320,10 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         list.add("总计");
         list.add("");
         list.add("");
+        list.add("");
+        list.add("");
+        list.add("");
+        list.add("");
         for (Map<String, Object> map : maps) {
             warehousingPacketNumber = warehousingPacketNumber + Integer.parseInt(map.get("in_stock_pack").toString());
             warehousingFactPerBagNumber = warehousingFactPerBagNumber + Integer.parseInt(map.get("in_stock_number").toString());
@@ -331,10 +335,10 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
             outOfstockNetWeight = outOfstockNetWeight.add(new BigDecimal(map.get("out_net_weight").toString()));
             outOfstockGrossWeight = outOfstockGrossWeight.add(new BigDecimal(map.get("out_gross_weight").toString()));
 
-            toVoidPacketNumber = toVoidPacketNumber + Integer.parseInt(map.get("cancel_stock_pack").toString());
+            /*toVoidPacketNumber = toVoidPacketNumber + Integer.parseInt(map.get("cancel_stock_pack").toString());
             toVoidFactPerBagNumber = toVoidFactPerBagNumber + Integer.parseInt(map.get("cancel_stock_number").toString());
             toVoidNetWeight = toVoidNetWeight.add(new BigDecimal(map.get("cancel_net_weight").toString()));
-            toVoidGrossWeight = toVoidGrossWeight.add(new BigDecimal(map.get("cancel_gross_weight").toString()));
+            toVoidGrossWeight = toVoidGrossWeight.add(new BigDecimal(map.get("cancel_gross_weight").toString()));*/
         }
 
         list.add(warehousingPacketNumber);
@@ -345,12 +349,12 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         list.add(outOfstockFactPerBagNumber);
         list.add(outOfstockNetWeight);
         list.add(outOfstockGrossWeight);
-        list.add("");
+    /*    list.add("");
         list.add("");
         list.add(toVoidPacketNumber);
         list.add(toVoidFactPerBagNumber);
         list.add(toVoidNetWeight);
-        list.add(toVoidGrossWeight);
+        list.add(toVoidGrossWeight);*/
         return Result.success(list);
     }
 
