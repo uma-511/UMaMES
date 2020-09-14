@@ -55,4 +55,6 @@ public interface ChemicalFiberProductionService {
     Map<String,Object> getProductionReport(ChemicalFiberProductionQueryCriteria criteria, Pageable pageable);
 
     Result getProductionReportSummaries(ChemicalFiberProductionQueryCriteria criteria);
+
+    void downloadProduct(ChemicalFiberProductionQueryCriteria criteria,  Pageable pageable, HttpServletResponse response) throws IOException;
 }

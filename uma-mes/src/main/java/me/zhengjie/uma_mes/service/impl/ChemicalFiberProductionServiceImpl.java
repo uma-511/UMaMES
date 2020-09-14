@@ -1,5 +1,8 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
+import cn.afterturn.easypoi.excel.entity.TemplateExportParams;
+import cn.hutool.extra.template.TemplateConfig;
 import com.lgmn.common.domain.LgmnPage;
 import com.lgmn.common.result.Result;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
@@ -16,6 +19,7 @@ import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductionRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductionService;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberProductionMapper;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -264,7 +268,6 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
                                                                                         StringUtils.isEmpty(criteria.getProdFineness()) ? "" : criteria.getProdFineness(),
                                                                                         tempPageable));
 
-
     }
 
     @Override
@@ -383,6 +386,71 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         //“0.00000000”确定精度
         DecimalFormat dF = new DecimalFormat("0.00");
         return dF.format((float)a/b);
+    }
+
+    public void downloadProduct(ChemicalFiberProductionQueryCriteria criteria,  Pageable pageable, HttpServletResponse response) throws IOException {
+        // 入库包数
+        Integer warehousingPacketNumber = 0;
+        // 实际每袋个数
+        Integer warehousingFactPerBagNumber = 0;
+
+        // 净重
+        BigDecimal warehousingNetWeight = new BigDecimal(0.0);
+
+        // 毛重
+        BigDecimal warehousingGrossWeight = new BigDecimal(0.0);
+
+        // 出库
+        // 包数
+        Integer outOfstockPacketNumber = 0;
+
+        // 实际每袋个数
+        Integer outOfstockFactPerBagNumber = 0;
+
+        // 净重
+        BigDecimal outOfstockNetWeight = new BigDecimal(0.0);
+
+        // 毛重
+        BigDecimal outOfstockGrossWeight = new BigDecimal(0.0);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String data1 = simpleDateFormat.format(criteria.getTempStartTime());
+        String data2 = simpleDateFormat.format(criteria.getTempEndTime());
+        Pageable tempPageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
+        Page<Map<String, Object>> ProdctionPage = chemicalFiberProductionRepository.getProductionReport(data1, data2, StringUtils.isEmpty(criteria.getProdColor()) ? "" : criteria.getProdColor(), StringUtils.isEmpty(criteria.getProdFineness()) ? "" : criteria.getProdFineness(), tempPageable);
+        List<Map<String, Object>> ProdctionList = ProdctionPage.getContent();
+        List<Map<String, Object>> listMap = new ArrayList<>();
+        for (int i = 1; i <= ProdctionList.size(); i++) {
+            Map<String, Object> dto = new HashMap<>();
+            Map<String, Object> dto2 = ProdctionList.get(i - 1);
+            dto.putAll(dto2);
+            dto.put("index" ,i);
+            warehousingPacketNumber = warehousingPacketNumber + Integer.parseInt(dto.get("in_stock_pack").toString());
+            warehousingFactPerBagNumber = warehousingFactPerBagNumber + Integer.parseInt(dto.get("in_stock_number").toString());
+            warehousingNetWeight = warehousingNetWeight.add(new BigDecimal(dto.get("in_net_weight").toString()));
+            warehousingGrossWeight = warehousingGrossWeight.add(new BigDecimal(dto.get("in_gross_weight").toString()));
+
+            outOfstockPacketNumber = outOfstockPacketNumber + Integer.parseInt(dto.get("out_stock_pack").toString());
+            outOfstockFactPerBagNumber = outOfstockFactPerBagNumber + Integer.parseInt(dto.get("out_stock_number").toString());
+            outOfstockNetWeight = outOfstockNetWeight.add(new BigDecimal(dto.get("out_net_weight").toString()));
+            outOfstockGrossWeight = outOfstockGrossWeight.add(new BigDecimal(dto.get("out_gross_weight").toString()));
+            listMap.add(dto);
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("ProdctionList", listMap);
+        map.put("warehousingPacketNumber", warehousingPacketNumber);
+        map.put("warehousingFactPerBagNumber", warehousingFactPerBagNumber);
+        map.put("warehousingNetWeight", warehousingNetWeight);
+        map.put("warehousingGrossWeight", warehousingGrossWeight);
+        map.put("outOfstockPacketNumber", outOfstockPacketNumber);
+        map.put("outOfstockFactPerBagNumber", outOfstockFactPerBagNumber);
+        map.put("outOfstockNetWeight", outOfstockNetWeight);
+        map.put("outOfstockGrossWeight", outOfstockGrossWeight);
+        Workbook workbook = null;
+        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/prodtion.xls";
+        // 加载模板
+        TemplateExportParams params = new TemplateExportParams(templatePath);
+        workbook = ExcelExportUtil.exportExcel(params, map);
+        FileUtil.downLoadExcel("生产报表导出.xls", response, workbook);
     }
 
 

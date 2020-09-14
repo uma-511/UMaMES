@@ -107,4 +107,13 @@ public class ChemicalFiberProductionController {
     public Result getProductionReportSummaries(@RequestBody ChemicalFiberProductionQueryCriteria criteria) {
         return chemicalFiberProductionService.getProductionReportSummaries(criteria);
     }
+
+    @Log("导出生产报表")
+    @GetMapping(value = "/downloadProduct")
+    // @PreAuthorize("@el.check('chemicalFiberProduction:list')")
+    public void downloadProduct(HttpServletResponse response, ChemicalFiberProductionQueryCriteria criteria,  Pageable pageable) throws IOException {
+        chemicalFiberProductionService.downloadProduct(criteria, pageable, response);
+    }
+
+
 }
