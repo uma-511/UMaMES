@@ -125,6 +125,21 @@ public class HandheldService {
                     if (!palletList.get(0).getProdFineness().equals(labelList.get(0).getFineness()) || !palletList.get(0).getProdColor().equals(labelList.get(0).getColor())) {
                         return Result.serverError("[" + labelMsgDto.getLabelNumber() +"]数据不统一");
                     }
+                    if (labelList.get(0).getStatus() == 2) {
+                        return Result.serverError("[" + labelMsgDto.getLabelNumber() +"]标签已出库");
+                    }
+                    if (labelList.get(0).getStatus() == 1) {
+                        return Result.serverError("[" + labelMsgDto.getLabelNumber() +"]标签已入库");
+                    }
+                    if (labelList.get(0).getStatus() == 3) {
+                        return Result.serverError("[" + labelMsgDto.getLabelNumber() +"]标签已作废");
+                    }
+                    if (labelList.get(0).getStatus() == 9) {
+                        return Result.serverError("[" + labelMsgDto.getLabelNumber() +"]标签已托板入库");
+                    }
+                    if (labelList.get(0).getStatus() == 5) {
+                        return Result.serverError("[" + labelMsgDto.getLabelNumber() +"]标签已退货");
+                    }
                 }
             } else {
                 if (labelMsgDto.getStatus() == 7) {
@@ -210,7 +225,7 @@ public class HandheldService {
 
     }
 
-    //@Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public Result uploadData(UploadDataDto uploadDataDto) {
         // 需要修改的标签列表
         List<ChemicalFiberLabel> chemicalFiberLabels = new ArrayList<>();
@@ -379,7 +394,7 @@ public class HandheldService {
 
         if (uploadDataDto.getStatus() != 6) {
             // 修改标签
-            if (uploadDataDto.getStatus() != 7 && uploadDataDto.getStatus() != 10) {
+            if (uploadDataDto.getStatus() != 7 || uploadDataDto.getStatus() != 10) {
                 // 修改托板标签记录
                 chemicalFiberPalletDetailService.update(chemicalFiberLabels);
             }
