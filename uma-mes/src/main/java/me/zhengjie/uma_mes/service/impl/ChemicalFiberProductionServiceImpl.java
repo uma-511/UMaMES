@@ -266,6 +266,8 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
                                                                                         data2,
                                                                                         StringUtils.isEmpty(criteria.getProdColor()) ? "" : criteria.getProdColor(),
                                                                                         StringUtils.isEmpty(criteria.getProdFineness()) ? "" : criteria.getProdFineness(),
+                                                                                        StringUtils.isEmpty(criteria.getMachineNumber()) ? "" : criteria.getMachineNumber(),
+                                                                                        StringUtils.isEmpty(criteria.getShifts()) ? "" : criteria.getShifts(),
                                                                                         tempPageable));
 
     }
@@ -279,7 +281,9 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
                                                                         data1,
                                                                         data2,
                                                                         StringUtils.isEmpty(criteria.getProdColor()) ? "" : criteria.getProdColor(),
-                                                                        StringUtils.isEmpty(criteria.getProdFineness()) ? "" : criteria.getProdFineness());
+                                                                        StringUtils.isEmpty(criteria.getProdFineness()) ? "" : criteria.getProdFineness(),
+                                                                        StringUtils.isEmpty(criteria.getMachineNumber()) ? "" : criteria.getMachineNumber(),
+                                                                        StringUtils.isEmpty(criteria.getShifts()) ? "" : criteria.getShifts());
 
 
 
@@ -416,7 +420,12 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         String data1 = simpleDateFormat.format(criteria.getTempStartTime());
         String data2 = simpleDateFormat.format(criteria.getTempEndTime());
         Pageable tempPageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
-        Page<Map<String, Object>> ProdctionPage = chemicalFiberProductionRepository.getProductionReport(data1, data2, StringUtils.isEmpty(criteria.getProdColor()) ? "" : criteria.getProdColor(), StringUtils.isEmpty(criteria.getProdFineness()) ? "" : criteria.getProdFineness(), tempPageable);
+        Page<Map<String, Object>> ProdctionPage = chemicalFiberProductionRepository.getProductionReport(data1, data2,
+                StringUtils.isEmpty(criteria.getProdColor()) ? "" : criteria.getProdColor(),
+                StringUtils.isEmpty(criteria.getProdFineness()) ? "" : criteria.getProdFineness(),
+                StringUtils.isEmpty(criteria.getMachineNumber()) ? "" : criteria.getMachineNumber(),
+                StringUtils.isEmpty(criteria.getShifts()) ? "" : criteria.getShifts(),
+                tempPageable);
         List<Map<String, Object>> ProdctionList = ProdctionPage.getContent();
         List<Map<String, Object>> listMap = new ArrayList<>();
         for (int i = 1; i <= ProdctionList.size(); i++) {

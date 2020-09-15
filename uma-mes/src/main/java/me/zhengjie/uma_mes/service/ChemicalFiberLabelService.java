@@ -53,4 +53,6 @@ public interface ChemicalFiberLabelService {
     ChemicalFiberLabel getByLabelNumber(String labelNumber);
 
     ChemicalFiberLabel getLastLabelByMachine(String machine);
+
+    List<ChemicalFiberLabelDTO> getShifts();
 }

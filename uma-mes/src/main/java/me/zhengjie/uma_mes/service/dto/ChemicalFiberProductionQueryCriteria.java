@@ -69,4 +69,8 @@ public class ChemicalFiberProductionQueryCriteria{
 
     // 临时结束时间
     private Long tempEndTime;
+
+    private String machineNumber;
+
+    private String shifts;
 }

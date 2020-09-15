@@ -35,6 +35,9 @@ public class HandheldService {
 
     private final ScanRecordService scanRecordService;
 
+    @Autowired
+    private  ScanRecordRepository scanRecordRepository;
+
     private final ScanRecordLabelService scanRecordLabelService;
 
     private final ConfigClassifyService configClassifyService;
@@ -337,6 +340,20 @@ public class HandheldService {
             ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(newChemicalFiberLabelDTO.getProductionId()).orElseGet(ChemicalFiberProduction::new);
             ObjectTransfer.transValue(production, viewScanRecord);
             viewScanRecord.setId(null);
+            if (uploadDataDto.getStatus() == 10) {
+
+                if (uploadDataDto.getIsAdd()) {
+                    viewScanRecord.setType("TZ+");
+                } else {
+                    viewScanRecord.setType("TZ-");
+                }
+            } else if (uploadDataDto.getStatus() == 7){
+                if (uploadDataDto.getIsAdd()) {
+                    viewScanRecord.setType("SH+");
+                } else {
+                    viewScanRecord.setType("RK-");
+                }
+            }
             viewScanRecordService.create(viewScanRecord);
 
             // 计算所有的数量和重量
@@ -570,12 +587,13 @@ public class HandheldService {
         scanRecordQueryCriteria.setStartTime(new Timestamp(Long.parseLong(timeMap.get("time").toString())));
         scanRecordQueryCriteria.setEndTime(new Timestamp(System.currentTimeMillis()));
         scanRecordQueryCriteria.setType(type);
-        List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
+        //List<ScanRecordDTO> scanRecordDTOS = scanRecordService.queryAll(scanRecordQueryCriteria);
+        List<ScanRecord> scanRecordDTOS = scanRecordRepository.getTime(year + "-" + month, type);
 
         if (scanRecordDTOS.size() == 0) {
             scanNumber = type + year + month + "001";
         } else {
-            ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(scanRecordDTOS.size() - 1);
+            ScanRecord scanRecordDTO = scanRecordDTOS.get(scanRecordDTOS.size() - 1);
             String tempScanNumber = scanRecordDTO.getScanNumber().substring(8);
             Integer number = Integer.parseInt(tempScanNumber) + 1;
             String tempNumberStr = String.format("%3d", number++).replace(" ", "0");
@@ -667,7 +685,7 @@ public class HandheldService {
         String checkLabelStatusStr;
         switch (chemicalFiberLabelDTO.getStatus()) {
             case 0:
-                checkLabelStatusStr = status != 1 && status != 9? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【待入仓】，请先入仓" : "";
+                checkLabelStatusStr = status != 1 && status != 9 && status != 10? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【待入仓】，请先入仓" : "";
                 break;
             case 1:
                 checkLabelStatusStr = status != 2 && status != 7 && status != 10 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已入仓】，请出仓" : "";
@@ -679,7 +697,7 @@ public class HandheldService {
                 checkLabelStatusStr =  chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已作废】";
                 break;
             case 4:
-                checkLabelStatusStr = status != 2 && status != 7 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已返仓】，请出仓" : "";
+                checkLabelStatusStr = status != 2 && status != 7 && status != 10? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已返仓】，请出仓" : "";
                 break;
             case 9:
                 checkLabelStatusStr = status != 2 && status != 7 && status != 10 ? chemicalFiberLabelDTO.getLabelNumber() + "当前状态【已托板入仓】，请出仓" : "";

@@ -172,4 +172,8 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
     public ChemicalFiberLabel getLastLabelByMachine(String machine) {
         return chemicalFiberLabelRepository.getLastLabelByMachine(machine);
     }
+
+    public List<ChemicalFiberLabelDTO> getShifts() {
+        return chemicalFiberLabelMapper.toDto(chemicalFiberLabelRepository.getShifts()) ;
+    }
 }

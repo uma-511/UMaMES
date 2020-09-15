@@ -36,7 +36,7 @@ public class ChemicalFiberDeliveryDetailQueryCriteria{
     @Query(type = Query.Type.INNER_LIKE)
     private String prodFineness;
 
-    @Query
+    @Query(type = Query.Type.INNER_LIKE)
     private String scanNumber;
 
     @Query(type = Query.Type.IN, propName = "scanNumber")

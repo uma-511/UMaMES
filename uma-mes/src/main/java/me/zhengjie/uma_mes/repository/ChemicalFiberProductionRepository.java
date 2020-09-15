@@ -61,7 +61,7 @@ public interface ChemicalFiberProductionRepository extends JpaRepository<Chemica
             "sum( CASE WHEN label.`status` = 0 OR label.`status` = 4 THEN 0 ELSE label.gross_weight END ) AS `out_gross_weight`" +
             "FROM uma_chemical_fiber_label label LEFT JOIN uma_chemical_fiber_product product ON label.product_id = product.id Left join uma_chemical_fiber_production production on label.production_id = production.id WHERE label.print_time BETWEEN ?1 AND ?2 " +
             "GROUP BY product.id" +
-            ") AS temp WHERE temp.del_flag = 0 AND temp.color LIKE %?3% AND temp.fineness LIKE %?4%",
+            ") AS temp WHERE temp.del_flag = 0 AND temp.color LIKE %?3% AND temp.fineness LIKE %?4% and temp.machine_number like %?5% and temp.shifts like %?6%",
             countQuery = "select count(*) as totalElements " +
                     "from (" +
                     "SELECT product.*," +
@@ -75,9 +75,9 @@ public interface ChemicalFiberProductionRepository extends JpaRepository<Chemica
                     "sum( CASE WHEN label.`status` = 0 OR label.`status` = 4 THEN 0 ELSE label.gross_weight END ) AS `out_gross_weight`" +
                     "FROM uma_chemical_fiber_label label LEFT JOIN uma_chemical_fiber_product product ON label.product_id = product.id where label.print_time BETWEEN ?1 AND ?2 " +
                     "GROUP BY product.id" +
-                    ") AS temp WHERE temp.del_flag = 0 AND temp.color LIKE %?3% AND temp.fineness LIKE %?4%",
+                    ") AS temp WHERE temp.del_flag = 0 AND temp.color LIKE %?3% AND temp.fineness LIKE %?4% and temp.machine_number like %?5% and temp.shifts like %?6%",
             nativeQuery = true)
-    Page<Map<String, Object>> getProductionReport(String data1, String data2, String color, String fineness, Pageable tempPageable);
+    Page<Map<String, Object>> getProductionReport(String data1, String data2, String color, String fineness, String machineNumber, String shifts, Pageable tempPageable);
 
     @Query(value = "SELECT * " +
             "FROM (" +
@@ -92,7 +92,7 @@ public interface ChemicalFiberProductionRepository extends JpaRepository<Chemica
             "sum( CASE WHEN label.`status` = 0 OR label.`status` = 4 THEN 0 ELSE label.gross_weight END ) AS `out_gross_weight`" +
             "FROM uma_chemical_fiber_label label LEFT JOIN uma_chemical_fiber_product product ON label.product_id = product.id Left join uma_chemical_fiber_production production on label.production_id = production.id WHERE label.print_time BETWEEN ?1 AND ?2 " +
             "GROUP BY product.id" +
-            ") AS temp WHERE temp.del_flag = 0 AND temp.color LIKE %?3% AND temp.fineness LIKE %?4%",
+            ") AS temp WHERE temp.del_flag = 0 AND temp.color LIKE %?3% AND temp.fineness LIKE %?4% and temp.machine_number like %?5% and temp.shifts like %?6%",
             nativeQuery = true)
-    List<Map<String, Object>> getProductionReportSummaries(String data1, String data2, String color, String fineness);
+    List<Map<String, Object>> getProductionReportSummaries(String data1, String data2, String color, String fineness, String machineNumber, String shifts);
 }
