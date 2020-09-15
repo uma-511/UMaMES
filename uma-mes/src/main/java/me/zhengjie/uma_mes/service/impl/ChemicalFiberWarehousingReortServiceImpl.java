@@ -127,8 +127,7 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
         List<Integer> notid = chemicalFiberStockWarehousingRepository.getNotId(createUser, supplierName);
         criteria.setWarehousingIdList(notid);
         List<ChemicalFiberStockWarehousingDetail> list1 = chemicalFiberStockWarehousingDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
-        for (int i = 0; i < list1.size(); i++) {
-            ChemicalFiberStockWarehousingDetail dto = list1.get(i);
+        for (int i = 0; i < list1.size(); i++) {            ChemicalFiberStockWarehousingDetail dto = list1.get(i);
             ChemicalFiberStockWarehousing warehousing = indexWarehousingId(list, dto.getWarehousingId());
             if (warehousing != null) {
                 sumTotalPrice = sumTotalPrice.add(dto.getTotalPrice());
@@ -137,7 +136,6 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
                 } else {
                     sum = sum.add(dto.getWarehousingNumber());
                 }
-
             }
         }
         map.put("sumTotalPrice",sumTotalPrice);
