@@ -90,7 +90,7 @@ public class Terminal extends SendCommand {
 
     public void goControl() {
 //        gobalSender.send(2000);
-        gobalSender.send(switchScreen("00 01"));
+        gobalSender.send(switchScreen("00 02"));
     }
 
     public void addGoControlCommand() {
@@ -298,7 +298,7 @@ public class Terminal extends SendCommand {
                 "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + label.getLabelNumber() + "\"\r\n" +
                 "PRINT 1\r\n";
         String command = CoderUtils.stringToHexStr(printCommand);
-        gobalSender.sendDeloy(command,800);
+        gobalSender.sendDeloy(command,600);
 //        checkPrintStatus(command);
         ReprintPage reprintPage = new ReprintPage();
         reprintPage.back(ip);
