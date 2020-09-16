@@ -90,7 +90,7 @@ public class Terminal extends SendCommand {
 
     public void goControl() {
 //        gobalSender.send(2000);
-        gobalSender.send(switchScreen("00 02"));
+        gobalSender.send(switchScreen("00 01"));
     }
 
     public void addGoControlCommand() {

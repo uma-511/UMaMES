@@ -255,7 +255,8 @@ public class HandheldService {
             scanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
             scanRecordService.create(scanRecord);
 
-            viewScanRecord.setScanNumber(scanNumber);
+            String scan = scanNumber.toUpperCase();
+            viewScanRecord.setScanNumber(scan);
             viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
             viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         } else {
@@ -287,8 +288,8 @@ public class HandheldService {
                 scanRecordService.create(scanRecord);
             }
 
-
-            viewScanRecord.setScanNumber(scanNumber);
+            String scan = scanNumber.toUpperCase();
+            viewScanRecord.setScanNumber(scan);
             viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
             viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         }
@@ -495,7 +496,7 @@ public class HandheldService {
             chemicalFiberDeliveryNote.setTotalPrice(new BigDecimal(0));
             chemicalFiberDeliveryNote.setCreateDate(new Timestamp(System.currentTimeMillis()));
             chemicalFiberDeliveryNoteService.create(chemicalFiberDeliveryNote);
-            chemicalFiberDeliveryNoteService.deliveryNoteStoredProcedure(scanNumber);
+            chemicalFiberDeliveryNoteService.deliveryNoteStoredProcedure(scan);
             // 更新托板记录
             updatePallet(chemicalFiberLabels);
         }
@@ -511,7 +512,7 @@ public class HandheldService {
                 chemicalFiberDeliveryDetailService.delete(chemicalFiberDeliveryDetailDTO.getId());
             }
             // 更新送货单
-            chemicalFiberDeliveryNoteService.deliveryNoteStoredProcedure(scanNumber);
+            chemicalFiberDeliveryNoteService.deliveryNoteStoredProcedure(scan);
         }
 
         return Result.success("上传成功");
