@@ -51,10 +51,10 @@ public class BonusJob implements Serializable {
     private Timestamp createTime;
 
 
-
+/*
     @ManyToMany(mappedBy = "bonusJobs")
     @JsonIgnore
-    private Set<BonusType> bonusTypes;
+    private Set<BonusType> bonusTypes;*/
 
     public @interface Update {}
 

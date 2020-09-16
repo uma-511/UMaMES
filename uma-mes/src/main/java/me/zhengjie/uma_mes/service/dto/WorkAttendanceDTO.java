@@ -1,6 +1,8 @@
 package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.io.Serializable;
 
@@ -37,7 +39,7 @@ public class WorkAttendanceDTO implements Serializable {
     /**
      * 天数
      */
-    private Integer day;
+    private BigDecimal day;
 
     /**
      * 备注

@@ -78,17 +78,17 @@ public class MonthlyWageStatisticsDTO implements Serializable {
     /**
      * 出勤天数
      */
-    private Float attendance;
+    private BigDecimal attendance;
 
     /**
      * 实际出勤天数
      */
-    private Float attendanceReal;
+    private BigDecimal attendanceReal;
 
     /**
      * 请假
      */
-    private BigDecimal leave;
+    private BigDecimal leaveCount;
 
     /**
      * 缺卡

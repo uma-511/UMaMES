@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import me.zhengjie.uma_mes.utils.CustomerBigDecimalSerialize;
 
+import javax.persistence.Column;
 import java.sql.Timestamp;
 import java.math.BigDecimal;
 import java.io.Serializable;
@@ -23,6 +24,11 @@ public class TravelPersionPerformanceDTO implements Serializable {
 
     // 人员id
     private Integer personId;
+
+    /**
+     * 流水号
+     */
+    private String scanNumber;
 
     // 职位
     private String permission;

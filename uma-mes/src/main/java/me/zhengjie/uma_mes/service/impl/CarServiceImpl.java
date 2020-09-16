@@ -84,9 +84,11 @@ public class CarServiceImpl implements CarService {
             if (resources.getTrialCycle().equals("十二个月")) {
                 offSetInt = 12;
             }
-            Date lastTrialDate = new Date(resources.getLastTrial().getTime());
-            Timestamp afterLastTrial = new Timestamp(DateUtil.offsetMonth(lastTrialDate, offSetInt).getTime());
-            resources.setExpectDate(afterLastTrial);
+            if (null != resources.getLastTrial()) {
+                Date lastTrialDate = new Date(resources.getLastTrial().getTime());
+                Timestamp afterLastTrial = new Timestamp(DateUtil.offsetMonth(lastTrialDate, offSetInt).getTime());
+                resources.setExpectDate(afterLastTrial);
+            }
         }
         resources.setEnable(Boolean.TRUE);
         return carMapper.toDto(carRepository.save(resources));
@@ -109,9 +111,11 @@ public class CarServiceImpl implements CarService {
             if(car.getTrialCycle().equals("十二个月")){
                 offSetInt = 12;
             }
-            Date lastTrialDate = new Date(car.getLastTrial().getTime());
-            Timestamp afterLastTrial = new Timestamp(DateUtil.offsetMonth(lastTrialDate,offSetInt).getTime());
-            car.setExpectDate(afterLastTrial);
+            if (null != resources.getLastTrial()) {
+                Date lastTrialDate = new Date(resources.getLastTrial().getTime());
+                Timestamp afterLastTrial = new Timestamp(DateUtil.offsetMonth(lastTrialDate, offSetInt).getTime());
+                resources.setExpectDate(afterLastTrial);
+            }
         }
         carRepository.save(car);
     }

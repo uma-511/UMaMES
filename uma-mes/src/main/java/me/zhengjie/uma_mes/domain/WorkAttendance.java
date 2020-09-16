@@ -4,6 +4,7 @@ import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.io.Serializable;
 
@@ -49,7 +50,7 @@ public class WorkAttendance implements Serializable {
      * 天数
      */
     @Column(name = "day")
-    private Integer day;
+    private BigDecimal day;
 
     /**
      * 备注

@@ -98,19 +98,19 @@ public class MonthlyWageStatistics implements Serializable {
      * 出勤天数
      */
     @Column(name = "attendance")
-    private Float attendance;
+    private BigDecimal attendance;
 
     /**
      * 实际出勤天数
      */
     @Column(name = "attendance_real")
-    private Float attendanceReal;
+    private BigDecimal attendanceReal;
 
     /**
      * 请假
      */
-    @Column(name = "leave")
-    private BigDecimal leave;
+    @Column(name = "leave_count")
+    private BigDecimal leaveCount;
 
     /**
      * 缺卡

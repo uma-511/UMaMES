@@ -3,6 +3,8 @@ package me.zhengjie.uma_mes.service.dto;
 import lombok.Data;
 import me.zhengjie.annotation.Query;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,12 +21,24 @@ public class TravelPersionPerformanceQueryCriteria{
     private String personName;
 
     /**
-     * 终点
+     * 状态
      */
     @Query(propName = "enable")
     private Boolean enable;
 
     private Boolean showUnEnable;
+
+    /**
+     * 大于等于
+      */
+    @Query(type = Query.Type.GREATER_THAN, propName = "createTime")
+    private Timestamp startTime;
+
+    /**
+     * 小于等于
+     */
+    @Query(type = Query.Type.LESS_THAN, propName = "createTime")
+    private Timestamp endTime;
 
     /**
      * 是否可用

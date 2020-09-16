@@ -32,9 +32,9 @@ public class CycleLabel implements Serializable {
     @Column(name = "name")
     private String name;
 
-    @ManyToMany(mappedBy = "cycles")
+   /* @ManyToMany(mappedBy = "cycles")
     @JsonIgnore
-    private Set<BonusType> bonusTypes;
+    private Set<BonusType> bonusTypes;*/
 
     public void copy(CycleLabel source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

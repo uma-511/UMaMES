@@ -32,7 +32,6 @@ public class TravelPersionPerformanceController {
     @Log("导出数据")
     @ApiOperation("导出数据")
     @GetMapping(value = "/download")
-    @PreAuthorize("@el.check('travelPersionPerformance:list')")
     public void download(HttpServletResponse response, TravelPersionPerformanceQueryCriteria criteria) throws IOException {
         travelPersionPerformanceService.download(travelPersionPerformanceService.queryAll(criteria), response);
     }
@@ -40,7 +39,6 @@ public class TravelPersionPerformanceController {
     @GetMapping
     @Log("查询TravelPersionPerformance")
     @ApiOperation("查询TravelPersionPerformance")
-    @PreAuthorize("@el.check('travelPersionPerformance:list')")
     public ResponseEntity getTravelPersionPerformances(TravelPersionPerformanceQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(travelPersionPerformanceService.queryAll(criteria,pageable),HttpStatus.OK);
     }
@@ -48,7 +46,6 @@ public class TravelPersionPerformanceController {
     @PostMapping
     @Log("新增TravelPersionPerformance")
     @ApiOperation("新增TravelPersionPerformance")
-    @PreAuthorize("@el.check('travelPersionPerformance:add')")
     public ResponseEntity create(@Validated @RequestBody TravelPersionPerformance resources){
         return new ResponseEntity<>(travelPersionPerformanceService.create(resources),HttpStatus.CREATED);
     }
@@ -56,7 +53,6 @@ public class TravelPersionPerformanceController {
     @PutMapping
     @Log("修改TravelPersionPerformance")
     @ApiOperation("修改TravelPersionPerformance")
-    @PreAuthorize("@el.check('travelPersionPerformance:edit')")
     public ResponseEntity update(@Validated @RequestBody TravelPersionPerformance resources){
         travelPersionPerformanceService.update(resources);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
@@ -65,7 +61,6 @@ public class TravelPersionPerformanceController {
     @DeleteMapping(value = "/{id}")
     @Log("删除TravelPersionPerformance")
     @ApiOperation("删除TravelPersionPerformance")
-    @PreAuthorize("@el.check('travelPersionPerformance:del')")
     public ResponseEntity delete(@PathVariable Integer id){
         travelPersionPerformanceService.delete(id);
         return new ResponseEntity(HttpStatus.OK);

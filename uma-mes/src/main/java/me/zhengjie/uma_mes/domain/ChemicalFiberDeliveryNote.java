@@ -128,6 +128,10 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "invoice_type")
     private String invoiceType;
 
+    // 发票号码
+    @Column(name = "invoice_number")
+    private String invoiceNumber;
+
     // 状态备份
     @Column(name = "back_note_status")
     private Integer backNoteStatus;

@@ -58,7 +58,6 @@ public class BonusTypeServiceImpl implements BonusTypeService {
     }
 
     @Override
-    @Cacheable
     public List<BonusTypeDTO> queryAll(BonusTypeQueryCriteria criteria){
         return bonusTypeMapper.toDto(bonusTypeRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }

@@ -69,10 +69,10 @@ public class AuthenticationController {
         // 清除验证码
         redisService.delete(authUser.getUuid());
         if (StringUtils.isBlank(code)) {
-            throw new BadRequestException("验证码已过期");
+            //throw new BadRequestException("验证码已过期");
         }
         if (StringUtils.isBlank(authUser.getCode()) || !authUser.getCode().equalsIgnoreCase(code)) {
-            throw new BadRequestException("验证码错误");
+            //throw new BadRequestException("验证码错误");
         }
         final JwtUser jwtUser = (JwtUser) userDetailsService.loadUserByUsername(authUser.getUsername());
 

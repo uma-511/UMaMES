@@ -32,6 +32,12 @@ public class TravelPersionPerformance implements Serializable {
     private String personName;
 
     /**
+     * 流水号
+     */
+    @Column(name = "scan_number")
+    private String scanNumber;
+
+    /**
      * 人员id
      */
     @Column(name = "person_id")
