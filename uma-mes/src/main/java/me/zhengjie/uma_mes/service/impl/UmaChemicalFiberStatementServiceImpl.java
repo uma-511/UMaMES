@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -52,6 +53,9 @@ import javax.servlet.http.HttpServletResponse;
 @CacheConfig(cacheNames = "umaChemicalFiberStatement")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberStatementService {
+
+    @Value("${globalCompanyName}")
+    private String globalCompanyName;
 
     private final UmaChemicalFiberStatementRepository umaChemicalFiberStatementRepository;
 
@@ -86,25 +90,36 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
 //    @Cacheable
     public Map<String,Object> queryAll(UmaChemicalFiberStatementQueryCriteria criteria, Pageable pageable){
         //Page<UmaChemicalFiberStatement> page = umaChemicalFiberStatementRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
-        Long createDate = criteria.getCreateDate();
-        Date date = new Date(createDate);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        Integer year = calendar.get(Calendar.YEAR);
-        Integer month = calendar.get(Calendar.MONTH) + 2;
+        String years = "";
         String months = "";
-        String days = "";
-        String dateTime = "";
-        if (month < 10) {
-            months = "0" + month;
-        } else {
-            months = month + "";
+        if (criteria.getCreateDate() != null) {
+            Long createDate = criteria.getCreateDate();
+            Date date = new Date(createDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            Integer year = calendar.get(Calendar.YEAR);
+            Integer month = calendar.get(Calendar.MONTH) + 1;
+            years = year + "";
+            if (month < 10) {
+                months = "0" + month;
+            } else {
+                months = month + "";
+            }
+        }
+
+        String customerName = "";
+        String accountCode = "";
+        if (criteria.getCustomerName() != null) {
+            customerName = criteria.getCustomerName();
+        }
+        if (criteria.getAccountCode() != null) {
+            accountCode = criteria.getAccountCode();
         }
         int start = pageable.getPageSize();
         int end = pageable.getPageNumber();
         int PageNumber = start * end;
         Map<String, Object> map = new HashMap<>();
-        List<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd(PageNumber, start);
+        List<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd(PageNumber, start, customerName, accountCode, years + "-" + months);
         Integer ListSeiz = umaChemicalFiberStatementRepository.findSize();
         map.put("content", pages);
         map.put("totalElements", ListSeiz);
@@ -314,11 +329,21 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
 
     @Override
     public void exportStatement(HttpServletResponse response, Integer id) {
+        String global = "";
+        String templatePath = "";
+        if (globalCompanyName.equals("YQ")) {
+            global = "高明"+"永琪";
+            templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_yq.xls";
+        } else (globalCompanyName.equals("XQ")) {
+            global = "南海" + "祥琪";
+            templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_xq.xls";
+
+        }
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(id).orElseGet(UmaChemicalFiberStatement::new);
         UmaChemicalFiberStatementDetailsQueryCriteria umaChemicalFiberStatementDetailsQueryCriteria = new UmaChemicalFiberStatementDetailsQueryCriteria();
         umaChemicalFiberStatementDetailsQueryCriteria.setStatementId(umaChemicalFiberStatement.getId());
         List<UmaChemicalFiberStatementDetailsDTO> umaChemicalFiberStatementDetailsDTOS = umaChemicalFiberStatementDetailsService.queryAll(umaChemicalFiberStatementDetailsQueryCriteria);
-        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList.xls";
+
         // 加载模板
         TemplateExportParams params = new TemplateExportParams(templatePath);
         // 生成workbook 并导出
@@ -404,6 +429,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         map.put("statementLists", listMap);
         map.put("receiptlistMap", receiptlistMap);
         map.put("sumTotalBag", sumTotalBag);
+        map.put("global", global);
         workbook = ExcelExportUtil.exportExcel(params, map);
         FileUtil.downLoadExcel("对账单导出.xlsx", response, workbook);
     }

@@ -18,7 +18,7 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
     @Query(value = "select user.realname from user where user.username=:username limit 1",nativeQuery = true)
     String getRealNameByUserName(@Param("username") String username);
 
-    @Query(value = "select COUNT(id) FROM uma_chemical_fiber_delivery_note WHERE create_date like %:currenDate%",nativeQuery = true)
+    @Query(value = "select COUNT(id) FROM uma_chemical_fiber_delivery_note WHERE create_date like %:currenDate%  and invalid = 0",nativeQuery = true)
     Integer getCurrenNoteCount(@Param("currenDate") String currenDate);
 
     @Query(value = "select scan_number FROM uma_chemical_fiber_delivery_note WHERE create_date like %:currenDate%  \n" +

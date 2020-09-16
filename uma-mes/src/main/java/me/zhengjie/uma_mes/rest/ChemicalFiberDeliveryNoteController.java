@@ -21,7 +21,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author Tan Jun Ming
@@ -165,5 +170,43 @@ public class ChemicalFiberDeliveryNoteController {
     @AnonymousAccess
     public Result getSalesReportSummaries(@RequestBody ChemicalFiberDeliveryNoteQueryCriteria criteria) {
         return chemicalFiberDeliveryNoteService.getSalesReportSummaries(criteria);
+    }
+
+    @PostMapping("/getSummaryData")
+    @Log("查询ChemicalFiberLabel")
+    @ApiOperation("查询ChemicalFiberLabel")
+    public Result getSummaryData(@RequestBody ChemicalFiberDeliveryNoteQueryCriteria criteria) {
+        BigDecimal sumTotalCost = new BigDecimal(0);
+        BigDecimal sumTotalPrice = new BigDecimal(0);
+        BigDecimal sumRemainder = new BigDecimal(0);
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+        }
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
+        if (null != criteria.getShowUnEnable() && criteria.getShowUnEnable())
+        {
+            booleanList.add(Boolean.FALSE);
+        }
+        criteria.setEnableList(booleanList);
+        List<ChemicalFiberDeliveryNoteDTO> ChemicalFiberDeliveryNoteList = chemicalFiberDeliveryNoteService.queryAll(criteria);
+        for (ChemicalFiberDeliveryNoteDTO Note : ChemicalFiberDeliveryNoteList) {
+            if (Note.getTotalCost() != null) {
+                sumTotalCost = sumTotalCost.add(Note.getTotalCost());
+            }
+            if (Note.getTotalPrice() != null) {
+                sumTotalPrice = sumTotalPrice.add(Note.getTotalPrice());
+            }
+            if (Note.getRemainder() != null) {
+                sumRemainder = sumRemainder.add(Note.getRemainder());
+            }
+        }
+        //sumNetWeight =  sumNetWeight.multiply(new BigDecimal(1000));
+        Map<String, Object> map = new HashMap<>();
+        map.put("sumTotalCost", sumTotalCost);
+        map.put("sumTotalPrice", sumTotalPrice);
+        map.put("sumRemainder", sumRemainder);
+        return Result.success(map);
     }
 }

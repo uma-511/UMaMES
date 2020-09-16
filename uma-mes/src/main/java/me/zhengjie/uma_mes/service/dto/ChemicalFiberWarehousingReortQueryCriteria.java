@@ -12,7 +12,7 @@ public class ChemicalFiberWarehousingReortQueryCriteria {
     @Query(type = Query.Type.INNER_LIKE)
     private String scanNumber;
 
-    @Query(type = Query.Type.INNER_LIKE)
+    @Query
     private String prodName;
 
     // 大于等于
