@@ -123,6 +123,9 @@ public class ChemicalFiberStockController {
         List<ChemicalFiberStockDTO> chemicalFiberStockDTOList = chemicalFiberStockService.queryAll(criteria);
         for (ChemicalFiberStockDTO chemicalFiberStockDTO : chemicalFiberStockDTOList) {
             String unit = chemicalFiberStockDTO.getProdUnit();
+            if( null == unit || unit.equals("")){
+                break;
+            }
             if (unit.equals("吨")) {
                 sumNetWeight = sumNetWeight.add(chemicalFiberStockDTO.getTotalNumber());
             }
