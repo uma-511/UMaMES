@@ -131,7 +131,7 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
             ChemicalFiberStockWarehousingDetail dto = list1.get(i);
             ChemicalFiberStockWarehousing warehousing = indexWarehousingId(list, dto.getWarehousingId());
             if (warehousing != null) {
-                sumTotalPrice = sumTotalPrice.add(warehousing.getTotalPrice());
+                sumTotalPrice = sumTotalPrice.add(dto.getTotalPrice());
                 if (dto.getUnit().equals("吨")) {
                     sumTon = sumTon.add(dto.getWarehousingNumber());
                 } else {
