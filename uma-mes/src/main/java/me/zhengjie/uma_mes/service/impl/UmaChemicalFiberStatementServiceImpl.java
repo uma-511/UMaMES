@@ -334,7 +334,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         if (globalCompanyName.equals("YQ")) {
             global = "高明"+"永琪";
             templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_yq.xls";
-        } else (globalCompanyName.equals("XQ")) {
+        } else {
             global = "南海" + "祥琪";
             templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_xq.xls";
 
