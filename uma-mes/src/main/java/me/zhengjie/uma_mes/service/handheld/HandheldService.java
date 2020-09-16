@@ -489,7 +489,8 @@ public class HandheldService {
 
         if (uploadDataDto.getStatus() == 2) {
             ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = new ChemicalFiberDeliveryNote();
-            chemicalFiberDeliveryNote.setScanNumber(scanNumber);
+            String scan = scanNumber.toUpperCase();
+            chemicalFiberDeliveryNote.setScanNumber(scan);
             chemicalFiberDeliveryNote.setTotalCost(new BigDecimal(0));
             chemicalFiberDeliveryNote.setTotalPrice(new BigDecimal(0));
             chemicalFiberDeliveryNote.setCreateDate(new Timestamp(System.currentTimeMillis()));
@@ -502,7 +503,8 @@ public class HandheldService {
         if (uploadDataDto.getStatus() == 7) {
             ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
             List<String> scanNumbers = new ArrayList<>();
-            scanNumbers.add(scanNumber);
+            String scan = scanNumber.toUpperCase();
+            scanNumbers.add(scan);
             chemicalFiberDeliveryDetailQueryCriteria.setScanNumbers(scanNumbers);
             List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
             for(ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {

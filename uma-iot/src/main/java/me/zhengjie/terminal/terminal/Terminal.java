@@ -206,10 +206,10 @@ public class Terminal extends SendCommand {
                 "CLS\r\n" +
                 "DENSITY 7\r\n" +
                 "REFERENCE 0,0\r\n" +
-                "TEXT 70,6,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\" \r\n" +
-                "TEXT 70,8,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
-                "TEXT 69,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
-                "TEXT 71,7,\"TSS24.BF2\",0,3,2,\"清远市奥锦新材料\"\r\n" +
+                "TEXT 70,6,\"TSS24.BF2\",0,2,2,\"清远市清城区翼德织造厂\" \r\n" +
+                "TEXT 70,8,\"TSS24.BF2\",0,2,2,\"清远市清城区翼德织造厂\"\r\n" +
+                "TEXT 69,7,\"TSS24.BF2\",0,2,2,\"清远市清城区翼德织造厂\"\r\n" +
+                "TEXT 71,7,\"TSS24.BF2\",0,2,2,\"清远市清城区翼德织造厂\"\r\n" +
                 "TEXT 45,67,\"TSS24.BF2\",0,2,2,\"色号：\" \r\n" +
                 "TEXT 175,66,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
                 "TEXT 175,68,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
@@ -217,10 +217,10 @@ public class Terminal extends SendCommand {
                 "TEXT 176,67,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n" +
                 "TEXT 370,67,\"TSS24.BF2\",0,2,2,\"纤度：\"\r\n" +
                 "TEXT 500,67,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFineness() + "\"\r\n" +
-                "TEXT 45,124,\"TSS24.BF2\",0,2,2,\"班组：\" \r\n" +
-                "TEXT 175,124,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + " - " + controlPannelInfo.getMachineNumber() + "\"\r\n" +
-                "TEXT 370,124,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n" +
-                "TEXT 500,124,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFactPerBagNumber() + "\"\r\n" +
+                "TEXT 45,124,\"TSS24.BF2\",0,2,2,\"数量：\" \r\n" +
+                "TEXT 175,124,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFactPerBagNumber()   + "\"\r\n" +
+                "TEXT 370,124,\"TSS24.BF2\",0,2,2,\"班组：\"\r\n" +
+                "TEXT 500,124,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + " - " + controlPannelInfo.getMachineNumber() + "\"\r\n" +
                 "TEXT 45,182,\"TSS24.BF2\",0,2,2,\"日期：\" \r\n" +
                 "TEXT 175,182,\"TSS24.BF2\",0,1,2,\"" + ym + "\"\r\n" +
                 "TEXT 370,182,\"TSS24.BF2\",0,2,2,\"净\"\r\n" +
