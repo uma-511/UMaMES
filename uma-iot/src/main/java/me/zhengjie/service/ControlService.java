@@ -233,6 +233,7 @@ public class ControlService {
                 gobalSender.sendImmediate(cancelPage.sendTip("标签已作废",ip));
             }else{
                 label.setStatus(3);
+                label.setPalletId("");
                 labelService.update(label);
                 gobalSender.sendImmediate(cancelPage.sendTip("标签作废成功",ip));
 
