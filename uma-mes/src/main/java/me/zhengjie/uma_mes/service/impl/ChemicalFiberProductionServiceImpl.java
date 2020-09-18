@@ -420,13 +420,11 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         String data1 = simpleDateFormat.format(criteria.getTempStartTime());
         String data2 = simpleDateFormat.format(criteria.getTempEndTime());
         Pageable tempPageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
-        Page<Map<String, Object>> ProdctionPage = chemicalFiberProductionRepository.getProductionReport(data1, data2,
+        List<Map<String, Object>> ProdctionList = chemicalFiberProductionRepository.getProductionReportSummaries(data1, data2,
                 StringUtils.isEmpty(criteria.getProdColor()) ? "" : criteria.getProdColor(),
                 StringUtils.isEmpty(criteria.getProdFineness()) ? "" : criteria.getProdFineness(),
                 StringUtils.isEmpty(criteria.getMachineNumber()) ? "" : criteria.getMachineNumber(),
-                StringUtils.isEmpty(criteria.getShifts()) ? "" : criteria.getShifts(),
-                tempPageable);
-        List<Map<String, Object>> ProdctionList = ProdctionPage.getContent();
+                StringUtils.isEmpty(criteria.getShifts()) ? "" : criteria.getShifts());
         List<Map<String, Object>> listMap = new ArrayList<>();
         for (int i = 1; i <= ProdctionList.size(); i++) {
             Map<String, Object> dto = new HashMap<>();
