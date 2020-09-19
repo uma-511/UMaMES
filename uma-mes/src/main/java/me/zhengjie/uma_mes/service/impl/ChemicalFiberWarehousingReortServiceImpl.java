@@ -73,7 +73,7 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
         for (int i = 0; i < list1.size(); i++) {
             ChemicalFiberStockWarehousingDetail dto = list1.get(i);
             ChemicalFiberStockWarehousing warehousing = indexWarehousingId(list, dto.getWarehousingId());
-            if (warehousing != null) {
+            if (warehousing.getId() != null) {
                 ++Elements;
                 ChemicalFiberWarehousingReortDTO WarehousingReort = new ChemicalFiberWarehousingReortDTO();
                 WarehousingReort.setScanNumber(dto.getScanNumber());
@@ -130,14 +130,13 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
         for (int i = 0; i < list1.size(); i++) {
             ChemicalFiberStockWarehousingDetail dto = list1.get(i);
             ChemicalFiberStockWarehousing warehousing = indexWarehousingId(list, dto.getWarehousingId());
-            if (warehousing != null) {
-                sumTotalPrice = sumTotalPrice.add(warehousing.getTotalPrice());
+            if (warehousing.getId() != null) {
+                sumTotalPrice = sumTotalPrice.add(dto.getTotalPrice());
                 if (dto.getUnit().equals("吨")) {
                     sumTon = sumTon.add(dto.getWarehousingNumber());
                 } else {
                     sum = sum.add(dto.getWarehousingNumber());
                 }
-
             }
         }
         map.put("sumTotalPrice",sumTotalPrice);
@@ -150,12 +149,14 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
 
 
     public ChemicalFiberStockWarehousing indexWarehousingId(List<ChemicalFiberStockWarehousing> list,Integer warehousingId) {
-
+        ChemicalFiberStockWarehousing is = new ChemicalFiberStockWarehousing();
         for (int j = 0; j < list.size(); j++) {
-            if (list.get(j).getId() == warehousingId) {
-                return list.get(j);
+            Integer a = list.get(j).getId();
+            if (Objects.equals(a, warehousingId)) {
+                is = list.get(j);
+                return is;
             }
         }
-        return null;
+        return is;
     }
 }

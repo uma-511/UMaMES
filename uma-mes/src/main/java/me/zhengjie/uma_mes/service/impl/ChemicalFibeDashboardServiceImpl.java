@@ -59,19 +59,9 @@ public class ChemicalFibeDashboardServiceImpl implements ChemicalFibeDashboardSe
         Integer year = calendar.get(Calendar.YEAR);
         Integer month = calendar.get(Calendar.MONTH) + 1;
         Integer day = calendar.get(Calendar.DAY_OF_MONTH);
-        String months = "";
-        String days = "";
         String dateTime = "";
-        if (month < 10) {
-            months = "0" + month;
-        } else {
-            months = month + "";
-        }
-        if (day < 10) {
-            days = "0" + day;
-        } else {
-            days = day + "";
-        }
+        String months = month < 10 ? "0" + month : month + "";
+        String days = day < 10 ? "0" + day : day + "";
         if (radio.equals("1")) {
             dateTime = year + "-" + months + "-" + days;
         }
