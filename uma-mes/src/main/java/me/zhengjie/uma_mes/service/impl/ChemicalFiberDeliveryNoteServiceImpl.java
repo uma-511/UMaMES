@@ -310,7 +310,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             BigDecimal realTotalPrise = new BigDecimal(0);
             BigDecimal totalWeight = new BigDecimal(0);
             for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
-                if(null == chemicalFiberDeliveryDetailDTO.getRealQuantity() || chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)) {
+                if(null == chemicalFiberDeliveryDetailDTO.getRealQuantity() ||(chemicalFiberDeliveryDetailDTO.getRealQuantity().compareTo(new BigDecimal(0.00))) == 0 || chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0) || chemicalFiberDeliveryDetailDTO.getRealQuantity().equals("")) {
                     //若实收数量为空则自动填入计划数
                     chemicalFiberDeliveryDetailDTO.setRealQuantity(chemicalFiberDeliveryDetailDTO.getTotalNumber());
                     detailPrise = new BigDecimal(0);

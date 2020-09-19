@@ -30,6 +30,20 @@ public class WorkAttendanceQueryCriteria{
 
     private Boolean showUnEnable;
 
+
+
+    /**
+     * 大于等于
+     */
+    @Query(type = Query.Type.GREATER_THAN, propName = "attenceDate")
+    private Timestamp startTime;
+
+    /**
+     * 小于等于
+     */
+    @Query(type = Query.Type.LESS_THAN, propName = "attenceDate")
+    private Timestamp endTime;
+
     /**
      * 是否可用
      */

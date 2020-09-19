@@ -53,10 +53,28 @@ public class WorkAttendance implements Serializable {
     private BigDecimal day;
 
     /**
+     * 金额
+     */
+    @Column(name = "price")
+    private BigDecimal price;
+
+    /**
      * 备注
      */
     @Column(name = "remark")
     private String remark;
+
+    /**
+     * 流水号
+     */
+    @Column(name = "serial_number")
+    private String serialNumber;
+
+    /**
+     * 安全类型
+     */
+    @Column(name = "safe_type")
+    private String safeType;
 
     /**
      * 创建日期

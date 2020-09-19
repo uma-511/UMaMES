@@ -2,6 +2,7 @@ package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
 
+import javax.persistence.Column;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.io.Serializable;
@@ -55,4 +56,19 @@ public class WorkAttendanceDTO implements Serializable {
      * 状态
      */
     private Boolean enable;
+
+    /**
+     * 流水号
+     */
+    private String serialNumber;
+
+    /**
+     * 安全类型
+     */
+    private String safeType;
+
+    /**
+     * 金额
+     */
+    private BigDecimal price;
 }

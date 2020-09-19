@@ -1,14 +1,13 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.*;
 import me.zhengjie.uma_mes.repository.WageUserRepository;
-import me.zhengjie.uma_mes.service.BonusTypeService;
-import me.zhengjie.uma_mes.service.TravelPersionPerformanceService;
+import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.utils.ValidationUtil;
 import me.zhengjie.utils.FileUtil;
 import me.zhengjie.uma_mes.repository.MonthlyWageStatisticsRepository;
-import me.zhengjie.uma_mes.service.MonthlyWageStatisticsService;
 import me.zhengjie.uma_mes.service.mapper.MonthlyWageStatisticsMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,6 +20,8 @@ import me.zhengjie.utils.QueryHelp;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.IOException;
@@ -45,12 +46,18 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
 
     private final TravelPersionPerformanceService travelPersionPerformanceService;
 
-    public MonthlyWageStatisticsServiceImpl(MonthlyWageStatisticsRepository monthlyWageStatisticsRepository, MonthlyWageStatisticsMapper monthlyWageStatisticsMapper, WageUserRepository wageUserRepository, BonusTypeService bonusTypeService, TravelPersionPerformanceService travelPersionPerformanceService) {
+    private final WorkAttendanceService workAttendanceService;
+
+    private final AcidPersionPerformanceService acidPersionPerformanceService;
+
+    public MonthlyWageStatisticsServiceImpl(MonthlyWageStatisticsRepository monthlyWageStatisticsRepository, MonthlyWageStatisticsMapper monthlyWageStatisticsMapper, WageUserRepository wageUserRepository, BonusTypeService bonusTypeService, TravelPersionPerformanceService travelPersionPerformanceService, WorkAttendanceService workAttendanceService, AcidPersionPerformanceService acidPersionPerformanceService) {
         this.monthlyWageStatisticsRepository = monthlyWageStatisticsRepository;
         this.monthlyWageStatisticsMapper = monthlyWageStatisticsMapper;
         this.wageUserRepository = wageUserRepository;
         this.bonusTypeService = bonusTypeService;
         this.travelPersionPerformanceService = travelPersionPerformanceService;
+        this.workAttendanceService = workAttendanceService;
+        this.acidPersionPerformanceService = acidPersionPerformanceService;
     }
 
     @Override
@@ -85,6 +92,8 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         // 设置为上一个月
         calendar.add(Calendar.MONTH, -1);
         calendar.set(Calendar.DAY_OF_MONTH,1);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
         return new Timestamp(calendar.getTimeInMillis());
     }
     public Timestamp getLastMonthEndTime() {
@@ -95,6 +104,43 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         // 设置为上一个月
         calendar.add(Calendar.MONTH, 0);
         calendar.set(Calendar.DAY_OF_MONTH,0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        date = calendar.getTime();
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+    public Timestamp getQuarterStartTime() throws ParseException {
+        Calendar calendar = Calendar.getInstance();
+        if (getMonthCn().equals("三月")) {
+            calendar.set(calendar.get(Calendar.YEAR), Calendar.JANUARY, 1);
+        }
+        if (getMonthCn().equals("六月")) {
+            calendar.set(calendar.get(Calendar.YEAR), Calendar.APRIL, 1);
+        }
+        if (getMonthCn().equals("九月")) {
+            calendar.set(calendar.get(Calendar.YEAR), Calendar.JULY, 1);
+        }
+        if (getMonthCn().equals("十月")) {
+            calendar.set(calendar.get(Calendar.YEAR), Calendar.OCTOBER, 1);
+        }
+        return new Timestamp(calendar.getTimeInMillis());
+    }
+
+    public Timestamp getQuarterEndTime() {
+        Calendar calendar = Calendar.getInstance();
+        if (getMonthCn().equals("三月")) {
+            calendar.set(calendar.get(Calendar.YEAR), Calendar.MARCH, 1);
+        }
+        if (getMonthCn().equals("六月")) {
+            calendar.set(calendar.get(Calendar.YEAR), Calendar.JUNE, 1);
+        }
+        if (getMonthCn().equals("九月")) {
+            calendar.set(calendar.get(Calendar.YEAR), Calendar.SEPTEMBER, 1);
+        }
+        if (getMonthCn().equals("十二月")) {
+            calendar.set(calendar.get(Calendar.YEAR), Calendar.DECEMBER, 1);
+        }
         return new Timestamp(calendar.getTimeInMillis());
     }
 
@@ -103,12 +149,18 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         Date date = new Date();
         calendar.setTime(date);
         calendar.add(Calendar.MONTH, -1);
-        return calendar.getActualMaximum(Calendar.DAY_OF_MONTH)-4;
+        return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
 
 
     public String getMonthCn(){
-        Integer month = new Timestamp(System.currentTimeMillis()).getMonth();
+        Date date = new Date();
+        Calendar calendar = Calendar.getInstance();
+        // 设置为当前时间
+        calendar.setTime(date);
+        // 设置为上一个月
+        calendar.add(Calendar.MONTH, 0);
+        Integer month = calendar.get(Calendar.MONTH);
         String monthCn = "";
         if (month.equals(1)) {
             monthCn = "一月";
@@ -152,59 +204,93 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void generateWage() {
+        BigDecimal zero = new BigDecimal(0);
+        String monthCn = getMonthCn();
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
         MonthlyWageStatistics monthlyWageStatistics;
-        //上月绩效列表
+        Boolean isQuarter = false;
+
+        if (monthCn.equals("三月") || monthCn.equals("六月") || monthCn.equals("九月") || monthCn.equals("十二月")) {
+            isQuarter = true;
+        }
+
+        // 上月放酸绩效
+        AcidPersionPerformanceQueryCriteria acidPersionPerformanceQueryCriteria = new AcidPersionPerformanceQueryCriteria();
+        acidPersionPerformanceQueryCriteria.setEnableList(booleanList);
+        acidPersionPerformanceQueryCriteria.setStartTime(getLastMonthStartTime());
+        acidPersionPerformanceQueryCriteria.setEndTime(getLastMonthEndTime());
+        List<AcidPersionPerformanceDTO> acidPersonPerformanceDTOS = acidPersionPerformanceService.queryAll(acidPersionPerformanceQueryCriteria);
+
+        // 上月司机绩效列表
         TravelPersionPerformanceQueryCriteria travelPersionPerformanceQueryCriteria = new TravelPersionPerformanceQueryCriteria();
+        travelPersionPerformanceQueryCriteria.setEnableList(booleanList);
         travelPersionPerformanceQueryCriteria.setStartTime(getLastMonthStartTime());
         travelPersionPerformanceQueryCriteria.setEndTime(getLastMonthEndTime());
         List<TravelPersionPerformanceDTO> travelPersionPerformanceDTOList = travelPersionPerformanceService.queryAll(travelPersionPerformanceQueryCriteria);
 
-        //奖金、补贴列表
+        // 奖金、补贴列表
         BonusTypeQueryCriteria bonusTypeQueryCriteria = new BonusTypeQueryCriteria();
         List<BonusTypeDTO> bonusTypeDTOList = bonusTypeService.queryAll(bonusTypeQueryCriteria);
 
+        // 考勤统计
+        WorkAttendanceQueryCriteria workAttendanceQueryCriteria = new WorkAttendanceQueryCriteria();
+        workAttendanceQueryCriteria.setEnableList(booleanList);
+        workAttendanceQueryCriteria.setStartTime(getLastMonthStartTime());
+        workAttendanceQueryCriteria.setEndTime(getLastMonthEndTime());
+        List<WorkAttendanceDTO> workAttendanceDTOS = workAttendanceService.queryAll(workAttendanceQueryCriteria);
+
         List<WageUser> wageUserList = wageUserRepository.getWageUser(Boolean.TRUE);
         for(WageUser w : wageUserList) {
+            if(!w.getRealName().equals("拖头车司机") && !w.getRealName().equals("槽罐车司机")){continue;}
             monthlyWageStatistics = new MonthlyWageStatistics();
             monthlyWageStatistics.setPersonName(w.getRealName());
             monthlyWageStatistics.setJob(w.getJob());
             monthlyWageStatistics.setDept(w.getDept());
             monthlyWageStatistics.setBasicSalary(w.getBasicSalary());
 
-            //绩效统计
-            BigDecimal performance = new BigDecimal(0);
+            // 绩效统计
+            // 出车绩效
+            BigDecimal performance = zero;
             for (TravelPersionPerformanceDTO travelPersionPerformanceDTO : travelPersionPerformanceDTOList) {
                 if (travelPersionPerformanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
                     performance = performance.add(travelPersionPerformanceDTO.getTotalPerformance());
                 }
             }
-            monthlyWageStatistics.setPerformance(performance);
+            //放酸绩效
+            for (AcidPersionPerformanceDTO acidPersionPerformanceDTO : acidPersonPerformanceDTOS) {
+                if (acidPersionPerformanceDTO.getPerson().equals(monthlyWageStatistics.getPersonName())){
+                    performance = performance.add(acidPersionPerformanceDTO.getPrice());
+                }
+            }
+            monthlyWageStatistics.setPerformance(performance.equals(zero)? null : performance);
 
-            //打卡奖
-            BigDecimal cardPrize = new BigDecimal(0);
-            //安全奖
-            BigDecimal safePrize = new BigDecimal(0);
-            //全勤奖
-            BigDecimal fullPrize = new BigDecimal(0);
-            //高温津贴
-            BigDecimal highTemperatureSubsidy = new BigDecimal(0);
+
+            // 打卡奖
+            BigDecimal cardPrize = zero;
+            // 安全奖
+            BigDecimal safePrize = zero;
+            // 全勤奖
+            BigDecimal fullPrize = zero;
+            // 高温津贴
+            BigDecimal highTemperatureSubsidy = zero;
             for (BonusTypeDTO bonusTypeDTO : bonusTypeDTOList) {
                 Set<CycleLabel> cycles = bonusTypeDTO.getCycles();
                 Set<BonusJob> bonusJobs = bonusTypeDTO.getBonusJobs();
                 for (CycleLabel cycleLabel : cycles) {
-                    if(null != cycleLabel && null != cycleLabel.getName() && cycleLabel.getName().equals(getMonthCn())) {
+                    if(null != cycleLabel && null != cycleLabel.getName() && cycleLabel.getName().equals(monthCn)) {
                         for (BonusJob bonusJob : bonusJobs) {
                             if (null != bonusJob && null != bonusJob.getName() && bonusJob.getName().equals(monthlyWageStatistics.getJob())) {
                                 if (bonusTypeDTO.getType().equals("打卡奖")) {
                                     cardPrize = cardPrize.add(bonusTypeDTO.getPrice());
                                 }
-                                if (bonusTypeDTO.getType().equals("安全奖（押运）")) {
+                                if (bonusTypeDTO.getType().equals("押运人员安全奖") && isQuarter) {
                                     safePrize = safePrize.add(bonusTypeDTO.getPrice());
                                 }
-                                if (bonusTypeDTO.getType().equals("安全奖（放酸）")) {
+                                if (bonusTypeDTO.getType().equals("放酸人员安全奖") && isQuarter) {
                                     safePrize = safePrize.add(bonusTypeDTO.getPrice());
                                 }
-                                if (bonusTypeDTO.getType().equals("安全奖（司机）")) {
+                                if (bonusTypeDTO.getType().equals("司机安全奖") && isQuarter) {
                                     safePrize = safePrize.add(bonusTypeDTO.getPrice());
                                 }
                                 if (bonusTypeDTO.getType().equals("全勤奖")) {
@@ -218,28 +304,96 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
                     }
                 }
             }
-            monthlyWageStatistics.setCardPrize(cardPrize);
-            monthlyWageStatistics.setSafePrize(safePrize);
-            monthlyWageStatistics.setFullPrize(fullPrize);
-            monthlyWageStatistics.setHighTemperatureSubsidy(highTemperatureSubsidy);
+            monthlyWageStatistics.setCardPrize(cardPrize.equals(zero)? null : cardPrize);
+            monthlyWageStatistics.setSafePrize(safePrize.equals(zero)? null : safePrize);
+            monthlyWageStatistics.setFullPrize(fullPrize.equals(zero)? null : fullPrize);
+            monthlyWageStatistics.setHighTemperatureSubsidy(highTemperatureSubsidy.equals(zero)? null : highTemperatureSubsidy);
 
-            monthlyWageStatistics.setOvertimePay(new BigDecimal(0));
-            monthlyWageStatistics.setOtherPrize(new BigDecimal(0));
-            BigDecimal payable = new BigDecimal(0);
+
+            BigDecimal payable = zero;
+            payable = payable.add(monthlyWageStatistics.getBasicSalary());
+            payable = payable.add(performance);
             payable = payable.add(cardPrize);
             payable = payable.add(safePrize);
             payable = payable.add(fullPrize);
-            monthlyWageStatistics.setWagesPayable(payable);
-            monthlyWageStatistics.setAttendance(new BigDecimal(getDaysOfMonth()));
-            monthlyWageStatistics.setAttendanceReal(new BigDecimal(0));
+            payable = payable.add(highTemperatureSubsidy);
+            monthlyWageStatistics.setWagesPayable(payable.equals(zero)? null : payable);
 
-            monthlyWageStatistics.setLeaveCount(new BigDecimal(0));
+            // 出勤天数 当月天数-休息天数
+            BigDecimal restDay = zero;
+            for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
+                if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
+                    if(workAttendanceDTO.getAttenceType().equals("休息")) {
+                        restDay = restDay.add(workAttendanceDTO.getDay());
+                    }
+                }
+            }
+            monthlyWageStatistics.setAttendance(new BigDecimal(getDaysOfMonth()).subtract(restDay));
+            monthlyWageStatistics.setRestDay(fullPrize.equals(zero)? null : fullPrize);
 
-            monthlyWageStatistics.setLackCard(new BigDecimal(0));
-            
-            monthlyWageStatistics.setViolationOfSafety(new BigDecimal(0));
-            monthlyWageStatistics.setNetSalary(new BigDecimal(0));
-            monthlyWageStatistics.setDateTime(new Timestamp(System.currentTimeMillis()));
+            // 请假(金额)
+            BigDecimal leaveDay = zero;
+            for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
+                if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
+                    if(workAttendanceDTO.getAttenceType().equals("请假")) {
+                        leaveDay = leaveDay.add(workAttendanceDTO.getDay());
+                    }
+                }
+            }
+
+            if (leaveDay.compareTo(zero) > 0) {
+                monthlyWageStatistics.setLeaveCount(fullPrize);
+            }
+
+            // 缺卡/迟到满7次 取消打卡奖
+            BigDecimal lackCount = zero;
+            for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
+                if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
+                    if(workAttendanceDTO.getAttenceType().equals("缺卡")) {
+                        lackCount = lackCount.add(workAttendanceDTO.getDay());
+                    }
+                    if(workAttendanceDTO.getAttenceType().equals("迟到")) {
+                        lackCount = lackCount.add(workAttendanceDTO.getDay());
+                    }
+                }
+            }
+            if (lackCount.compareTo(new BigDecimal(7)) >= 0) {
+                monthlyWageStatistics.setLackCard(cardPrize);
+            }
+
+            // 实际出勤天数
+            monthlyWageStatistics.setAttendanceReal(new BigDecimal(getDaysOfMonth()).subtract(restDay).subtract(leaveDay));
+
+            // 违反安全(金额) 统计近三个月的总违反安全记录
+            BigDecimal safePrice = zero;
+            if (isQuarter) {
+                // 考勤统计
+                workAttendanceQueryCriteria.setEnableList(booleanList);
+                try {
+                    workAttendanceQueryCriteria.setStartTime(getQuarterStartTime());
+                    workAttendanceQueryCriteria.setEndTime(getQuarterEndTime());
+                }catch (Exception e){
+                    throw new BadRequestException("查询违反安全记录失败");
+                }
+
+                workAttendanceDTOS = workAttendanceService.queryAll(workAttendanceQueryCriteria);
+                for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
+                    if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
+                        if(workAttendanceDTO.getAttenceType().equals("安全问题")) {
+                            safePrice = safePrice.add(workAttendanceDTO.getPrice());
+                        }
+                    }
+                }
+                monthlyWageStatistics.setViolationOfSafety(safePrice.equals(zero)? null : safePrice);
+            }
+
+            // 实发工资
+            BigDecimal netSalary = monthlyWageStatistics.getWagesPayable().subtract(leaveDay).subtract(lackCount).subtract(safePrice);
+            monthlyWageStatistics.setNetSalary(netSalary);
+
+            // 日期
+            monthlyWageStatistics.setDateTime(getLastMonthStartTime());
+            monthlyWageStatistics.setStatus(0);
             monthlyWageStatisticsRepository.save(monthlyWageStatistics);
         }
     }

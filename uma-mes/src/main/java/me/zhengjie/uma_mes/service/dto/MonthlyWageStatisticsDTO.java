@@ -1,6 +1,8 @@
 package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
+
+import javax.persistence.Column;
 import java.sql.Timestamp;
 import java.math.BigDecimal;
 import java.io.Serializable;
@@ -109,4 +111,14 @@ public class MonthlyWageStatisticsDTO implements Serializable {
      * 实发工资
      */
     private BigDecimal netSalary;
+
+    /**
+     * 状态
+     */
+    private Integer status;
+
+    /**
+     * 休息
+     */
+    private BigDecimal restDay;
 }

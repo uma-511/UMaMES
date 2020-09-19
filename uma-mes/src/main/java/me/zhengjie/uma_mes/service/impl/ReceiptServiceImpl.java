@@ -21,6 +21,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 import java.io.IOException;
@@ -96,7 +97,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         resources.setStatus(2);
         resources.setEnable(Boolean.TRUE);
         CustomerDTO customerDTO = customerService.findById(resources.getCustomerId());
-        customerDTO.setAccount(customerDTO.getAccount().add(resources.getAmountOfMoney()));
+        BigDecimal currentAccount = null == customerDTO.getAccount()? new BigDecimal(0):customerDTO.getAccount();
+        customerDTO.setAccount(currentAccount.add(resources.getAmountOfMoney()));
         customerService.save(customerMapper.toEntity(customerDTO));
         return receiptMapper.toDto(receiptRepository.save(resources));
 

@@ -20,12 +20,9 @@ import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
 
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 /**
 * @author wave
@@ -73,9 +70,50 @@ public class WorkAttendanceServiceImpl implements WorkAttendanceService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public WorkAttendanceDTO create(WorkAttendance resources) {
+        resources.setSerialNumber(generateSerialNumber());
         resources.setEnable(Boolean.TRUE);
         resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
         return workAttendanceMapper.toDto(workAttendanceRepository.save(resources));
+    }
+
+    private String generateSerialNumber() {
+        String serialNumber;
+        Map<String, Object> timeMap = monthTimeInMillis();
+        String year = timeMap.get("year").toString();
+        String month = timeMap.get("month").toString();
+
+        String currenNumber=workAttendanceRepository.getCurrenAttendanceCountWithMaxNumber(year+"-"+month);
+
+        if (null == currenNumber || currenNumber.equals("")) {
+            serialNumber = year.substring(2,4) + month + "00001";
+        } else {
+            Integer lastNumber = Integer.parseInt(currenNumber.substring(currenNumber.length()-5,currenNumber.length()));
+            Integer number = lastNumber+ 1;
+            String tempNumberStr = String.format("%5d", number++).replace(" ", "0");
+            serialNumber = "C" + year.substring(2,4) + month + tempNumberStr;
+        }
+        return serialNumber;
+    }
+
+    public Map monthTimeInMillis() {
+        // 获取当前日期
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.YEAR, 0);
+        calendar.add(Calendar.MONTH, 0);
+        // 设置为1号,当前日期既为本月第一天
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Long time = calendar.getTimeInMillis();
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int year = calendar.get(Calendar.YEAR);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("time", time);
+        map.put("month", month < 10 ? "0" + month : month);
+        map.put("year", year);
+        return map;
     }
 
     @Override

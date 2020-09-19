@@ -101,6 +101,12 @@ public class MonthlyWageStatistics implements Serializable {
     private BigDecimal attendance;
 
     /**
+     * 休息
+     */
+    @Column(name = "rest_day")
+    private BigDecimal restDay;
+
+    /**
      * 实际出勤天数
      */
     @Column(name = "attendance_real")
@@ -135,6 +141,12 @@ public class MonthlyWageStatistics implements Serializable {
      */
     @Column(name = "net_salary")
     private BigDecimal netSalary;
+
+    /**
+     * 状态
+     */
+    @Column(name = "status")
+    private Integer status;
 
     public void copy(MonthlyWageStatistics source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

@@ -39,6 +39,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Query(value = "select * from user where realname like %:realname% ",nativeQuery = true)
     List<User> getUserListByRealName(String realname);
 
-    @Query(value = "SELECT r.permission FROM role r WHERE r.id = (select ur.role_id  from users_roles ur where ur.user_id = :id) limit 1",nativeQuery = true)
+    @Query(value = "select j.`name` from job j where j.id=(select u.job_id from `user` u where u.id= :id) limit 1",nativeQuery = true)
     String getPermissionByUserId(Long id);
 }

@@ -27,6 +27,18 @@ public class AcidPersionPerformanceQueryCriteria{
 
     private Boolean showUnEnable;
 
+    /**
+     * 大于等于
+     */
+    @Query(type = Query.Type.GREATER_THAN, propName = "taskDate")
+    private Timestamp startTime;
+
+    /**
+     * 小于等于
+     */
+    @Query(type = Query.Type.LESS_THAN, propName = "taskDate")
+    private Timestamp endTime;
+
     // 是否可用
     @Query(type = Query.Type.IN,propName = "enable")
     private List<Boolean> enableList;
