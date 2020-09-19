@@ -98,6 +98,15 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
     // 发票类型
     private String invoiceType;
 
+    // 发票号码
+    private String invoiceNumber;
+
     // 是否可用
     private Boolean enable;
+
+    // 发货地
+    private String startPlace;
+
+    // 目的地
+    private String endPlace;
 }

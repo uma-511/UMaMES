@@ -76,6 +76,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserDTO> getUserListByRealName(String realname){
+        if (null == realname || realname.equals("")) {
+            UserQueryCriteria criteria = new UserQueryCriteria();
+            List<User> users = userRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+            return userMapper.toDto(users);
+        }
+        List<User> users = userRepository.getUserListByRealName(realname);
+        return userMapper.toDto(users);
+    }
+
+    @Override
+    public String getPermissionByUserId(Long id){
+        String permission = userRepository.getPermissionByUserId(id);
+        return permission;
+    }
+
+    @Override
     @Cacheable
     public List<UserDTO> queryAll(UserQueryCriteria criteria) {
         List<User> users = userRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));

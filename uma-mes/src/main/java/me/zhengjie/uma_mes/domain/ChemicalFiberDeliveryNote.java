@@ -128,6 +128,10 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "invoice_type")
     private String invoiceType;
 
+    // 发票号码
+    @Column(name = "invoice_number")
+    private String invoiceNumber;
+
     // 状态备份
     @Column(name = "back_note_status")
     private Integer backNoteStatus;
@@ -135,6 +139,14 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     // 是否可用
     @Column(name = "enable")
     private Boolean enable;
+
+    // 发货地
+    @Column(name = "start_place")
+    private String startPlace;
+
+    // 目的地
+    @Column(name = "end_place")
+    private String endPlace;
 
     @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;

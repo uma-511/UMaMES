@@ -39,15 +39,18 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     private String prodFineness;
 
     // 成本单价
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal cost;
 
     // 销售单价
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal sellingPrice;
 
     // 单位
     private String unit;
 
     // 总成本
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalCost;
 
     // 总金额
@@ -55,12 +58,15 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     private BigDecimal totalPrice;
 
     // 总件数
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalBag;
 
     // 总数量
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalNumber;
 
     // 总重量
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalWeight;
 
     // 备注

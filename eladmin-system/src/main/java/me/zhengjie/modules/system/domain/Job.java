@@ -9,6 +9,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
@@ -34,6 +35,10 @@ public class Job implements Serializable {
     @Column(unique = true)
     @NotNull
     private Long sort;
+
+    @Column(name = "basic_salary")
+    @NotNull
+    private BigDecimal basicSalary;
 
     @Column(name = "enabled",nullable = false)
     @NotNull

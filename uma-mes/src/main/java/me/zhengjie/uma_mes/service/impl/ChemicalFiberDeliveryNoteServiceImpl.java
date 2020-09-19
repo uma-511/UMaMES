@@ -7,20 +7,11 @@ import cn.hutool.extra.template.TemplateConfig;
 import com.lgmn.common.result.Result;
 import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.exception.BadRequestException;
-import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
-import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
-import me.zhengjie.uma_mes.domain.UmaChemicalFiberStatement;
-import me.zhengjie.uma_mes.domain.UmaChemicalFiberStatementDetails;
-import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryDetailRepository;
-import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
-import me.zhengjie.uma_mes.repository.UmaChemicalFiberStatementDetailsRepository;
-import me.zhengjie.uma_mes.repository.UmaChemicalFiberStatementRepository;
+import me.zhengjie.uma_mes.domain.*;
+import me.zhengjie.uma_mes.repository.*;
 import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.dto.*;
-import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryDetailMapper;
-import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryNoteMapper;
-import me.zhengjie.uma_mes.service.mapper.ChemicalFiberStockMapper;
-import me.zhengjie.uma_mes.service.mapper.CustomerMapper;
+import me.zhengjie.uma_mes.service.mapper.*;
 import me.zhengjie.uma_mes.utils.NumberToCN;
 import me.zhengjie.utils.*;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -33,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -75,6 +67,16 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     private final CustomerMapper customerMapper;
 
+    private final CarService carService;
+
+    private final CarMapper carMapper;
+
+    private final TravelExpensesService travelExpensesService;
+
+    private final TravelExpensesMapper travelExpensesMapper;
+
+    private final TravelPersionPerformanceRepository travelPersionPerformanceRepository;
+
     @Autowired
     ChemicalFiberDeliveryNotePayDetailService chemicalFiberDeliveryNotePayDetailService;
 
@@ -90,7 +92,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     @Autowired
     private ChemicalFiberDeliveryDetailRepository chemicalFiberDeliveryDetailRepository;
 
-
     public ChemicalFiberDeliveryNoteServiceImpl(ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository,
                                                 ChemicalFiberDeliveryNoteMapper chemicalFiberDeliveryNoteMapper,
                                                 CustomerService customerService,
@@ -98,10 +99,15 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                                                 ScanRecordService scanRecordService,
                                                 ScanRecordLabelService scanRecordLabelService,
                                                 ChemicalFiberLabelService chemicalFiberLabelService,
-                                                 ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper,
+                                                ChemicalFiberDeliveryDetailMapper chemicalFiberDeliveryDetailMapper,
                                                 ChemicalFiberStockService chemicalFiberStockService,
                                                 ChemicalFiberStockMapper chemicalFiberStockMapper,
-                                                CustomerMapper customerMapper){
+                                                CustomerMapper customerMapper,
+                                                CarService carService,
+                                                CarMapper carMapper,
+                                                TravelExpensesService travelExpensesService,
+                                                TravelExpensesMapper travelExpensesMapper,
+                                                TravelPersionPerformanceRepository travelPersionPerformanceRepository){
         this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
         this.chemicalFiberDeliveryNoteMapper = chemicalFiberDeliveryNoteMapper;
         this.customerService = customerService;
@@ -113,6 +119,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         this.chemicalFiberStockService = chemicalFiberStockService;
         this.chemicalFiberStockMapper = chemicalFiberStockMapper;
         this.customerMapper = customerMapper;
+        this.carService = carService;
+        this.carMapper = carMapper;
+        this.travelExpensesService = travelExpensesService;
+        this.travelExpensesMapper = travelExpensesMapper;
+        this.travelPersionPerformanceRepository = travelPersionPerformanceRepository;
     }
 
     @Override
@@ -234,10 +245,12 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     }
 
     public Map monthTimeInMillis() {
-        Calendar calendar = Calendar.getInstance();// 获取当前日期
+        // 获取当前日期
+        Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.YEAR, 0);
         calendar.add(Calendar.MONTH, 0);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+        // 设置为1号,当前日期既为本月第一天
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
@@ -260,7 +273,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(resources.getId()).orElseGet(ChemicalFiberDeliveryNote::new);
         ValidationUtil.isNull( chemicalFiberDeliveryNote.getId(),"ChemicalFiberDeliveryNote","id",resources.getId());
         chemicalFiberDeliveryNote.copy(resources);
-//        chemicalFiberDeliveryNote.setCreateDate(new Timestamp(System.currentTimeMillis()));
         chemicalFiberDeliveryNote.setCreateUser(chemicalFiberDeliveryNoteRepository.getRealNameByUserName(SecurityUtils.getUsername()));
         chemicalFiberDeliveryNote.setCustomerId(customerDTO.getId());
         chemicalFiberDeliveryNote.setCustomerCode(customerDTO.getCode());
@@ -286,6 +298,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void recived(Integer id) {
         try{
             ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
@@ -295,6 +308,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             ChemicalFiberStockQueryCriteria chemicalFiberStockQueryCriteria;
             BigDecimal detailPrise;
             BigDecimal realTotalPrise = new BigDecimal(0);
+            BigDecimal totalWeight = new BigDecimal(0);
             for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
                 if(null == chemicalFiberDeliveryDetailDTO.getRealQuantity() || chemicalFiberDeliveryDetailDTO.getRealQuantity().equals(0)) {
                     //若实收数量为空则自动填入计划数
@@ -305,6 +319,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                     chemicalFiberDeliveryDetailDTO.setRealPrice(detailPrise);
                 }else{
                     realTotalPrise=realTotalPrise.add(chemicalFiberDeliveryDetailDTO.getRealPrice());
+                }
+                if ( chemicalFiberDeliveryDetailDTO.getUnit().equals("吨") ){
+                    totalWeight=totalWeight.add(chemicalFiberDeliveryDetailDTO.getRealQuantity());
                 }
                 chemicalFiberDeliveryDetailService.update(chemicalFiberDeliveryDetailMapper.toEntity(chemicalFiberDeliveryDetailDTO));
                 //处理库存
@@ -326,10 +343,108 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             chemicalFiberDeliveryNote.setTotalPrice(realTotalPrise);
             update(chemicalFiberDeliveryNote);
             StatementUp(id);
-        }catch (Exception e){
+            //生成司机/押运工资单
+            generatePerformanceByCar(chemicalFiberDeliveryNote.getCarNumber(),chemicalFiberDeliveryNote.getStartPlace(),chemicalFiberDeliveryNote.getEndPlace(),chemicalFiberDeliveryNote.getDriverMain(),chemicalFiberDeliveryNote.getDriverDeputy(), chemicalFiberDeliveryNote.getLoaderOne(), chemicalFiberDeliveryNote.getLoaderTwo(),totalWeight,chemicalFiberDeliveryNote.getScanNumber());
+        }catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             throw new BadRequestException("签收失败，请校验订单数据");
         }
+    }
 
+    public void generatePerformanceByCar(String carNumber,String startPlace,String endPlace,String driverMain,String driverDeputy,String loaderOne,String loaderTwo,BigDecimal totalWeight,String scanNumber) {
+        CarQueryCriteria carQueryCriteria = new CarQueryCriteria();
+        carQueryCriteria.setCarNumber(carNumber);
+        if ( null == carNumber || carNumber.equals("") ) {
+            return;
+        }
+        List<CarDTO> carList = carService.queryAll(carQueryCriteria);
+        Car car = null;
+        for(CarDTO carDTO : carList){
+            car = carMapper.toEntity(carDTO);
+        }
+        if (null == car) {
+            throw new BadRequestException("签收失败，无法找到车辆信息");
+        }
+        else {
+            TravelExpensesQueryCriteria travelExpensesQueryCriteria = new TravelExpensesQueryCriteria();
+            travelExpensesQueryCriteria.setStartPlace(startPlace);
+            travelExpensesQueryCriteria.setEndPlace(endPlace);
+            travelExpensesQueryCriteria.setEnable(Boolean.TRUE);
+            List<TravelExpensesDTO> travelExpensesList = travelExpensesService.queryAll(travelExpensesQueryCriteria);
+            TravelExpenses travelExpenses = null;
+            //司机里程费
+            BigDecimal travelExpensesPrice = new BigDecimal(0);
+            for(TravelExpensesDTO travelExpensesDTO : travelExpensesList){
+                travelExpenses = travelExpensesMapper.toEntity(travelExpensesDTO);
+            }
+            if ( car.getCarType().equals("厢式车") ) {
+                if( null != travelExpenses) {
+                    travelExpensesPrice = travelExpenses.getVanPrice();
+                }else{
+                    travelExpensesPrice = new BigDecimal(0);
+                }
+                Integer driverId = 0;
+                driverId = chemicalFiberDeliveryNoteRepository.getIdByRealName(driverMain);
+                if ( 0 == driverId ) {
+                    throw new BadRequestException("签收失败，获取人员id异常");
+                }
+                String driverPermission = null;
+                driverPermission = chemicalFiberDeliveryNoteRepository.getPermissionByRealName(driverMain);
+                if ( null == driverPermission ) {
+                    throw new BadRequestException("签收失败，获取人员职位异常");
+                }
+                BigDecimal surchargePrice = new BigDecimal(0);
+                createPermission(driverMain,driverId,driverPermission,travelExpensesPrice,surchargePrice,scanNumber);
+            }
+            if ( car.getCarType().equals("槽罐车") ) {
+                if( null != travelExpenses) {
+                    travelExpensesPrice = travelExpenses.getTankPrice();
+                }else{
+                    travelExpensesPrice = new BigDecimal(0);
+                }
+                Integer driverMainId = null;
+                driverMainId = chemicalFiberDeliveryNoteRepository.getIdByRealName(driverMain);
+                if ( null == driverMainId ) {
+                    throw new BadRequestException("签收失败，获取人员id异常");
+                }
+                String driverMainPermission = null;
+                driverMainPermission = chemicalFiberDeliveryNoteRepository.getPermissionByRealName(driverMain);
+                if ( null == driverMainPermission ) {
+                    throw new BadRequestException("签收失败，获取人员职位异常");
+                }
+                BigDecimal surchargePrice = new BigDecimal(0);
+                if( globalCompanyName.equals("XQ") ){
+                    surchargePrice = new BigDecimal(65);
+                }else{
+                    surchargePrice = new BigDecimal(75);
+                }
+                if ( totalWeight.compareTo(new BigDecimal(15)) >= 0 ){
+                    if ( totalWeight.compareTo(new BigDecimal(20)) >= 0 ){
+                        surchargePrice = surchargePrice.add(new BigDecimal(10));
+                    }else{
+                        surchargePrice = surchargePrice.add(new BigDecimal(5));
+                    }
+                }
+                createPermission(driverMain,driverMainId,driverMainPermission,travelExpensesPrice,surchargePrice,scanNumber);
+            }
+        }
+    }
+
+    private void createPermission(String user,Integer userId,String userPermission,BigDecimal expensesPrice,BigDecimal surchargePrice,String scanNumber) {
+        TravelPersionPerformance travelPersionPerformance = new TravelPersionPerformance();
+        travelPersionPerformance.setEnable(Boolean.TRUE);
+        travelPersionPerformance.setCreateTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        travelPersionPerformance.setMileageFee(expensesPrice);
+        travelPersionPerformance.setTotalPerformance(expensesPrice.add(surchargePrice));
+        travelPersionPerformance.setPersonId(userId);
+        travelPersionPerformance.setPermission(userPermission);
+        travelPersionPerformance.setOvertimePay(new BigDecimal(0));
+        travelPersionPerformance.setAllowance(new BigDecimal(0));
+        travelPersionPerformance.setSurcharge(surchargePrice);
+        travelPersionPerformance.setHandlingCost(new BigDecimal(0));
+        travelPersionPerformance.setPersonName(user);
+        travelPersionPerformance.setScanNumber(scanNumber);
+        travelPersionPerformanceRepository.save(travelPersionPerformance);
     }
 
     @Override
@@ -400,9 +515,16 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
         chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
         List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
-        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/delivery_temp.xls";
+        String lastName = "";
+        if ( globalCompanyName.equals("XQ") ) {
+            lastName = "/delivery_temp_xq.xls";
+        } else {
+            lastName = "/delivery_temp_xq.xls";
+        }
+        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + lastName;
         // 加载模板
         TemplateExportParams params = new TemplateExportParams(templatePath);
+        params.setReadonly(Boolean.TRUE);
         // 生成workbook 并导出
         Workbook workbook = null;
         if (null == chemicalFiberDeliveryNote.getDeliveryDate() || chemicalFiberDeliveryNote.getDeliveryDate().equals("")) {
@@ -542,7 +664,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             map.put("currPage", item);
             map.put("totalPage", sheelPages);
             map.put("totalNumber", chemicalFiberLabelDTOSTemp.size());
-//            map.put("weight", totalTotalWeights);
             map.put(SHEET_NAME,"第" + item + "页");
             list.add(map);
         }
@@ -621,19 +742,19 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         List<ChemicalFiberDeliveryNote> chemicalFiberDeliveryNotes = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
 
         // 总成本
-        BigDecimal totalCost = new BigDecimal(0.0);
+        BigDecimal totalCost = new BigDecimal(0);
 
         // 总金额
-        BigDecimal totalPrice = new BigDecimal(0.0);
+        BigDecimal totalPrice = new BigDecimal(0);
 
         // 总件数
-        BigDecimal totalBag = new BigDecimal(0.0);
+        BigDecimal totalBag = new BigDecimal(0);
 
         // 总数量
-        BigDecimal totalNumber = new BigDecimal(0.0);
+        BigDecimal totalNumber = new BigDecimal(0);
 
         // 总重量
-        BigDecimal totalWeight = new BigDecimal(0.0);
+        BigDecimal totalWeight = new BigDecimal(0);
 
         for (ChemicalFiberDeliveryNote chemicalFiberDeliveryNote : chemicalFiberDeliveryNotes) {
             for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryNote.getChemicalFiberDeliveryDetails()) {
@@ -699,8 +820,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 statementAdd.setContacts(note.getContacts());
                 statementAdd.setContactPhone(note.getContactPhone());
                 statementAdd.setUpDate(new Timestamp(dateUp.getTime()));
-                //statementAdd.setTotalArrears(note.getBalance());
-                //statementAdd.setAccumulatedArrears(statement1.getTotalArrears());
                 statementAdd.setReceivable(note.getTotalPrice());
                 statementAdd = umaChemicalFiberStatementRepository.save(statementAdd);
                 List<UmaChemicalFiberStatementDetails> staementDetail = new ArrayList<>();

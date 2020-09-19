@@ -37,5 +37,9 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
     @Query(value = "SELECT sum(b.total_price) as k FROM uma_chemical_fiber_delivery_note b WHERE b.customer_id = :customerId AND b.delivery_date > '1950-01' AND delivery_date < :dateTime ",nativeQuery = true)
     Integer getOnCreditSum(@Param("dateTime") String dateTime, @Param("customerId") Integer customerId);
 
+    @Query(value = "select user.id from user where user.realname=:username limit 1",nativeQuery = true)
+    Integer getIdByRealName(@Param("username") String username);
 
+    @Query(value = "SELECT r.permission FROM role r WHERE r.id = (select ur.role_id  from users_roles ur where ur.user_id =(select u.id from user u where u.realname=:username)) limit 1",nativeQuery = true)
+    String getPermissionByRealName(@Param("username") String username);
 }

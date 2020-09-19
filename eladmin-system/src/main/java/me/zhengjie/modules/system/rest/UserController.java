@@ -188,4 +188,22 @@ public class UserController {
         List<UserDTO> userDTOS = userService.getUserListByDept(criteria.getDeptIdList(),criteria.getRealname());
         return new ResponseEntity<>(userDTOS,HttpStatus.OK);
     }
+
+    @PostMapping(value = "/getUserListByRealName")
+    @ApiOperation("获取用户列表")
+    public ResponseEntity getUserListByRealName(UserQueryCriteria criteria){
+        List<UserDTO> userDTOS = userService.getUserListByRealName(criteria.getRealname());
+        return new ResponseEntity<>(userDTOS,HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/getPermissionByUserId")
+    @ApiOperation("获取用户职位")
+    public ResponseEntity getPermissionByUserId(UserQueryCriteria criteria){
+        String permission = userService.getPermissionByUserId(criteria.getId());
+        UserDTO userDTO = new UserDTO();
+        userDTO.setPermission(permission);
+        List<UserDTO> userDTOS = new ArrayList<>();
+        userDTOS.add(userDTO);
+        return new ResponseEntity<>(userDTOS,HttpStatus.OK);
+    }
 }
