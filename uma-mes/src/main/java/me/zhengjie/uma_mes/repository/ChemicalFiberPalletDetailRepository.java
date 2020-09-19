@@ -15,7 +15,7 @@ import java.util.Map;
 */
 public interface ChemicalFiberPalletDetailRepository extends JpaRepository<ChemicalFiberPalletDetail, Integer>, JpaSpecificationExecutor<ChemicalFiberPalletDetail> {
 
-    @Query(value = "SELECT * FROM uma_chemical_fiber_pallet_detail where pallet_id = :palletNumber and status = 9 or status = 11",nativeQuery = true)
+    @Query(value = "SELECT * FROM uma_chemical_fiber_pallet_detail where pallet_id = :palletNumber and status = 9 or pallet_id = :palletNumber and status = 11",nativeQuery = true)
     List<ChemicalFiberPalletDetail> getPalletDateil(@Param("palletNumber") String palletNumber);
 
     @Query(value = "SELECT * FROM uma_chemical_fiber_pallet_detail where pallet_id = :palletNumber and label_number = :labelNumber",nativeQuery = true)

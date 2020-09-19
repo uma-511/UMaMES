@@ -427,7 +427,7 @@ public class HandheldService {
 
         if (uploadDataDto.getStatus() == 1) {
             // 新增库存
-            saveStock(chemicalFiberLabels, stockList);
+            saveStock(chemicalFiberLabels);
         }
 
         if (uploadDataDto.getStatus() == 10) {
@@ -485,7 +485,7 @@ public class HandheldService {
             }
             chemicalFiberLabelRepository.saveAll(labelList);
             chemicalFiberPalletDetailService.create(chemicalFiberPalletDetails, Pallet.getPalletNumber());
-            saveStock(chemicalFiberLabels,stockList);
+            saveStock(chemicalFiberLabels);
         }
 
         if (uploadDataDto.getStatus() == 2) {
@@ -804,9 +804,10 @@ public class HandheldService {
      * @param chemicalFiberLabels 标签信息
      * @param stockList 库存列表
      */
-    public void saveStock(List<ChemicalFiberLabel> chemicalFiberLabels, List<ChemicalFiberStock> stockList) {
+    public void saveStock(List<ChemicalFiberLabel> chemicalFiberLabels) {
         for (ChemicalFiberLabel newChemicalFiberLabelDTO : chemicalFiberLabels ) {
             ChemicalFiberStock stock = new ChemicalFiberStock();
+            List<ChemicalFiberStock> stockList = chemicalFiberStockRepository.findAll();
             stock = isProdId(newChemicalFiberLabelDTO.getProductId(), stockList);
             BigDecimal Weight = new BigDecimal(0);
             BigDecimal tare = new BigDecimal(0);
