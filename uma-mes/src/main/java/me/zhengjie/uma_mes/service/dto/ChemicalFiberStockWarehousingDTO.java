@@ -29,6 +29,9 @@ public class ChemicalFiberStockWarehousingDTO implements Serializable {
     // 批号
     private Integer batchNumber;
 
+    // 供应商编号
+    private String supplierCode;
+
     // 供应商名字
     private String supplierName;
 

@@ -40,6 +40,10 @@ public class ChemicalFiberStockWarehousing implements Serializable {
     private Timestamp warehousingDate;
 
     // 供应商名字
+    @Column(name = "supplier_code")
+    private String supplierCode;
+
+    // 供应商名字
     @Column(name = "supplier_name")
     private String supplierName;
 
