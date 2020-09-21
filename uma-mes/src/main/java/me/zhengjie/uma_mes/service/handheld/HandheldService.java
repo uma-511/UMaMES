@@ -67,6 +67,9 @@ public class HandheldService {
     private ChemicalFiberProductionRepository chemicalFiberProductionRepository;
 
     @Autowired
+    private ChemicalFiberProductionReportService productionReportService;
+
+    @Autowired
     private ViewScanRecordService viewScanRecordService;
 
     public HandheldService(
@@ -427,6 +430,7 @@ public class HandheldService {
 
         if (uploadDataDto.getStatus() == 1) {
             // 新增库存
+            saveProdctionReport(chemicalFiberLabels);
             saveStock(chemicalFiberLabels);
         }
 
@@ -485,6 +489,7 @@ public class HandheldService {
             }
             chemicalFiberLabelRepository.saveAll(labelList);
             chemicalFiberPalletDetailService.create(chemicalFiberPalletDetails, Pallet.getPalletNumber());
+            saveProdctionReport(chemicalFiberLabels);
             saveStock(chemicalFiberLabels);
         }
 
@@ -842,6 +847,46 @@ public class HandheldService {
                 stock.setTotalNumber(newChemicalFiberLabelDTO.getFactPerBagNumber());
                 stock.setTotalBag(++Bag);
                 chemicalFiberStockRepository.save(stock);
+            }
+        }
+    }
+
+    /**
+     * 生产报表记录
+     * @param chemicalFiberLabels
+     */
+    public void saveProdctionReport(List<ChemicalFiberLabel> chemicalFiberLabels) {
+        for (ChemicalFiberLabel dto : chemicalFiberLabels) {
+            ChemicalFiberProductionReport report = productionReportService.getReport(dto.getShifts(), dto.getMachine());
+            if (report != null) {
+                BigDecimal warehousingPacketNumber = report.getWarehousingPacketNumber();
+                BigDecimal warehousingFactPerBagNumber = report.getWarehousingFactPerBagNumber();
+                BigDecimal warehousingNetWeight = report.getWarehousingNetWeight();
+                BigDecimal warehousingGrossWeight = report.getWarehousingGrossWeight();
+
+                report.setWarehousingPacketNumber(warehousingPacketNumber.add(new BigDecimal(1)));
+                report.setWarehousingFactPerBagNumber(warehousingFactPerBagNumber.add(new BigDecimal(dto.getFactPerBagNumber())));
+                report.setWarehousingNetWeight(warehousingNetWeight.add(dto.getNetWeight()));
+                report.setWarehousingGrossWeight(warehousingGrossWeight.add(dto.getGrossWeight()));
+                productionReportService.update(report);
+
+            } else {
+                ChemicalFiberProductionReportDTO reportDTO = new ChemicalFiberProductionReportDTO();
+                reportDTO.setProductionPacketNumber(new BigDecimal(1));
+                reportDTO.setProductionFactPerBagNumber(new BigDecimal(dto.getFactPerBagNumber()));
+                reportDTO.setProductionNetWeight(dto.getNetWeight());
+                reportDTO.setProductionGrossWeight(dto.getGrossWeight());
+
+                ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(dto.getProductionId()).orElseGet(ChemicalFiberProduction::new);
+                reportDTO.setFineness(dto.getFineness());
+                reportDTO.setColor(dto.getColor());
+                reportDTO.setProductionId(dto.getProductionId());
+                reportDTO.setProductionNumber(production.getNumber());
+                reportDTO.setProdId(dto.getProductId());
+                reportDTO.setShifts(dto.getShifts());
+                reportDTO.setMachine(dto.getMachine());
+                reportDTO.setTime(new Timestamp(System.currentTimeMillis()));
+                productionReportService.create(reportDTO);
             }
         }
     }

@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @Entity
 @Data
 @Table(name="uma_chemical_fiber_production_report")
-public class ChemicalFiberProuctionReport implements Serializable {
+public class ChemicalFiberProductionReport implements Serializable {
 
 
     @Id
@@ -74,10 +74,27 @@ public class ChemicalFiberProuctionReport implements Serializable {
     @Column(name = "warehousing_gross_weight")
     private BigDecimal warehousingGrossWeight;
 
-    //
+    // 入库包数
+    @Column(name = "to_void_packet_number")
+    private BigDecimal toVoidPacketNumber;
+
+    // 入库个数
+    @Column(name = "to_void_fact_per_bag_number")
+    private BigDecimal toVoidFactPerBagNumber;
+
+    // 入库净重
+    @Column(name = "to_void_net_weight")
+    private BigDecimal toVoidNetWeight;
+
+    // 入库毛重
+    @Column(name = "to_void_gross_weight")
+    private BigDecimal toVoidGrossWeight;
+
+    // 产品id
     @Column(name = "prod_id")
     private Integer prodId;
 
+    // 时间
     @Column(name = "time")
     private Timestamp time;
 
