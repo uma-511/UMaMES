@@ -338,6 +338,7 @@ public class HandheldService {
 
             ChemicalFiberPalletDetail chemicalFiberPalletDetail = new ChemicalFiberPalletDetail();
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberPalletDetail);
+            chemicalFiberPalletDetail.setId(null);
             chemicalFiberPalletDetails.add(chemicalFiberPalletDetail);
 
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, viewScanRecord);
