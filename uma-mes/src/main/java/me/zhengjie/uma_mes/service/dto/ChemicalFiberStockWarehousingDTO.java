@@ -60,4 +60,10 @@ public class ChemicalFiberStockWarehousingDTO implements Serializable {
     // 副司机
     private Integer invalid;
 
+    // 副司机
+    private BigDecimal ton;
+
+    // 副司机
+    private BigDecimal branch;
+
 }

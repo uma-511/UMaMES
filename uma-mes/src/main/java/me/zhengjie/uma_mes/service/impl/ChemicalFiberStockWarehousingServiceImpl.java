@@ -69,6 +69,11 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         }
         criteria.setInvalidList(invalidList);
         Page<ChemicalFiberStockWarehousing> page = chemicalFiberStockWarehousingRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        List<ChemicalFiberStockWarehousing> list = page.getContent();
+        List<ChemicalFiberStockWarehousingDTO> tonAndBranch = chemicalFiberStockWarehousingRepository.getTonAndBranch();
+        for (ChemicalFiberStockWarehousingDTO dto : tonAndBranch) {
+
+        }
         return PageUtil.toPage(page.map(chemicalFiberStockWarehousingMapper::toDto));
     }
 

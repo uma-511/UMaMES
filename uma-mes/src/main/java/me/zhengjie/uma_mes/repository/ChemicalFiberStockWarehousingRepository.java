@@ -2,6 +2,7 @@ package me.zhengjie.uma_mes.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockWarehousing;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockWarehousingDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -27,6 +28,9 @@ public interface ChemicalFiberStockWarehousingRepository extends JpaRepository<C
 
     @Query(value = "SELECT b.id from uma_chemical_fiber_stock_warehousing b where b.invalid = 0 and b.warehousing_status = 2 and  supplier_name like %:name% and create_user like %:user% ",nativeQuery = true)
     List<Integer> getNotId(@Param("user") String user, @Param("name") String name);
+
+    @Query(value = "SELECT warehousing_id, sum( CASE WHEN unit = '吨' THEN warehousing_number ELSE 0 END ) AS ton, sum( CASE WHEN unit = '支' THEN warehousing_number ELSE 0 END ) AS branch FROM uma_chemical_fiber_stock_warehousing_detail GROUP BY warehousing_id",nativeQuery = true)
+    List<ChemicalFiberStockWarehousingDTO> getTonAndBranch();
 
 
 
