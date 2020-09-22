@@ -102,4 +102,12 @@ public class ChemicalFiberLabelController {
         map.put("sumGrossWeight", sumGrossWeight);
         return Result.success(map);
     }
+
+    @PostMapping(value = "/getShifts")
+    @Log("查询班次")
+    @ApiOperation("查询班次")
+    //@PreAuthorize("@el.check('chemicalFiberLabel:add')")
+    public ResponseEntity getShifts(){
+        return new ResponseEntity<>(chemicalFiberLabelService.getShifts(),HttpStatus.OK);
+    }
 }
