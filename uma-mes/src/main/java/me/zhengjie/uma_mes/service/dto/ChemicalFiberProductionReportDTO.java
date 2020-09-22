@@ -2,64 +2,74 @@ package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
 
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 
 @Data
 public class ChemicalFiberProductionReportDTO implements Serializable {
 
-    // 订单编号
-    private String number;
 
-    // 产品颜色
-    private String prodColor;
+    // 生产单单号
+    private String productionNumber;
 
-    // 产品纤度
-    private String prodFineness;
+    // 生产单id
+    private Integer productionId;
 
-    // ---------------------------
+    // 机台号
+    private String machine;
 
-    // 入库
-    // 包数
-    private Integer warehousingPacketNumber = 0;
-    // 实际每袋个数
-    private Integer warehousingFactPerBagNumber = 0;
+    // 班次
+    private String shifts;
 
-    // 净重
-    private BigDecimal warehousingNetWeight = new BigDecimal(0.0);
+    // 纤度
+    private String fineness;
 
-    // 毛重
-    private BigDecimal warehousingGrossWeight = new BigDecimal(0.0);
+    // 色号
+    private String color;
 
-    // 在库包数比例
-    private Double warehousingPacketRatio = 0.0;
+    // 生产包数
+    private BigDecimal productionPacketNumber = new BigDecimal(0);
 
-    // 净重比例
-    private BigDecimal warehousingNetWeightRatio = new BigDecimal(0.0);
+    // 生产个数
+    private BigDecimal productionFactPerBagNumber = new BigDecimal(0);
 
-    // 出库
-    // 包数
-    private Integer outOfstockPacketNumber = 0;
+    // 生产净重
+    private BigDecimal productionNetWeight = new BigDecimal(0);
 
-    // 实际每袋个数
-    private Integer outOfstockFactPerBagNumber = 0;
+    // 生产毛重
+    private BigDecimal productionGrossWeight = new BigDecimal(0);
 
-    // 净重
-    private BigDecimal outOfstockNetWeight = new BigDecimal(0.0);
+    // 入库包数
+    private BigDecimal warehousingPacketNumber = new BigDecimal(0);
 
-    // 毛重
-    private BigDecimal outOfstockGrossWeight = new BigDecimal(0.0);
+    // 入库个数
+    private BigDecimal warehousingFactPerBagNumber = new BigDecimal(0);
 
-    // 作废
-    // 包数
-    private Integer toVoidPacketNumber = 0;
+    // 入库净重
+    private BigDecimal warehousingNetWeight = new BigDecimal(0);
 
-    // 实际每袋个数
-    private Integer toVoidFactPerBagNumber = 0;
+    // 入库毛重
+    private BigDecimal warehousingGrossWeight = new BigDecimal(0);
 
-    // 净重
-    private BigDecimal toVoidNetWeight = new BigDecimal(0.0);
+    // 入库包数
+    private BigDecimal toVoidPacketNumber = new BigDecimal(0);
 
-    // 毛重
-    private BigDecimal toVoidGrossWeight = new BigDecimal(0.0);
+    // 入库个数
+    private BigDecimal toVoidFactPerBagNumber = new BigDecimal(0);
+
+    // 入库净重
+    private BigDecimal toVoidNetWeight = new BigDecimal(0);
+
+    // 入库毛重
+    private BigDecimal toVoidGrossWeight = new BigDecimal(0);
+
+    // 产品id
+    private Integer prodId;
+
+    // 时间
+    private Timestamp time;
+
+
 }

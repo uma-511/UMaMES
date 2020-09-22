@@ -16,9 +16,9 @@ import me.zhengjie.terminal.terminal.Terminal;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduct;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
-import me.zhengjie.uma_mes.service.ChemicalFiberLabelService;
-import me.zhengjie.uma_mes.service.ChemicalFiberProductService;
-import me.zhengjie.uma_mes.service.ChemicalFiberProductionService;
+import me.zhengjie.uma_mes.domain.ChemicalFiberProductionReport;
+import me.zhengjie.uma_mes.repository.ChemicalFiberProductionRepository;
+import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.MachineService;
 import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.dto.termina.TerminalUploadDataDto;
@@ -63,6 +63,12 @@ public class ControlService {
 
     @Autowired
     ReprintPage reprintPage;
+
+    @Autowired
+    ChemicalFiberProductionReportService reportService;
+
+    @Autowired
+    ChemicalFiberProductionRepository chemicalFiberProductionRepository;
     /**
      * 获取机台生产单数据
      */
@@ -200,6 +206,49 @@ public class ControlService {
 
         ChemicalFiberLabelDTO labelDto = labelService.create(label);
 
+        ChemicalFiberProductionReport report = reportService.getReport(labelDto.getShifts(), labelDto.getMachine());
+        if (report != null) {
+            BigDecimal packetNumber = report.getWarehousingPacketNumber();
+            BigDecimal factPerBagNumber = report.getWarehousingFactPerBagNumber();
+            BigDecimal netWeight = report.getWarehousingNetWeight();
+            BigDecimal grossWeight = report.getWarehousingGrossWeight();
+
+            report.setWarehousingPacketNumber(packetNumber.add(new BigDecimal(1)));
+            report.setWarehousingFactPerBagNumber(factPerBagNumber.add(new BigDecimal(labelDto.getFactPerBagNumber())));
+            report.setWarehousingNetWeight(netWeight.add(labelDto.getNetWeight()));
+            report.setWarehousingGrossWeight(grossWeight.add(labelDto.getGrossWeight()));
+
+            report.setProductionPacketNumber(packetNumber.add(new BigDecimal(1)));
+            report.setProductionFactPerBagNumber(factPerBagNumber.add(new BigDecimal(labelDto.getFactPerBagNumber())));
+            report.setProductionNetWeight(netWeight.add(labelDto.getNetWeight()));
+            report.setProductionGrossWeight(grossWeight.add(labelDto.getGrossWeight()));
+
+
+            reportService.update(report);
+
+        } else {
+            ChemicalFiberProductionReportDTO reportDTO = new ChemicalFiberProductionReportDTO();
+            reportDTO.setProductionPacketNumber(new BigDecimal(1));
+            reportDTO.setProductionFactPerBagNumber(new BigDecimal(labelDto.getFactPerBagNumber()));
+            reportDTO.setProductionNetWeight(labelDto.getNetWeight());
+            reportDTO.setProductionGrossWeight(labelDto.getGrossWeight());
+
+            reportDTO.setWarehousingPacketNumber(new BigDecimal(1));
+            reportDTO.setWarehousingFactPerBagNumber(new BigDecimal(labelDto.getFactPerBagNumber()));
+            reportDTO.setWarehousingNetWeight(labelDto.getNetWeight());
+            reportDTO.setWarehousingGrossWeight(labelDto.getGrossWeight());
+
+            ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(labelDto.getProductionId()).orElseGet(ChemicalFiberProduction::new);
+            reportDTO.setFineness(labelDto.getFineness());
+            reportDTO.setColor(labelDto.getColor());
+            reportDTO.setProductionId(labelDto.getProductionId());
+            reportDTO.setProductionNumber(controlPanelInfo.getProductionNumber());
+            reportDTO.setProdId(labelDto.getProductId());
+            reportDTO.setShifts(labelDto.getShifts());
+            reportDTO.setMachine(labelDto.getMachine());
+            reportDTO.setTime(new Timestamp(System.currentTimeMillis()));
+            reportService.create(reportDTO);
+        }
         /**
          * todo 打印操作
          */
@@ -232,6 +281,7 @@ public class ControlService {
             }else if(label.getStatus()==3){
                 gobalSender.sendImmediate(cancelPage.sendTip("标签已作废",ip));
             }else{
+                reportService.delectReport(label);
                 label.setStatus(3);
                 labelService.update(label);
                 gobalSender.sendImmediate(cancelPage.sendTip("标签作废成功",ip));
