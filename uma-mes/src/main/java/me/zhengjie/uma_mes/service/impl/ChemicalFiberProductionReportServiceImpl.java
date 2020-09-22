@@ -156,18 +156,18 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             BigDecimal toVoidNetWeight = report.getToVoidNetWeight();
             BigDecimal toVoidGrossWeight = report.getToVoidGrossWeight();
 
-            report.setWarehousingPacketNumber(toVoidPacketNumber.add(new BigDecimal(1)));
-            report.setWarehousingFactPerBagNumber(toVoidFactPerBagNumber.add(new BigDecimal(label.getFactPerBagNumber())));
-            report.setWarehousingNetWeight(toVoidNetWeight.add(label.getNetWeight()));
-            report.setWarehousingGrossWeight(toVoidGrossWeight.add(label.getGrossWeight()));
+            report.setToVoidPacketNumber(toVoidPacketNumber.add(new BigDecimal(1)));
+            report.setToVoidFactPerBagNumber(toVoidFactPerBagNumber.add(new BigDecimal(label.getFactPerBagNumber())));
+            report.setToVoidNetWeight(toVoidNetWeight.add(label.getNetWeight()));
+            report.setToVoidGrossWeight(toVoidGrossWeight.add(label.getGrossWeight()));
             update(report);
 
         } else {
             ChemicalFiberProductionReportDTO reportDTO = new ChemicalFiberProductionReportDTO();
-            reportDTO.setProductionPacketNumber(new BigDecimal(1));
-            reportDTO.setProductionFactPerBagNumber(new BigDecimal(label.getFactPerBagNumber()));
-            reportDTO.setProductionNetWeight(label.getNetWeight());
-            reportDTO.setProductionGrossWeight(label.getGrossWeight());
+            reportDTO.setToVoidPacketNumber(new BigDecimal(1));
+            reportDTO.setToVoidFactPerBagNumber(new BigDecimal(label.getFactPerBagNumber()));
+            reportDTO.setToVoidNetWeight(label.getNetWeight());
+            reportDTO.setToVoidGrossWeight(label.getGrossWeight());
 
             ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(label.getProductionId()).orElseGet(ChemicalFiberProduction::new);
             reportDTO.setFineness(label.getFineness());
