@@ -3,10 +3,8 @@ package me.zhengjie.uma_mes.service.handheld;
 import com.lgmn.common.result.Result;
 import com.lgmn.common.result.ResultEnum;
 import com.lgmn.common.utils.ObjectTransfer;
-import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
-import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
-import me.zhengjie.uma_mes.domain.ScanRecord;
-import me.zhengjie.uma_mes.domain.ScanRecordLabel;
+import me.zhengjie.uma_mes.domain.*;
+import me.zhengjie.uma_mes.repository.ChemicalFiberProductionRepository;
 import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.dto.handheld.LabelMsgDto;
@@ -15,6 +13,7 @@ import me.zhengjie.uma_mes.vo.handheld.ChemicalFiberLabelInfoVo;
 import me.zhengjie.uma_mes.vo.handheld.ChemicalFiberProductionInfoVo;
 import me.zhengjie.uma_mes.vo.handheld.LabelMsgVo;
 import me.zhengjie.utils.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +39,10 @@ public class HandheldService {
     private final ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService;
 
     private final ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService;
+    @Autowired
+    private ChemicalFiberProductionRepository chemicalFiberProductionRepository;
+    @Autowired
+    private ViewScanRecordService viewScanRecordService;
 
     public HandheldService(
             ChemicalFiberLabelService chemicalFiberLabelService,
@@ -121,6 +124,7 @@ public class HandheldService {
     public Result uploadData(UploadDataDto uploadDataDto) {
         // 需要修改的标签列表
         List<ChemicalFiberLabel> chemicalFiberLabels = new ArrayList<>();
+        ViewScanRecord viewScanRecord = new ViewScanRecord();
         ScanRecord scanRecord;
         String scanNumber;
         if (uploadDataDto.getStatus() != 7) {
@@ -134,6 +138,11 @@ public class HandheldService {
             scanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
             scanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
             scanRecordService.create(scanRecord);
+
+            String scan = scanNumber.toUpperCase();
+            viewScanRecord.setScanNumber(scan);
+            viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
+            viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         } else {
             ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
             scanRecordQueryCriteria.setAccurateScanNumber(uploadDataDto.getScanNumber());
@@ -146,6 +155,11 @@ public class HandheldService {
             ObjectTransfer.transValue(scanRecordDTO, tempScanRecord);
             scanRecord = tempScanRecord;
             scanNumber = uploadDataDto.getScanNumber();
+
+            String scan = scanNumber.toUpperCase();
+            viewScanRecord.setScanNumber(scan);
+            viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
+            viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         }
 
         List<ScanRecordLabel> scanRecordLabels = new ArrayList<>();
@@ -173,6 +187,12 @@ public class HandheldService {
             ChemicalFiberLabel chemicalFiberLabel = new ChemicalFiberLabel();
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberLabel);
             chemicalFiberLabels.add(chemicalFiberLabel);
+
+            ObjectTransfer.transValue(newChemicalFiberLabelDTO, viewScanRecord);
+            ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(newChemicalFiberLabelDTO.getProductionId()).orElseGet(ChemicalFiberProduction::new);
+            ObjectTransfer.transValue(production, viewScanRecord);
+            viewScanRecord.setId(null);
+            viewScanRecordService.create(viewScanRecord);
 
             if (uploadDataDto.getIsAdd()) {
                 Timestamp tempTimestamp = new Timestamp(Long.parseLong(scanTime));
