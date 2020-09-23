@@ -124,7 +124,6 @@ public class HandheldService {
     public Result uploadData(UploadDataDto uploadDataDto) {
         // 需要修改的标签列表
         List<ChemicalFiberLabel> chemicalFiberLabels = new ArrayList<>();
-        ViewScanRecord viewScanRecord = new ViewScanRecord();
         ScanRecord scanRecord;
         String scanNumber;
         if (uploadDataDto.getStatus() != 7) {
@@ -139,10 +138,6 @@ public class HandheldService {
             scanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
             scanRecordService.create(scanRecord);
 
-            String scan = scanNumber.toUpperCase();
-            viewScanRecord.setScanNumber(scan);
-            viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
-            viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         } else {
             ScanRecordQueryCriteria scanRecordQueryCriteria = new ScanRecordQueryCriteria();
             scanRecordQueryCriteria.setAccurateScanNumber(uploadDataDto.getScanNumber());
@@ -156,10 +151,6 @@ public class HandheldService {
             scanRecord = tempScanRecord;
             scanNumber = uploadDataDto.getScanNumber();
 
-            String scan = scanNumber.toUpperCase();
-            viewScanRecord.setScanNumber(scan);
-            viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
-            viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         }
 
         List<ScanRecordLabel> scanRecordLabels = new ArrayList<>();
@@ -187,12 +178,6 @@ public class HandheldService {
             ChemicalFiberLabel chemicalFiberLabel = new ChemicalFiberLabel();
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, chemicalFiberLabel);
             chemicalFiberLabels.add(chemicalFiberLabel);
-
-            ObjectTransfer.transValue(newChemicalFiberLabelDTO, viewScanRecord);
-            ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(newChemicalFiberLabelDTO.getProductionId()).orElseGet(ChemicalFiberProduction::new);
-            ObjectTransfer.transValue(production, viewScanRecord);
-            viewScanRecord.setId(null);
-            viewScanRecordService.create(viewScanRecord);
 
             if (uploadDataDto.getIsAdd()) {
                 Timestamp tempTimestamp = new Timestamp(Long.parseLong(scanTime));
