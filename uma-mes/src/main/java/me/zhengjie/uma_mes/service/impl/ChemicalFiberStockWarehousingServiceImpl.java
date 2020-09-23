@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockWarehousing;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockWarehousingDetail;
@@ -15,6 +16,7 @@ import me.zhengjie.utils.SecurityUtils;
 import me.zhengjie.utils.ValidationUtil;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -71,10 +73,20 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         Page<ChemicalFiberStockWarehousing> page = chemicalFiberStockWarehousingRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         List<ChemicalFiberStockWarehousing> list = page.getContent();
         List<ChemicalFiberStockWarehousingDTO> tonAndBranch = chemicalFiberStockWarehousingRepository.getTonAndBranch();
+        Map<Integer, String> tonanBranchMap = new HashMap<>();
         for (ChemicalFiberStockWarehousingDTO dto : tonAndBranch) {
-
+            String tonAndBranchStr = dto.getTon() + "吨" + "/" + dto.getBranch() + "支";
+            tonanBranchMap.put(dto.getId(), tonAndBranchStr);
         }
-        return PageUtil.toPage(page.map(chemicalFiberStockWarehousingMapper::toDto));
+        List<ChemicalFiberStockWarehousingDTO> warehousingDTO = new ArrayList<>();
+        for (ChemicalFiberStockWarehousing dto : list) {
+            ChemicalFiberStockWarehousingDTO war = new ChemicalFiberStockWarehousingDTO();
+            ObjectTransfer.transValue(dto, war);
+            war.setTonAndBranch(tonanBranchMap.get(dto.getId()));
+            warehousingDTO.add(war);
+        }
+        /*return PageUtil.toPage(page.map(chemicalFiberStockWarehousingMapper::toDto));*/
+        return PageUtil.toPage(new PageImpl(warehousingDTO, pageable, page.getTotalElements()));
     }
 
 
