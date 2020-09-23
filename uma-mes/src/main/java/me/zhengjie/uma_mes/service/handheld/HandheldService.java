@@ -320,7 +320,7 @@ public class HandheldService {
             scanNumber = type + year + month + "001";
         } else {
             ScanRecordDTO scanRecordDTO = scanRecordDTOS.get(scanRecordDTOS.size() - 1);
-            String tempScanNumber = scanRecordDTO.getScanNumber().substring(7);
+            String tempScanNumber = scanRecordDTO.getScanNumber().substring(6);
             Integer number = Integer.parseInt(tempScanNumber) + 1;
             String tempNumberStr = String.format("%3d", number++).replace(" ", "0");
             scanNumber = type + year + month + tempNumberStr;

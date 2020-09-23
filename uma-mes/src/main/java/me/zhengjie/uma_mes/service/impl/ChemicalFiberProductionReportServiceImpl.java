@@ -30,6 +30,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -92,6 +94,12 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         // 入库包数
         BigDecimal toVoidPacketNumber = new BigDecimal(0);
 
+        BigDecimal toVoidFactPerBagNumber = new BigDecimal(0);
+
+        BigDecimal toVoidNetWeight = new BigDecimal(0);
+
+        BigDecimal toVoidGrossWeight = new BigDecimal(0);
+
         List<Object> list = new ArrayList<>();
         list.add("总计");
         list.add("");
@@ -112,6 +120,9 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             warehousingGrossWeight = warehousingGrossWeight.add(dto.getWarehousingGrossWeight());
 
             toVoidPacketNumber = toVoidPacketNumber.add(dto.getToVoidPacketNumber());
+            toVoidFactPerBagNumber = toVoidFactPerBagNumber.add(dto.getToVoidFactPerBagNumber());
+            toVoidNetWeight = toVoidNetWeight.add(dto.getToVoidNetWeight());
+            toVoidGrossWeight = toVoidGrossWeight.add(dto.getToVoidGrossWeight());
 
 
         }
@@ -125,6 +136,9 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         list.add(warehousingNetWeight);
         list.add(warehousingGrossWeight);
         list.add(toVoidPacketNumber);
+        /*list.add(toVoidFactPerBagNumber);
+        list.add(toVoidNetWeight);
+        list.add(toVoidGrossWeight);*/
 
         return Result.success(list);
     }
@@ -138,6 +152,15 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         return chemicalFiberProductionReportRepository.getReport(year + "-" + month + "-" + day, shifts, machine);
     }
 
+    public ChemicalFiberProductionReport getDelectReport(String time, String shifts, String machine) {
+
+       /* Map<String, Object> timeMap = monthTimeInMillis();
+        String year = timeMap.get("year").toString();
+        String month = timeMap.get("month").toString();
+        String day = timeMap.get("day").toString();*/
+        return chemicalFiberProductionReportRepository.getReport(time, shifts, machine);
+    }
+
     public void update(ChemicalFiberProductionReport report) {
         chemicalFiberProductionReportRepository.save(report);
     }
@@ -149,36 +172,46 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
     }
 
     public void delectReport(ChemicalFiberLabel label) {
-        ChemicalFiberProductionReport report = getReport(label.getShifts(), label.getMachine());
+        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String time = sdf.format(label.getPrintTime());
+        ChemicalFiberProductionReport report = getDelectReport(time,label.getShifts(), label.getMachine());
         if (report != null) {
             BigDecimal toVoidPacketNumber = report.getToVoidPacketNumber();
             BigDecimal toVoidFactPerBagNumber = report.getToVoidFactPerBagNumber();
             BigDecimal toVoidNetWeight = report.getToVoidNetWeight();
             BigDecimal toVoidGrossWeight = report.getToVoidGrossWeight();
 
+            BigDecimal productionPacketNumber = report.getProductionPacketNumber();
+            BigDecimal productionFactPerBagNumber = report.getProductionFactPerBagNumber();
+            BigDecimal productionNetWeight = report.getProductionNetWeight();
+            BigDecimal productionGrossWeight = report.getProductionGrossWeight();
+
+            BigDecimal warehousingPacketNumber = report.getWarehousingPacketNumber();
+            BigDecimal warehousingFactPerBagNumber = report.getWarehousingFactPerBagNumber();
+            BigDecimal warehousingNetWeight = report.getWarehousingNetWeight();
+            BigDecimal warehousingGrossWeight = report.getWarehousingGrossWeight();
+
+
+
             report.setToVoidPacketNumber(toVoidPacketNumber.add(new BigDecimal(1)));
             report.setToVoidFactPerBagNumber(toVoidFactPerBagNumber.add(new BigDecimal(label.getFactPerBagNumber())));
             report.setToVoidNetWeight(toVoidNetWeight.add(label.getNetWeight()));
             report.setToVoidGrossWeight(toVoidGrossWeight.add(label.getGrossWeight()));
+
+            report.setProductionPacketNumber(productionPacketNumber.subtract(new BigDecimal(1)));
+            report.setProductionFactPerBagNumber(productionFactPerBagNumber.subtract(new BigDecimal(label.getFactPerBagNumber())));
+            report.setProductionNetWeight(productionNetWeight.subtract(label.getNetWeight()));
+            report.setProductionGrossWeight(productionGrossWeight.subtract(label.getGrossWeight()));
+
+            if (label.getStatus() != 0) {
+                report.setWarehousingPacketNumber(warehousingPacketNumber.subtract(new BigDecimal(1)));
+                report.setWarehousingFactPerBagNumber(warehousingFactPerBagNumber.subtract(new BigDecimal(label.getFactPerBagNumber())));
+                report.setWarehousingNetWeight(warehousingNetWeight.subtract(label.getNetWeight()));
+                report.setWarehousingGrossWeight(warehousingGrossWeight.subtract(label.getGrossWeight()));
+            }
+
             update(report);
 
-        } else {
-            ChemicalFiberProductionReportDTO reportDTO = new ChemicalFiberProductionReportDTO();
-            reportDTO.setToVoidPacketNumber(new BigDecimal(1));
-            reportDTO.setToVoidFactPerBagNumber(new BigDecimal(label.getFactPerBagNumber()));
-            reportDTO.setToVoidNetWeight(label.getNetWeight());
-            reportDTO.setToVoidGrossWeight(label.getGrossWeight());
-
-            ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(label.getProductionId()).orElseGet(ChemicalFiberProduction::new);
-            reportDTO.setFineness(label.getFineness());
-            reportDTO.setColor(label.getColor());
-            reportDTO.setProductionId(label.getProductionId());
-            reportDTO.setProductionNumber(production.getNumber());
-            reportDTO.setProdId(label.getProductId());
-            reportDTO.setShifts(label.getShifts());
-            reportDTO.setMachine(label.getMachine());
-            reportDTO.setTime(new Timestamp(System.currentTimeMillis()));
-            create(reportDTO);
         }
     }
 
@@ -195,8 +228,10 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         for (int i = 1; i <= procuctionReportList.size(); i++) {
             Map<String, Object> maps = new HashMap<>();
             ChemicalFiberProductionReport dto = procuctionReportList.get(i - 1);
+            DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String time = sdf.format(dto.getTime());
             maps.put("index", i);
-            maps.put("printTime", dto.getTime());
+            maps.put("printTime", time);
             maps.put("number", dto.getProductionNumber());
             maps.put("machine", dto.getMachine());
             maps.put("shifts", dto.getShifts());
@@ -204,7 +239,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             maps.put("fineness", dto.getFineness());
             maps.put("productionPacketNumber", dto.getProductionPacketNumber());
             maps.put("productionFactPerBagNumber", dto.getProductionFactPerBagNumber());
-            maps.put("productionNetWeight", dto.getProductionGrossWeight());
+            maps.put("productionNetWeight", dto.getProductionNetWeight());
             maps.put("productionGrossWeight", dto.getProductionGrossWeight());
             maps.put("warehousingPacketNumber", dto.getWarehousingPacketNumber());
             maps.put("warehousingPerBagNumber", dto.getWarehousingFactPerBagNumber());
