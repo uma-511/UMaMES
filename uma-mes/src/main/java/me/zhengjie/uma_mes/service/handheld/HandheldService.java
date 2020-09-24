@@ -23,6 +23,8 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -858,7 +860,9 @@ public class HandheldService {
      */
     public void saveProdctionReport(List<ChemicalFiberLabel> chemicalFiberLabels) {
         for (ChemicalFiberLabel dto : chemicalFiberLabels) {
-            ChemicalFiberProductionReport report = productionReportService.getReport(dto.getShifts(), dto.getMachine());
+            DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String time = sdf.format(dto.getPrintTime());
+            ChemicalFiberProductionReport report = productionReportService.getReport(time,dto.getShifts(), dto.getMachine());
             if (report != null) {
                 BigDecimal warehousingPacketNumber = report.getWarehousingPacketNumber();
                 BigDecimal warehousingFactPerBagNumber = report.getWarehousingFactPerBagNumber();
@@ -886,7 +890,7 @@ public class HandheldService {
                 reportDTO.setProdId(dto.getProductId());
                 reportDTO.setShifts(dto.getShifts());
                 reportDTO.setMachine(dto.getMachine());
-                reportDTO.setTime(new Timestamp(System.currentTimeMillis()));
+                reportDTO.setTime(dto.getPrintTime());
                 productionReportService.create(reportDTO);
             }
         }

@@ -18,7 +18,7 @@ public interface ChemicalFiberProductionReportService {
     Map<String, Object> queryAll(ChemicalFiberProductionReportQueryCriteria criteria, Pageable pageable);
 
 
-    ChemicalFiberProductionReport getReport(String shifts, String machine);
+    ChemicalFiberProductionReport getReport(String time, String shifts, String machine);
 
     void update(ChemicalFiberProductionReport report);
 

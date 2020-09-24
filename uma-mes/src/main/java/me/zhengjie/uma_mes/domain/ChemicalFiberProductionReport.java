@@ -75,12 +75,13 @@ public class ChemicalFiberProductionReport implements Serializable {
     private BigDecimal warehousingGrossWeight;
 
     // 入库包数
+    @Column(name = "to_void_fact_per_bag_number")
+    private BigDecimal toVoidFactPerBagNumber;
+
+    // 入库个数
     @Column(name = "to_void_packet_number")
     private BigDecimal toVoidPacketNumber;
 
-    // 入库个数
-    @Column(name = "to_void_fact_per_bag_number")
-    private BigDecimal toVoidFactPerBagNumber;
 
     // 入库净重
     @Column(name = "to_void_net_weight")

@@ -130,7 +130,7 @@ public class ChemicalFiberPalletServiceImpl implements ChemicalFiberPalletServic
         String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/hqexcal.xls";
         // 加载模板
         TemplateExportParams params = new TemplateExportParams(templatePath);
-        params.setReadonly(Boolean.TRUE);
+        /*params.setReadonly(Boolean.TRUE);*/
         workbook = ExcelExportUtil.exportExcel(params, map);
         Sheet sheet1 = workbook.getSheet("Sheet1");
         Drawing patriarch = sheet1.createDrawingPatriarch();

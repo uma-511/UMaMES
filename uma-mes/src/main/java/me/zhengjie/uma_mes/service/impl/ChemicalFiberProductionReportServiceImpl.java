@@ -131,13 +131,14 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         return Result.success(list);
     }
 
-    public ChemicalFiberProductionReport getReport(String shifts, String machine) {
-
+    public ChemicalFiberProductionReport getReport(String time, String shifts, String machine) {
+/*
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
         String day = timeMap.get("day").toString();
-        return chemicalFiberProductionReportRepository.getReport(year + "-" + month + "-" + day, shifts, machine);
+        return chemicalFiberProductionReportRepository.getReport(year + "-" + month + "-" + day, shifts, machine);*/
+        return chemicalFiberProductionReportRepository.getReport(time, shifts, machine);
     }
 
     public ChemicalFiberProductionReport getDelectReport(String time, String shifts, String machine) {
@@ -252,7 +253,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         map.put("ProdctionList", listMap);
         map.put("productionPacketNumber", sum.getProductionPacketNumber());
         map.put("productionFactPerBagNumber", sum.getProductionFactPerBagNumber());
-        map.put("productionNetWeight", sum.getProductionGrossWeight());
+        map.put("productionNetWeight", sum.getProductionNetWeight());
         map.put("productionGrossWeight", sum.getProductionGrossWeight());
         map.put("warehousingPacketNumber", sum.getWarehousingPacketNumber());
         map.put("warehousingPerBagNumber", sum.getWarehousingFactPerBagNumber());

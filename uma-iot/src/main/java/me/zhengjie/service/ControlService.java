@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Random;
 
@@ -204,7 +205,10 @@ public class ControlService {
 
         ChemicalFiberProductionReport report = new ChemicalFiberProductionReport();
 
-        report = productionReportService.getReport(labelDto.getShifts(), labelDto.getMachine());
+        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String time = sdf.format(labelDto.getPrintTime());
+
+        report = productionReportService.getReport(time, labelDto.getShifts(), labelDto.getMachine());
 
         if (report != null) {
             BigDecimal productionPacketNumber = report.getProductionPacketNumber();
