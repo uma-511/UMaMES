@@ -40,10 +40,12 @@ public class ChemicalFibeDashboardServiceImpl implements ChemicalFibeDashboardSe
         dto.setWarehousingNumber(chemicalFiberStockWarehousingRepository.getWarehousingOrders(dateTime));
         dto.setWarehousingTonNumber(chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "吨"));
         dto.setWarehousingBranchNumber(chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "支"));
+
         dto.setDeliveryNumber(chemicalFiberDeliveryNoteRepository.getCurrenNoteCount(dateTime));
         dto.setDeliveryTonNumber(chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "吨"));
         dto.setDeliveryBranchNumber(chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "支"));
         dto.setDeliveryTotalNumber(chemicalFiberDeliveryNoteRepository.getDeliveryAmount(dateTime));
+
         dto.setStockTonNumber(chemicalFiberStockRepository.getTonnageInStorage("吨"));
         dto.setStockBranchNumber(chemicalFiberStockRepository.getTonnageInStorage("支"));
 

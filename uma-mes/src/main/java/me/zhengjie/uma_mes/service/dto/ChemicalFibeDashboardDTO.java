@@ -9,31 +9,31 @@ public class ChemicalFibeDashboardDTO implements Serializable {
 
 
     // 入库单数
-    private Integer warehousingNumber;
+    private BigDecimal warehousingNumber;
 
     // 入库吨数
-    private Integer warehousingTonNumber;
+    private BigDecimal warehousingTonNumber;
 
     // 入库支数
-    private Integer warehousingBranchNumber;
+    private BigDecimal warehousingBranchNumber;
 
     // 送货单数
-    private Integer deliveryNumber;
+    private BigDecimal deliveryNumber;
 
     // 送货吨数
-    private Integer deliveryTonNumber;
+    private BigDecimal deliveryTonNumber;
 
     // 送货支数
-    private Integer deliveryBranchNumber;
+    private BigDecimal deliveryBranchNumber;
 
     // 送货金额
-    private Integer deliveryTotalNumber;
+    private BigDecimal deliveryTotalNumber;
 
     // 库存吨数
-    private Integer stockTonNumber;
+    private BigDecimal stockTonNumber;
 
     // 库存支数
-    private Integer stockBranchNumber;
+    private BigDecimal stockBranchNumber;
 
 
 }

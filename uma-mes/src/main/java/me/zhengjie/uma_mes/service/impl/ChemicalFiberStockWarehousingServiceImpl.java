@@ -72,11 +72,11 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         criteria.setInvalidList(invalidList);
         Page<ChemicalFiberStockWarehousing> page = chemicalFiberStockWarehousingRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         List<ChemicalFiberStockWarehousing> list = page.getContent();
-        List<ChemicalFiberStockWarehousingDTO> tonAndBranch = chemicalFiberStockWarehousingRepository.getTonAndBranch();
+        List<Map<String, Object>> tonAndBranch = chemicalFiberStockWarehousingDetailRepository.getTonAndBranch();
         Map<Integer, String> tonanBranchMap = new HashMap<>();
-        for (ChemicalFiberStockWarehousingDTO dto : tonAndBranch) {
-            String tonAndBranchStr = dto.getTon() + "吨" + "/" + dto.getBranch() + "支";
-            tonanBranchMap.put(dto.getId(), tonAndBranchStr);
+        for (Map<String, Object> dto : tonAndBranch) {
+            String tonAndBranchStr = dto.get("ton") + "吨" + "/" + dto.get("branch") + "支";
+            tonanBranchMap.put((Integer)dto.get("warehousing_id"), tonAndBranchStr);
         }
         List<ChemicalFiberStockWarehousingDTO> warehousingDTO = new ArrayList<>();
         for (ChemicalFiberStockWarehousing dto : list) {

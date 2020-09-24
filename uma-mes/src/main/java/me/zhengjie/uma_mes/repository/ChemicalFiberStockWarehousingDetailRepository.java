@@ -23,4 +23,7 @@ public interface ChemicalFiberStockWarehousingDetailRepository extends JpaReposi
             "\t) AS temp where temp.invalid = 0 ",
             nativeQuery = true)
     List<Map<String, Object>> getSummaryDate(String data1, String data2, String color, String fineness);
+
+    @Query(value = "select * from(SELECT warehousing_id , sum( CASE WHEN unit = '吨' THEN warehousing_number ELSE 0 END ) AS ton, sum( CASE WHEN unit = '支' THEN warehousing_number ELSE 0 END ) AS branch FROM uma_chemical_fiber_stock_warehousing_detail GROUP BY warehousing_id ) as temp ",nativeQuery = true)
+    List<Map<String, Object>> getTonAndBranch();
 }
