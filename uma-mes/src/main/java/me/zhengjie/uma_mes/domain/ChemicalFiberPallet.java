@@ -76,4 +76,16 @@ public class ChemicalFiberPallet {
     @Column(name = "packer")
     private String packer;
 
+    // 新增时间
+    @Column(name = "create_date")
+    private Timestamp createDate;
+
+    // 出库个数
+    @Column(name = "warehousing_number")
+    private Integer warehousingNumber;
+
+    // 出库包数
+    @Column(name = "warehousing_bag")
+    private Integer warehousingBag;
+
 }

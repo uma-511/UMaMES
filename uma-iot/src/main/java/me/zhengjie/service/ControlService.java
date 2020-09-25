@@ -13,15 +13,15 @@ import me.zhengjie.terminal.terminal.CancelPage;
 import me.zhengjie.terminal.terminal.ControllerPage;
 import me.zhengjie.terminal.terminal.ReprintPage;
 import me.zhengjie.terminal.terminal.Terminal;
-import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
-import me.zhengjie.uma_mes.domain.ChemicalFiberProduct;
-import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
-import me.zhengjie.uma_mes.domain.ChemicalFiberProductionReport;
+import me.zhengjie.uma_mes.domain.*;
+import me.zhengjie.uma_mes.repository.ChemicalFiberPalletDetailRepository;
+import me.zhengjie.uma_mes.repository.ChemicalFiberPalletRepository;
 import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.MachineService;
 import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.dto.termina.TerminalUploadDataDto;
 import me.zhengjie.uma_mes.service.terminal.TerminalService;
+import me.zhengjie.utils.QueryHelp;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Random;
 
 @Slf4j
@@ -66,6 +67,12 @@ public class ControlService {
 
     @Autowired
     ChemicalFiberProductionReportService productionReportService;
+
+    @Autowired
+    ChemicalFiberPalletRepository chemicalFiberPalletRepository;
+
+    @Autowired
+    ChemicalFiberPalletDetailRepository chemicalFiberPalletDetailRepository;
     /**
      * 获取机台生产单数据
      */
@@ -270,6 +277,9 @@ public class ControlService {
                 gobalSender.sendImmediate(cancelPage.sendTip("标签已作废",ip));
             }else{
                 productionReportService.delectReport(label);
+                ChemicalFiberPalletDetailQueryCeiteria ceieria = new ChemicalFiberPalletDetailQueryCeiteria();
+                List<ChemicalFiberPalletDetail> palletDetail = chemicalFiberPalletDetailRepository.findAll(((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,ceieria,criteriaBuilder)));
+                chemicalFiberPalletDetailRepository.deleteAll(palletDetail);
                 label.setStatus(3);
                 label.setPalletId("");
                 labelService.update(label);

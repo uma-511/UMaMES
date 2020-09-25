@@ -4,11 +4,13 @@ import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.TemplateExportParams;
 import cn.afterturn.easypoi.excel.entity.enmus.ExcelStyleType;
 import cn.hutool.extra.template.TemplateConfig;
+import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberPallet;
 import me.zhengjie.uma_mes.domain.ChemicalFiberPalletDetail;
 import me.zhengjie.uma_mes.repository.ChemicalFiberPalletDetailRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberPalletRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberPalletService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberPalletDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberPalletQueryCeiteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberPalletMapper;
 import me.zhengjie.utils.FileUtil;
@@ -29,6 +31,7 @@ import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -64,7 +67,40 @@ public class ChemicalFiberPalletServiceImpl implements ChemicalFiberPalletServic
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
         }
         Page<ChemicalFiberPallet> page = chemicalFiberPalletRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
-        return PageUtil.toPage(page.map(chemicalFiberPalletMapper::toDto));
+        List<ChemicalFiberPallet> list = page.getContent();
+        List<Map<String, Object>> number = chemicalFiberPalletRepository.getNumbar();
+        Map<String, ChemicalFiberPalletDTO> numberDTO = new HashMap();
+        for (Map<String, Object> number1 : number) {
+            ChemicalFiberPalletDTO dto = new ChemicalFiberPalletDTO();
+            String totalBagStr = number1.get("total_bag").toString();
+            Integer totalBag = Integer.parseInt(totalBagStr);
+            dto.setTotalBag(totalBag);
+
+            String totalNumberStr = number1.get("total_number").toString();
+            Integer totalNumber = Integer.parseInt(totalNumberStr);
+            dto.setTotalNumber(totalNumber);
+            dto.setGrossWeight((BigDecimal)number1.get("total_gross_weight"));
+            dto.setNetWeight((BigDecimal)number1.get("total_net_weight"));
+            dto.setTare((BigDecimal)number1.get("total_tare"));
+            String warehousingBagStr = number1.get("warehousing_bag").toString();
+            Integer warehousingBag = Integer.parseInt(warehousingBagStr);
+            dto.setWarehousingBag(warehousingBag);
+
+            String warehousingNumberStr = number1.get("warehousing_number").toString();
+            Integer warehousingNumber = Integer.parseInt(warehousingNumberStr);
+            dto.setWarehousingNumber(warehousingNumber);
+            numberDTO.put((String)number1.get("pallet_id"), dto);
+        }
+        List<ChemicalFiberPalletDTO> pageDTO = new ArrayList<>();
+        for (ChemicalFiberPallet pallet : list) {
+            ChemicalFiberPalletDTO Pages = new ChemicalFiberPalletDTO();
+            ObjectTransfer.transValue(pallet, Pages);
+            ChemicalFiberPalletDTO getnumber = numberDTO.get(pallet.getPalletNumber());
+            ObjectTransfer.transValue(getnumber, Pages);
+            pageDTO.add(Pages);
+        }
+        /*return PageUtil.toPage(page.map(chemicalFiberPalletMapper::toDto));*/
+        return PageUtil.toPage(new PageImpl(pageDTO, pageable, page.getTotalElements()));
 
     }
 

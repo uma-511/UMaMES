@@ -442,7 +442,7 @@ public class HandheldService {
                 updatePallet(chemicalFiberLabels);
             } else {
                 List<ChemicalFiberPalletDetail> palletList = chemicalFiberPalletDetailService.createPallet(chemicalFiberPalletDetails, uploadDataDto.getScanNumber());
-                List<ChemicalFiberPallet> PalletList = chemicalFiberPalletRepository.findAll();
+                /*List<ChemicalFiberPallet> PalletList = chemicalFiberPalletRepository.findAll();
                 for (ChemicalFiberPalletDetail dto : palletList) {
                     if (dto.getPalletId() != null) {
                         ChemicalFiberPallet pallet = isPalletId(dto.getPalletId(), PalletList);
@@ -463,10 +463,13 @@ public class HandheldService {
                         pallet.setGrossWeight(grossWeight);
                         pallet.setTotalNumber(factPerBagNumber);
                         pallet.setTotalBag(totalBag);
-                        chemicalFiberPalletRepository.save(pallet);
-                    }
 
-                }
+
+                        pallet.setCreateDate(new Timestamp(System.currentTimeMillis()));
+                        chemicalFiberPalletRepository.save(pallet);*/
+                    /*}*/
+
+                /*}*/
             }
         }
 
@@ -485,6 +488,9 @@ public class HandheldService {
             Pallet.setGrossWeight(sumGrossWeight);
             Pallet.setTotalNumber(sumNumber);
             Pallet.setTotalBag(sumBag);
+            Pallet.setCreateDate(new Timestamp(System.currentTimeMillis()));
+            Pallet.setWarehousingNumber(0);
+            Pallet.setWarehousingBag(0);
             Pallet = chemicalFiberPalletRepository.save(Pallet);
             for (ChemicalFiberLabel dto : chemicalFiberLabels) {
                 dto.setPalletId(Pallet.getPalletNumber());
@@ -766,7 +772,7 @@ public class HandheldService {
      * @param chemicalFiberLabels 标签数据
      */
     public void updatePallet(List<ChemicalFiberLabel> chemicalFiberLabels) {
-        for (ChemicalFiberLabel dto : chemicalFiberLabels) {
+        /*for (ChemicalFiberLabel dto : chemicalFiberLabels) {
             List<ChemicalFiberPallet> PalletList = chemicalFiberPalletRepository.findAll();
             if (dto.getPalletId() != null) {
                 ChemicalFiberPallet pallet = isPalletId(dto.getPalletId(), PalletList);
@@ -775,19 +781,30 @@ public class HandheldService {
                 BigDecimal grossWeight = pallet.getGrossWeight();
                 Integer factPerBagNumber = pallet.getTotalNumber();
                 Integer totalBag = pallet.getTotalBag();
+
+                Integer warehousingNumber = pallet.getWarehousingNumber();
+                Integer warehousingBag = pallet.getWarehousingBag();
+
                 netWeight = netWeight.subtract(dto.getNetWeight());
                 tare = tare.subtract(dto.getTare());
                 grossWeight = grossWeight.subtract(dto.getGrossWeight());
                 factPerBagNumber = factPerBagNumber - dto.getFactPerBagNumber();
                 totalBag = totalBag - 1;
+
+                warehousingNumber = warehousingNumber + dto.getFactPerBagNumber();
+                warehousingBag = warehousingNumber + 1;
+
                 pallet.setNetWeight(netWeight);
                 pallet.setTare(tare);
                 pallet.setGrossWeight(grossWeight);
-                pallet.setTotalNumber(factPerBagNumber);
-                pallet.setTotalBag(totalBag);
-                chemicalFiberPalletRepository.save(pallet);
-            }
-        }
+
+                *//*if (dto.getStatus() == 2) {
+                    pallet.setWarehousingNumber(warehousingNumber);
+                    pallet.setWarehousingBag(warehousingBag);
+                }*//*
+                chemicalFiberPalletRepository.save(pallet);*/
+        /*    }
+        }*/
     }
 
     /**
