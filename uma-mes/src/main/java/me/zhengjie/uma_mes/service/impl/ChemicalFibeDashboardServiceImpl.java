@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -37,17 +38,17 @@ public class ChemicalFibeDashboardServiceImpl implements ChemicalFibeDashboardSe
         String dateTime = DashboardTime(criteria);
 
         ChemicalFibeDashboardDTO dto = new ChemicalFibeDashboardDTO();
-        dto.setWarehousingNumber(chemicalFiberStockWarehousingRepository.getWarehousingOrders(dateTime));
-        dto.setWarehousingTonNumber(chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "吨"));
-        dto.setWarehousingBranchNumber(chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "支"));
+        dto.setWarehousingNumber((BigDecimal)chemicalFiberStockWarehousingRepository.getWarehousingOrders(dateTime));
+        dto.setWarehousingTonNumber((BigDecimal)chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "吨"));
+        dto.setWarehousingBranchNumber((BigDecimal)chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "支"));
 
         dto.setDeliveryNumber(chemicalFiberDeliveryNoteRepository.getCurrenNoteCount(dateTime));
-        dto.setDeliveryTonNumber(chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "吨"));
-        dto.setDeliveryBranchNumber(chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "支"));
-        dto.setDeliveryTotalNumber(chemicalFiberDeliveryNoteRepository.getDeliveryAmount(dateTime));
+        dto.setDeliveryTonNumber((BigDecimal)chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "吨"));
+        dto.setDeliveryBranchNumber((BigDecimal)chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "支"));
+        dto.setDeliveryTotalNumber((BigDecimal)chemicalFiberDeliveryNoteRepository.getDeliveryAmount(dateTime));
 
-        dto.setStockTonNumber(chemicalFiberStockRepository.getTonnageInStorage("吨"));
-        dto.setStockBranchNumber(chemicalFiberStockRepository.getTonnageInStorage("支"));
+        dto.setStockTonNumber((BigDecimal)chemicalFiberStockRepository.getTonnageInStorage("吨"));
+        dto.setStockBranchNumber((BigDecimal)chemicalFiberStockRepository.getTonnageInStorage("支"));
 
         return dto;
     }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -30,5 +31,5 @@ public interface ChemicalFiberStockRepository extends JpaRepository<ChemicalFibe
     ChemicalFiberStock findByProdId(@Param("prodId") Integer prodId, @Param("prodUnit") String prodUnit);
 
     @Query(value = "SELECT SUM(total_number) FROM uma_chemical_fiber_stock where prod_unit = :unit",nativeQuery = true)
-    Integer getTonnageInStorage(@Param("unit") String unit);
+    BigDecimal getTonnageInStorage(@Param("unit") String unit);
 }

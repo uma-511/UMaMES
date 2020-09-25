@@ -3,6 +3,7 @@ package me.zhengjie.uma_mes.service.dto;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 public class ChemicalFibeDashboardDTO implements Serializable {
@@ -18,7 +19,7 @@ public class ChemicalFibeDashboardDTO implements Serializable {
     private BigDecimal warehousingBranchNumber;
 
     // 送货单数
-    private BigDecimal deliveryNumber;
+    private Integer deliveryNumber;
 
     // 送货吨数
     private BigDecimal deliveryTonNumber;

@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 
+import java.math.BigDecimal;
+
 /**
 * @author Tan Jun Ming
 * @date 2019-11-20
@@ -28,11 +30,11 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
     @Query(value = "select * FROM uma_chemical_fiber_delivery_note where scan_number = :scanNumber",nativeQuery = true)
     ChemicalFiberDeliveryNote getByScanNumber(@Param("scanNumber") String scanNumber);
 
-    @Query(value = "SELECT  SUM(b.total_number) FROM uma_chemical_fiber_delivery_note a LEFT JOIN  uma_chemical_fiber_delivery_detail b on a.scan_number = b.scan_number where a.create_date LIKE %:dateTime% and b.unit = :unit and invalid = 0  and note_status >= 3",nativeQuery = true)
-    Integer getTonnageInStorage(@Param("dateTime") String dateTime, @Param("unit") String unit);
+    @Query(value = "SELECT  SUM(b.total_number) FROM uma_chemical_fiber_delivery_note a LEFT JOIN  uma_chemical_fiber_delivery_detail b on a.scan_number = b.scan_number where a.create_date LIKE %:dateTime% and b.unit = :unit and invalid = 0  and a.note_status >= 3",nativeQuery = true)
+    BigDecimal getTonnageInStorage(@Param("dateTime") String dateTime, @Param("unit") String unit);
 
     @Query(value = "SELECT SUM(total_price) from uma_chemical_fiber_delivery_note where create_date LIKE %:dateTime% and invalid = 0 and note_status >= 3",nativeQuery = true)
-    Integer getDeliveryAmount(@Param("dateTime") String dateTime);
+    BigDecimal getDeliveryAmount(@Param("dateTime") String dateTime);
 
     @Query(value = "SELECT sum(b.total_price) as k FROM uma_chemical_fiber_delivery_note b WHERE b.customer_id = :customerId AND b.delivery_date > '1950-01' AND delivery_date < :dateTime ",nativeQuery = true)
     Integer getOnCreditSum(@Param("dateTime") String dateTime, @Param("customerId") Integer customerId);
