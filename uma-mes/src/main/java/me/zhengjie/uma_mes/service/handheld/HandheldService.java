@@ -261,9 +261,9 @@ public class HandheldService {
             scanRecordService.create(scanRecord);
 
             String scan = scanNumber.toUpperCase();
-            /*viewScanRecord.setScanNumber(scan);
+            viewScanRecord.setScanNumber(scan);
             viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
-            viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));*/
+            viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         } else {
             scanRecord = new ScanRecord();
             if (uploadDataDto.getStatus() == 7) {
@@ -293,10 +293,10 @@ public class HandheldService {
                 scanRecordService.create(scanRecord);
             }
 
-            /*String scan = scanNumber.toUpperCase();
+            String scan = scanNumber.toUpperCase();
             viewScanRecord.setScanNumber(scan);
             viewScanRecord.setScanTime(new Timestamp(System.currentTimeMillis()));
-            viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));*/
+            viewScanRecord.setType(getTypeStr(uploadDataDto.getStatus()));
         }
 
         List<ScanRecordLabel> scanRecordLabels = new ArrayList<>();
@@ -346,8 +346,8 @@ public class HandheldService {
             ObjectTransfer.transValue(newChemicalFiberLabelDTO, viewScanRecord);
             ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(newChemicalFiberLabelDTO.getProductionId()).orElseGet(ChemicalFiberProduction::new);
             ObjectTransfer.transValue(production, viewScanRecord);
-            /*viewScanRecord.setId(null);*/
-           /* if (uploadDataDto.getStatus() == 10) {
+            viewScanRecord.setId(null);
+            if (uploadDataDto.getStatus() == 10) {
 
                 if (uploadDataDto.getIsAdd()) {
                     viewScanRecord.setType("TZ+");
@@ -360,7 +360,7 @@ public class HandheldService {
                 } else {
                     viewScanRecord.setType("RK-");
                 }
-            }*/
+            }
             viewScanRecordService.create(viewScanRecord);
 
             // 计算所有的数量和重量
@@ -638,11 +638,6 @@ public class HandheldService {
                 type = "TB";
                 break;
             case 10:
-                if (uploadDataDto.getIsAdd()) {
-                    viewScanRecord.setType("TZ+");
-                } else {
-                    viewScanRecord.setType("TZ-");
-                }
                 type = "TZ";
                 break;
             default:
