@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Map;
 
 @Api(tags = "优码MES:化纤-盘点单列表管理")
@@ -37,8 +39,15 @@ public class ChemicalFiberWarehousingReortController {
     @Log("查询ChemicalFiberLabel")
     @ApiOperation("查询ChemicalFiberLabel")
     public Result getSummaryData(@RequestBody ChemicalFiberWarehousingReortQueryCriteria criteria) {
-
         Map<String, Object> map = chemicalFiberWarehousingReortService.getSummaryData(criteria);
         return Result.success(map);
+    }
+
+    @Log("导出数据")
+    @ApiOperation("导出数据")
+    @GetMapping(value = "/download")
+    // @PreAuthorize("@el.check('chemicalFiberProduction:list')")
+    public void download(HttpServletResponse response, ChemicalFiberWarehousingReortQueryCriteria criteria) throws IOException {
+        chemicalFiberWarehousingReortService.download(chemicalFiberWarehousingReortService.queryAlls(criteria), response);
     }
 }
