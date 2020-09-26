@@ -21,6 +21,12 @@ public class TravelPersionPerformanceQueryCriteria{
     private String personName;
 
     /**
+     * 流水号
+     */
+    @Query(propName = "scanNumber",type = Query.Type.INNER_LIKE)
+    private String scanNumber;
+
+    /**
      * 状态
      */
     @Query(propName = "enable")

@@ -39,15 +39,19 @@ public class User implements Serializable {
     @JoinColumn(name = "avatar_id")
     private UserAvatar userAvatar;
 
-    @NotBlank
-    @Pattern(regexp = "([a-z0-9A-Z]+[-|.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}",message = "格式错误")
+    /**
+     * @Pattern(regexp = "([a-z0-9A-Z]+[-|.]?)+[a-z0-9A-Z]@([a-z0-9A-Z]+(-[a-z0-9A-Z]+)?\\.)+[a-zA-Z]{2,}",message = "格式错误")
+     */
     private String email;
 
-    @NotBlank
     private String phone;
 
     @NotNull
     private Boolean enabled;
+
+    @NotNull
+    @Column(name = "is_worker")
+    private Boolean isWorker;
 
     private String password;
 

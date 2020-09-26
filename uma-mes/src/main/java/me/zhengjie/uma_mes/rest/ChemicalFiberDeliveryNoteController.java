@@ -129,6 +129,15 @@ public class ChemicalFiberDeliveryNoteController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @Log("订单签收")
+    @ApiOperation("订单签收")
+    @GetMapping(value = "/reRecived/{id}")
+    @AnonymousAccess()
+    public ResponseEntity reRecived(@PathVariable Integer id) {
+        chemicalFiberDeliveryNoteService.reRecived(id);
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
     @Log("订单失效")
     @ApiOperation("订单失效")
     @GetMapping(value = "/doInvalid/{id}")

@@ -13,6 +13,6 @@ import java.util.List;
  */
 public interface WageUserRepository extends JpaRepository<WageUser, Long>, JpaSpecificationExecutor<WageUser> {
 
-    @Query(value = "SELECT u.id as id,u.realname as realName,(select j.`name` from job j where j.id=u.job_id) as job,(select d.`name` from dept d where d.id=u.dept_id) as dept,(select ifnull(j.basic_salary,0) from job j where j.id=u.job_id) as basicsalary FROM `user` u where u.enabled = :enable",nativeQuery = true)
+    @Query(value = "SELECT u.id as id,u.realname as realName,(select j.`name` from job j where j.id=u.job_id) as job,(select d.`name` from dept d where d.id=u.dept_id) as dept,(select ifnull(j.basic_salary,0) from job j where j.id=u.job_id) as basicsalary FROM `user` u where u.enabled = :enable and u.is_worker = '1'",nativeQuery = true)
     List<WageUser> getWageUser(Boolean enable);
 }

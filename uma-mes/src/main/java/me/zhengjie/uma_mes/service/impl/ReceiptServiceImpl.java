@@ -168,6 +168,13 @@ public class ReceiptServiceImpl implements ReceiptService {
     public void update(Receipt resources) {
         Receipt receipt = receiptRepository.findById(resources.getId()).orElseGet(Receipt::new);
         ValidationUtil.isNull( receipt.getId(),"Receipt","id",resources.getId());
+        CustomerDTO customerDTO = customerService.findById(receipt.getCustomerId());
+        BigDecimal currentAccount = null == customerDTO.getAccount()? new BigDecimal(0):customerDTO.getAccount();
+        // 减去旧的金额，加上新金额
+        currentAccount = currentAccount.subtract(receipt.getAmountOfMoney());
+        currentAccount = currentAccount.add(resources.getAmountOfMoney());
+        customerDTO.setAccount(currentAccount);
+        customerService.save(customerMapper.toEntity(customerDTO));
         receipt.copy(resources);
         receiptRepository.save(receipt);
     }
@@ -177,6 +184,10 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         Receipt receipt = receiptRepository.findById(id).orElseGet(Receipt::new);
+        CustomerDTO customerDTO = customerService.findById(receipt.getCustomerId());
+        BigDecimal currentAccount = null == customerDTO.getAccount()? new BigDecimal(0):customerDTO.getAccount();
+        customerDTO.setAccount(currentAccount.subtract(receipt.getAmountOfMoney()));
+        customerService.save(customerMapper.toEntity(customerDTO));
         receipt.setEnable(Boolean.FALSE);
         receiptRepository.save(receipt);
     }

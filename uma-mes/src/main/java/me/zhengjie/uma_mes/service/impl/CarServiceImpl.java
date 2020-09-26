@@ -99,7 +99,6 @@ public class CarServiceImpl implements CarService {
     public void update(Car resources) {
         Car car = carRepository.findById(resources.getId()).orElseGet(Car::new);
         ValidationUtil.isNull( car.getId(),"Car","id",resources.getId());
-        car.copy(resources);
         Integer offSetInt = 0;
         if (null != car.getTrialCycle()){
             if(car.getTrialCycle().equals("三个月")){
@@ -117,6 +116,7 @@ public class CarServiceImpl implements CarService {
                 resources.setExpectDate(afterLastTrial);
             }
         }
+        car.copy(resources);
         carRepository.save(car);
     }
 

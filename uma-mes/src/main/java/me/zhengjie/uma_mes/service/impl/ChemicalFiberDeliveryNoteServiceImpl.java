@@ -343,12 +343,55 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             chemicalFiberDeliveryNote.setTotalPrice(realTotalPrise);
             update(chemicalFiberDeliveryNote);
             StatementUp(id);
-            //生成司机/押运工资单
+            // 生成司机绩效
             generatePerformanceByCar(chemicalFiberDeliveryNote.getCarNumber(),chemicalFiberDeliveryNote.getStartPlace(),chemicalFiberDeliveryNote.getEndPlace(),chemicalFiberDeliveryNote.getDriverMain(),chemicalFiberDeliveryNote.getDriverDeputy(), chemicalFiberDeliveryNote.getLoaderOne(), chemicalFiberDeliveryNote.getLoaderTwo(),totalWeight,chemicalFiberDeliveryNote.getScanNumber());
         }catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             throw new BadRequestException("签收失败，请校验订单数据");
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void reRecived(Integer id) {
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+
+        // 找出产品并回仓
+        ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
+        chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
+        //处理库存
+        ChemicalFiberStockQueryCriteria chemicalFiberStockQueryCriteria;
+        for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO:chemicalFiberDeliveryDetailDTOS){
+            chemicalFiberStockQueryCriteria = new ChemicalFiberStockQueryCriteria();
+            chemicalFiberStockQueryCriteria.setProdName(chemicalFiberDeliveryDetailDTO.getProdName());
+            chemicalFiberStockQueryCriteria.setProdId(chemicalFiberDeliveryDetailDTO.getProdId());
+            chemicalFiberStockQueryCriteria.setProdUnit(chemicalFiberDeliveryDetailDTO.getUnit());
+            List<ChemicalFiberStockDTO> chemicalFiberStockDTOs = chemicalFiberStockService.queryAll(chemicalFiberStockQueryCriteria);
+            if(null == chemicalFiberStockDTOs || chemicalFiberStockDTOs.size() == 0)
+            {
+                throw new BadRequestException("没查到库存记录，操作失败");
+            }
+            for(ChemicalFiberStockDTO chemicalFiberStockDTO:chemicalFiberStockDTOs){
+                chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber().add(chemicalFiberDeliveryDetailDTO.getRealQuantity()));
+                chemicalFiberStockService.update(chemicalFiberStockMapper.toEntity(chemicalFiberStockDTO));
+            }
+        }
+
+
+        // 找出支付记录并回退金额
+        List<ChemicalFiberDeliveryNotePayDetailDTO> chemicalFiberDeliveryNotePayDetailDTOS = chemicalFiberDeliveryNotePayDetailService.findListByScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        BigDecimal totalAmount = new BigDecimal(0);
+        for (ChemicalFiberDeliveryNotePayDetailDTO chemicalFiberDeliveryNotePayDetailDTO : chemicalFiberDeliveryNotePayDetailDTOS){
+            totalAmount = totalAmount.add(chemicalFiberDeliveryNotePayDetailDTO.getAmount());
+            chemicalFiberDeliveryNotePayDetailService.delete(chemicalFiberDeliveryNotePayDetailDTO.getId());
+        }
+        CustomerDTO customerDTO = customerService.findById(chemicalFiberDeliveryNote.getCustomerId());
+        customerDTO.setAccount(customerDTO.getAccount().add(totalAmount));
+        customerService.update(customerMapper.toEntity(customerDTO));
+
+        chemicalFiberDeliveryNote.setNoteStatus(3);
+        chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
     }
 
     public void generatePerformanceByCar(String carNumber,String startPlace,String endPlace,String driverMain,String driverDeputy,String loaderOne,String loaderTwo,BigDecimal totalWeight,String scanNumber) {
@@ -383,18 +426,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 }else{
                     travelExpensesPrice = new BigDecimal(0);
                 }
-                Integer driverId = 0;
-                driverId = chemicalFiberDeliveryNoteRepository.getIdByRealName(driverMain);
-                if ( 0 == driverId ) {
-                    throw new BadRequestException("签收失败，获取人员id异常");
-                }
-                String driverPermission = null;
-                driverPermission = chemicalFiberDeliveryNoteRepository.getPermissionByRealName(driverMain);
-                if ( null == driverPermission ) {
-                    throw new BadRequestException("签收失败，获取人员职位异常");
-                }
-                BigDecimal surchargePrice = new BigDecimal(0);
-                createPermission(driverMain,driverId,driverPermission,travelExpensesPrice,surchargePrice,scanNumber);
+                generateDriverPermission(driverMain,totalWeight,travelExpensesPrice,scanNumber);
+                generateDriverPermission(driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
             }
             if ( car.getCarType().equals("槽罐车") ) {
                 if( null != travelExpenses) {
@@ -402,45 +435,60 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 }else{
                     travelExpensesPrice = new BigDecimal(0);
                 }
-                Integer driverMainId = null;
-                driverMainId = chemicalFiberDeliveryNoteRepository.getIdByRealName(driverMain);
-                if ( null == driverMainId ) {
-                    throw new BadRequestException("签收失败，获取人员id异常");
-                }
-                String driverMainPermission = null;
-                driverMainPermission = chemicalFiberDeliveryNoteRepository.getPermissionByRealName(driverMain);
-                if ( null == driverMainPermission ) {
-                    throw new BadRequestException("签收失败，获取人员职位异常");
-                }
-                BigDecimal surchargePrice = new BigDecimal(0);
-                if( globalCompanyName.equals("XQ") ){
-                    surchargePrice = new BigDecimal(65);
+                generateDriverPermission(driverMain,totalWeight,travelExpensesPrice,scanNumber);
+                generateDriverPermission(driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
+            }
+            if ( car.getCarType().equals("拖头车") ) {
+                if( null != travelExpenses) {
+                    travelExpensesPrice = travelExpenses.getTractorPrice();
                 }else{
-                    surchargePrice = new BigDecimal(75);
+                    travelExpensesPrice = new BigDecimal(0);
                 }
-                if ( totalWeight.compareTo(new BigDecimal(15)) >= 0 ){
-                    if ( totalWeight.compareTo(new BigDecimal(20)) >= 0 ){
-                        surchargePrice = surchargePrice.add(new BigDecimal(10));
-                    }else{
-                        surchargePrice = surchargePrice.add(new BigDecimal(5));
-                    }
-                }
-                createPermission(driverMain,driverMainId,driverMainPermission,travelExpensesPrice,surchargePrice,scanNumber);
+                generateDriverPermission(driverMain,totalWeight,travelExpensesPrice,scanNumber);
+                generateDriverPermission(driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
             }
         }
     }
 
-    private void createPermission(String user,Integer userId,String userPermission,BigDecimal expensesPrice,BigDecimal surchargePrice,String scanNumber) {
+    private void generateDriverPermission(String driverRealName,BigDecimal totalWeight,BigDecimal travelExpensesPrice,String scanNumber){
+        Integer driverId = null;
+        driverId = chemicalFiberDeliveryNoteRepository.getIdByRealName(driverRealName);
+        if ( null == driverId ) {
+            throw new BadRequestException("签收失败，获取人员id异常");
+        }
+        String driverPermission = null;
+        driverPermission = chemicalFiberDeliveryNoteRepository.getPermissionByRealName(driverRealName);
+        if ( null == driverPermission ) {
+            throw new BadRequestException("签收失败，获取人员职位异常");
+        }
+        // 附加费
+       /* BigDecimal surchargePrice = new BigDecimal(0);
+        if( globalCompanyName.equals("XQ") ){
+            surchargePrice = new BigDecimal(65);
+        }else{
+            surchargePrice = new BigDecimal(75);
+        }
+        if ( totalWeight.compareTo(new BigDecimal(15)) >= 0 ){
+            if ( totalWeight.compareTo(new BigDecimal(20)) >= 0 ){
+                surchargePrice = surchargePrice.add(new BigDecimal(10));
+            }else{
+                surchargePrice = surchargePrice.add(new BigDecimal(5));
+            }
+        }*/
+        createPermission(driverRealName,driverId,driverPermission,travelExpensesPrice,scanNumber);
+    }
+
+
+    private void createPermission(String user,Integer userId,String userPermission,BigDecimal expensesPrice,String scanNumber) {
         TravelPersionPerformance travelPersionPerformance = new TravelPersionPerformance();
         travelPersionPerformance.setEnable(Boolean.TRUE);
         travelPersionPerformance.setCreateTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         travelPersionPerformance.setMileageFee(expensesPrice);
-        travelPersionPerformance.setTotalPerformance(expensesPrice.add(surchargePrice));
+        travelPersionPerformance.setTotalPerformance(expensesPrice);
         travelPersionPerformance.setPersonId(userId);
         travelPersionPerformance.setPermission(userPermission);
         travelPersionPerformance.setOvertimePay(new BigDecimal(0));
         travelPersionPerformance.setAllowance(new BigDecimal(0));
-        travelPersionPerformance.setSurcharge(surchargePrice);
         travelPersionPerformance.setHandlingCost(new BigDecimal(0));
         travelPersionPerformance.setPersonName(user);
         travelPersionPerformance.setScanNumber(scanNumber);

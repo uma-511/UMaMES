@@ -57,7 +57,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable
     public Object queryAll(UserQueryCriteria criteria, Pageable pageable) {
         Page<User> page = userRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(userMapper::toDto));
@@ -90,6 +89,17 @@ public class UserServiceImpl implements UserService {
     public String getPermissionByUserId(Long id){
         String permission = userRepository.getPermissionByUserId(id);
         return permission;
+    }
+
+    @Override
+    public void changeIsWorker(Long id) {
+        User user = userRepository.findById(id).orElseGet(User::new);
+        if (user.getIsWorker()){
+            user.setIsWorker(Boolean.FALSE);
+        } else {
+            user.setIsWorker(Boolean.TRUE);
+        }
+        userRepository.save(user);
     }
 
     @Override

@@ -51,4 +51,6 @@ public interface CustomerService {
     void download(List<CustomerDTO> all, HttpServletResponse response) throws IOException;
 
     void save(Customer customer);
+
+    void changeOverArrears(CustomerQueryCriteria criteria);
 }

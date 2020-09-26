@@ -129,10 +129,10 @@ public class ChemicalFiberStockServiceImpl implements ChemicalFiberStockService 
         FileUtil.downloadExcel(list, response);
     }
 
-    @Override
+/*    @Override
     public void stockTask() {
         chemicalFiberStockRepository.stockTask();
-    }
+    }*/
 
     @Override
     public ChemicalFiberStock findByColorAndFineness(String color, String fineness) {

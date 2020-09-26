@@ -3,6 +3,8 @@ package me.zhengjie.uma_mes.service.dto;
 import lombok.Data;
 import me.zhengjie.annotation.Query;
 
+import java.math.BigDecimal;
+
 /**
 * @author Tan Jun Ming
 * @date 2019-11-20
@@ -55,4 +57,6 @@ public class CustomerQueryCriteria{
     // 模糊
     @Query(type = Query.Type.LESS_THAN)
     private Long otherDate;
+
+    private BigDecimal overArrears;
 }

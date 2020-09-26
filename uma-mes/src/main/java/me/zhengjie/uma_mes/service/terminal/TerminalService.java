@@ -118,7 +118,7 @@ public class TerminalService {
         ChemicalFiberStock fiberStock = chemicalFiberStockService.findByColorAndFineness(chemicalFiberProduct.getColor(),chemicalFiberProduct.getFineness());
         if(fiberStock==null) {
             chemicalFiberStockService.create(chemicalFiberStock);
-            chemicalFiberStockService.stockTask();
+            //chemicalFiberStockService.stockTask();
         }
     }
 

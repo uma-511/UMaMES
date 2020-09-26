@@ -54,7 +54,7 @@ public interface ChemicalFiberStockService {
 
     void download(List<ChemicalFiberStockDTO> all, HttpServletResponse response) throws IOException;
 
-    void stockTask();
+    /*void stockTask();*/
 
     Object buildTree(List<ChemicalFiberStockDTO> chemicalFiberStockDTO);
 

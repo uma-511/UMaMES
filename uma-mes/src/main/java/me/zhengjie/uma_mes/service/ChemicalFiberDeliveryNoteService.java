@@ -64,6 +64,8 @@ public interface ChemicalFiberDeliveryNoteService {
 
     void recived(Integer id);
 
+    void reRecived(Integer id);
+
     void doInvalid(Integer id);
 
     void unInvalid(Integer id);

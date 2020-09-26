@@ -2,6 +2,7 @@ package me.zhengjie.modules.system.rest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.config.DataScope;
 import me.zhengjie.domain.VerificationCode;
@@ -64,6 +65,15 @@ public class UserController {
     @PreAuthorize("@el.check('user:list')")
     public void download(HttpServletResponse response, UserQueryCriteria criteria) throws IOException {
         userService.download(userService.queryAll(criteria), response);
+    }
+
+    @Log("修改是否职工标志")
+    @ApiOperation("修改是否职工标志")
+    @GetMapping(value = "/changeIsWorker/{id}")
+    @AnonymousAccess()
+    public ResponseEntity changeIsWorker(@PathVariable Long id) {
+        userService.changeIsWorker(id);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @Log("查询用户")

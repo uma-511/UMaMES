@@ -85,6 +85,21 @@ public class CustomerServiceImpl implements CustomerService {
             criteria.setContactPhone("");
         }
         List<Customer> pages = customerRepository.findAllWithTotalArrears(PageNumber, start,otherDate,criteria.getName(),criteria.getCode(),criteria.getAddress(),criteria.getContacts(),criteria.getContactPhone());
+        for(Customer customer : pages){
+            // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
+            if (null == customer.getOverArrears()) {
+                customer.setOverArrears(new BigDecimal(0));
+            }
+            customer.setTotalArrears(customer.getTotalArrears().add(customer.getOverArrears()));
+
+            if (null == customer.getCurrentArrears() || customer.getCurrentArrears().compareTo(new BigDecimal(0.00)) == 0 || customer.getCurrentArrears().equals(0.00)) {
+                customer.setCurrentArrears(null);
+            }if (null == customer.getTotalArrears() || customer.getTotalArrears().compareTo(new BigDecimal(0.00)) == 0 || customer.getTotalArrears().equals(0.00)) {
+                customer.setTotalArrears(null);
+            }if (null == customer.getAccount() || customer.getAccount().compareTo(new BigDecimal(0.00)) == 0 || customer.getAccount().equals(0.00)) {
+                customer.setAccount(null);
+            }
+        }
         Integer Size = customerRepository.findSize();
         map.put("content", pages);
         map.put("totalElements", Size);
@@ -113,7 +128,15 @@ public class CustomerServiceImpl implements CustomerService {
         if (null == criteria.getContactPhone()){
             criteria.setContactPhone("");
         }
-        return customerMapper.toDto(customerRepository.findAllWithTotalArrearsForGetList(otherDate,criteria.getName(),criteria.getCode(),criteria.getAddress(),criteria.getContacts(),criteria.getContactPhone()));
+        List<CustomerDTO> customerDTOList = customerMapper.toDto(customerRepository.findAllWithTotalArrearsForGetList(otherDate,criteria.getName(),criteria.getCode(),criteria.getAddress(),criteria.getContacts(),criteria.getContactPhone()));
+        for (CustomerDTO customerDTO : customerDTOList){
+            // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
+            if (null == customerDTO.getOverArrears()) {
+                customerDTO.setOverArrears(new BigDecimal(0));
+            }
+            customerDTO.setTotalArrears(customerDTO.getTotalArrears().add(customerDTO.getOverArrears()));
+        }
+        return customerDTOList;
     }
 /*
     public List<CustomerDTO> queryAllWithTotalArrears(CustomerQueryCriteria criteria){
@@ -129,12 +152,18 @@ public class CustomerServiceImpl implements CustomerService {
         return customerMapper.toDto(customer);
     }
 
+    @Override
     public CustomerDTO findByIdWithTotalArrears(Integer id) {
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
         String otherDate= year+"-"+month;
         Customer customer = customerRepository.findByIdWithArrears(id,otherDate);
+        // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
+        if (null == customer.getOverArrears()) {
+            customer.setOverArrears(new BigDecimal(0));
+        }
+        customer.setTotalArrears(customer.getTotalArrears().add(customer.getOverArrears()));
         ValidationUtil.isNull(customer.getId(),"Customer","id",id);
         return customerMapper.toDto(customer);
     }
@@ -236,6 +265,13 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public void save(Customer customer) {
+        customerRepository.save(customer);
+    }
+
+    @Override
+    public void changeOverArrears(CustomerQueryCriteria criteria) {
+        Customer customer = customerRepository.findById(criteria.getId()).orElseGet(Customer::new);
+        customer.setOverArrears(criteria.getOverArrears());
         customerRepository.save(customer);
     }
 }

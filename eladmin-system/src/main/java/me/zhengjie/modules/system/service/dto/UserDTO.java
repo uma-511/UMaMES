@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -32,6 +34,8 @@ public class UserDTO implements Serializable {
     private String phone;
 
     private Boolean enabled;
+
+    private Boolean isWorker;
 
     private String permission;
 

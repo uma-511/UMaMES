@@ -11,7 +11,7 @@ public class StockTask {
         this.chemicalFiberStockService = chemicalFiberStockService;
     }
 
-    public void run(){
+    /*public void run(){
         chemicalFiberStockService.stockTask();
-    }
+    }*/
 }

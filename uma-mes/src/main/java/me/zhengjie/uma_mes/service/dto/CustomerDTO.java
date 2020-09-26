@@ -6,6 +6,7 @@ import lombok.Data;
 import me.zhengjie.annotation.Query;
 import me.zhengjie.uma_mes.utils.CustomerBigDecimalSerialize;
 
+import javax.persistence.Column;
 import javax.persistence.NamedQuery;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -62,4 +63,8 @@ public class CustomerDTO implements Serializable {
     // 客户当月总欠款
     @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal currentArrears;
+
+    // 旧有欠款
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal overArrears;
 }

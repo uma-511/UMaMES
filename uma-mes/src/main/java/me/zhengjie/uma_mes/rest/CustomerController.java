@@ -83,6 +83,15 @@ public class CustomerController {
         return new ResponseEntity<>(customerService.queryAll(criteria),HttpStatus.OK);
     }
 
+    @Log("修改客户欠款")
+    @ApiOperation("修改客户欠款")
+    @PostMapping(value = "/changeOverArrears")
+    @AnonymousAccess()
+    public ResponseEntity changeOverArrears(@RequestBody CustomerQueryCriteria criteria) {
+        customerService.changeOverArrears(criteria);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @Log("获取客户byId")
     @ApiOperation("获取客户byId")
     @PostMapping(value = "/getCustomerById")

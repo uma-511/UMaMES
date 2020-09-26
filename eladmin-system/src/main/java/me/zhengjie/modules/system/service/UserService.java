@@ -44,5 +44,7 @@ public interface UserService {
 
     String getPermissionByUserId(Long id);
 
+    void changeIsWorker(Long id);
+
     void download(List<UserDTO> queryAll, HttpServletResponse response) throws IOException;
 }

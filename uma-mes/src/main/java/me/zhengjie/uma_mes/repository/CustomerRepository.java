@@ -15,7 +15,7 @@ import java.util.List;
 * @date 2019-11-20
 */
 public interface CustomerRepository extends JpaRepository<Customer, Integer>, JpaSpecificationExecutor<Customer> {
-    @Query(value = "SELECT customer.id,customer.NAME,customer.CODE,customer.address,customer.contacts,customer.contact_phone,customer.remark,customer.create_date,customer.create_user,customer.del_flag,customer.full_name,customer.account," +
+    @Query(value = "SELECT customer.id,customer.NAME,customer.CODE,customer.address,customer.contacts,customer.contact_phone,customer.remark,customer.create_date,customer.create_user,customer.del_flag,customer.full_name,customer.account,customer.over_arrears," +
             " (SELECT ifnull(sum( balance ),0) FROM uma_chemical_fiber_delivery_note n WHERE  n.customer_id = customer.id and n.create_date < :otherDate) as total_arrears" +
             ",(SELECT ifnull(sum( balance ),0) FROM uma_chemical_fiber_delivery_note n WHERE  n.customer_id = customer.id and n.create_date like %:otherDate%) as current_arrears" +
             " FROM uma_customer customer" +
@@ -24,7 +24,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer>, Jp
             " ORDER BY customer.id DESC LIMIT :Start,:End",nativeQuery = true)
     List<Customer> findAllWithTotalArrears(@Param("Start") Integer Start, @Param("End") Integer End, @Param("otherDate") String otherDate, @Param("name") String name, @Param("code") String code, @Param("address") String address, @Param("contacts") String contacts, @Param("contactPhone") String contactPhone);
 
-    @Query(value = "SELECT customer.id,customer.NAME,customer.CODE,customer.address,customer.contacts,customer.contact_phone,customer.remark,customer.create_date,customer.create_user,customer.del_flag,customer.full_name,customer.account," +
+    @Query(value = "SELECT customer.id,customer.NAME,customer.CODE,customer.address,customer.contacts,customer.contact_phone,customer.remark,customer.create_date,customer.create_user,customer.del_flag,customer.full_name,customer.account,customer.over_arrears," +
             " (SELECT ifnull(sum( balance ),0) FROM uma_chemical_fiber_delivery_note n WHERE  n.customer_id = customer.id and n.create_date < :otherDate) as total_arrears" +
             ",(SELECT ifnull(sum( balance ),0) FROM uma_chemical_fiber_delivery_note n WHERE  n.customer_id = customer.id and n.create_date like %:otherDate%) as current_arrears" +
             " FROM uma_customer customer" +
@@ -33,7 +33,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer>, Jp
             " ORDER BY customer.id ",nativeQuery = true)
     List<Customer> findAllWithTotalArrearsForGetList(@Param("otherDate") String otherDate, @Param("name") String name, @Param("code") String code, @Param("address") String address, @Param("contacts") String contacts, @Param("contactPhone") String contactPhone);
 
-    @Query(value = "SELECT customer.id,customer.NAME,customer.CODE,customer.address,customer.contacts,customer.contact_phone,customer.remark,customer.create_date,customer.create_user,customer.del_flag,customer.full_name,customer.account," +
+    @Query(value = "SELECT customer.id,customer.NAME,customer.CODE,customer.address,customer.contacts,customer.contact_phone,customer.remark,customer.create_date,customer.create_user,customer.del_flag,customer.full_name,customer.account,customer.over_arrears," +
             " (SELECT ifnull(sum( balance ),0) FROM uma_chemical_fiber_delivery_note n WHERE  n.customer_id = customer.id and n.create_date < :otherDate) as total_arrears" +
             ",(SELECT ifnull(sum( balance ),0) FROM uma_chemical_fiber_delivery_note n WHERE  n.customer_id = customer.id and n.create_date like %:otherDate%) as current_arrears" +
             " FROM uma_customer customer" +

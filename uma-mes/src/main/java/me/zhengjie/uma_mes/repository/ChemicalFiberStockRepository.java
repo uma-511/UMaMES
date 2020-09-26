@@ -15,8 +15,8 @@ import java.util.List;
 */
 public interface ChemicalFiberStockRepository extends JpaRepository<ChemicalFiberStock, Integer>, JpaSpecificationExecutor<ChemicalFiberStock> {
 
-    @Procedure(procedureName = "proc_update_stock")
-    void stockTask();
+    /*@Procedure(procedureName = "proc_update_stock")
+    void stockTask();*/
 
     ChemicalFiberStock findByProdColorAndProdFineness(String color,String fineness);
 
