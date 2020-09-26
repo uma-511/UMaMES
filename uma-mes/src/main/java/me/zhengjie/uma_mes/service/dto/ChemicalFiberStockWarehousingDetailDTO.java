@@ -43,4 +43,8 @@ public class ChemicalFiberStockWarehousingDetailDTO implements Serializable {
 
     // 产品Id
     private Integer prodId;
+
+    private Integer ton;
+
+    private Integer branch;
 }
