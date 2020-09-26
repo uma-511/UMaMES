@@ -60,4 +60,6 @@ public class ChemicalFiberStockWarehousingDTO implements Serializable {
     // 副司机
     private Integer invalid;
 
+    private String tonAndBranch;
+
 }

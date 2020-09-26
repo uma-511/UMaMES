@@ -40,4 +40,6 @@ public class ChemicalFiberStockLnventoryDTO implements Serializable {
     // 盘亏数量
     private String lnventoryLossStr;
 
+    private Integer invalid;
+
 }

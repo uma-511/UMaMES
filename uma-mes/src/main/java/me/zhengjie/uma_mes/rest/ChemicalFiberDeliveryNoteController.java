@@ -9,9 +9,11 @@ import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
+import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNotePayDetailService;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
 import me.zhengjie.uma_mes.service.CustomerService;
 import me.zhengjie.uma_mes.service.dto.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +44,9 @@ public class ChemicalFiberDeliveryNoteController {
     private final ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService;
 
     private final CustomerService customerService;
+
+    @Autowired
+    private ChemicalFiberDeliveryNotePayDetailService chemicalFiberDeliveryNotePayDetailService;
 
     public ChemicalFiberDeliveryNoteController(ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService,
                                                ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService,
@@ -201,8 +206,13 @@ public class ChemicalFiberDeliveryNoteController {
         criteria.setEnableList(booleanList);
         List<ChemicalFiberDeliveryNoteDTO> ChemicalFiberDeliveryNoteList = chemicalFiberDeliveryNoteService.queryAll(criteria);
         for (ChemicalFiberDeliveryNoteDTO Note : ChemicalFiberDeliveryNoteList) {
-            if (Note.getTotalCost() != null) {
-                sumTotalCost = sumTotalCost.add(Note.getTotalCost());
+            BigDecimal paySum = new BigDecimal(0);
+            List<ChemicalFiberDeliveryNotePayDetailDTO> pay = chemicalFiberDeliveryNotePayDetailService.findListByScanNumber(Note.getScanNumber());
+            for (ChemicalFiberDeliveryNotePayDetailDTO payNote : pay) {
+                paySum = paySum.add(payNote.getAmount());
+            }
+            if (paySum != null) {
+                sumTotalCost = sumTotalCost.add(paySum);
             }
             if (Note.getTotalPrice() != null) {
                 sumTotalPrice = sumTotalPrice.add(Note.getTotalPrice());
