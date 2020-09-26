@@ -9,11 +9,11 @@ import java.sql.Timestamp;
 public class ChemicalFiberPalletQueryCeiteria {
 
     // 大于等于
-    @Query(type = Query.Type.GREATER_THAN, propName = "printTime")
+    @Query(type = Query.Type.GREATER_THAN, propName = "createDate")
     private Timestamp startTime;
 
     // 小于等于
-    @Query(type = Query.Type.LESS_THAN, propName = "printTime")
+    @Query(type = Query.Type.LESS_THAN, propName = "createDate")
     private Timestamp endTime;
 
 
