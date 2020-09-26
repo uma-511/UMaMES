@@ -96,6 +96,6 @@ public class ReprintPage extends SendCommand {
         log.info("reprint clean");
         gobalSender.addCommand(sendTip("",ip));
         gobalSender.addCommand(sendLabelNumber("",ip));
-        gobalSender.send(2000);
+        gobalSender.send(100);
     }
 }

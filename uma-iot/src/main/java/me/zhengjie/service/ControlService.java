@@ -141,7 +141,7 @@ public class ControlService {
         gobalSender.addCommand(controllerPage.sendTotalNumber(controlPanelInfo.getTotalNumber(), ip));
         gobalSender.addCommand(controllerPage.sendTotalWeight(controlPanelInfo.getTotalWeight(), ip));
         gobalSender.addCommand(controllerPage.sendTip("",ip));
-        gobalSender.send(2000);
+        gobalSender.send(1000);
     }
 
     public void updateControllerPageTotalFieldsAndGoControl(String ip){

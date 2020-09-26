@@ -43,6 +43,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static cn.afterturn.easypoi.excel.ExcelExportUtil.SHEET_NAME;
@@ -157,6 +158,8 @@ public class ChemicalFiberPalletServiceImpl implements ChemicalFiberPalletServic
         map.put("prodName", chemicalFiberDeliveryNoteExportPoundExcelDto.getProdName());
         map.put("createDate", new Timestamp(chemicalFiberDeliveryNoteExportPoundExcelDto.getCreateDate()));*/
         map.put("total", total);
+        String Time = new SimpleDateFormat("yyyy-MM-dd").format(chemicalFiberPallet.getCreateDate());
+        map.put("createDate", Time);
         map.put("totalWeight", totalWeight);
         map.put("totalPage", sheelPages);
         map.put("palletNumber", chemicalFiberPallet.getPalletNumber());
@@ -174,7 +177,7 @@ public class ChemicalFiberPalletServiceImpl implements ChemicalFiberPalletServic
         //anchor.setAnchorType(3);
         patriarch.createPicture(anchor, workbook.addPicture(
                 generateBarCode128(chemicalFiberPallet.getPalletNumber(), 10D, 5D, false, true), HSSFWorkbook.PICTURE_TYPE_JPEG));
-        FileUtil.downLoadExcel("磅码单导出.xls", response, workbook);
+        FileUtil.downLoadExcel("托板单导出.xls", response, workbook);
 
     }
 

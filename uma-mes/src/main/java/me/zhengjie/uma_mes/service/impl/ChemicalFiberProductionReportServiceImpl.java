@@ -52,8 +52,14 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
 
     public Map<String, Object> queryAll(ChemicalFiberProductionReportQueryCriteria criteria, Pageable pageable) {
         if (criteria.getTempStartTime() != null) {
-            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
-            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+            String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempStartTime());
+            StartTime = StartTime + " 07:00:00";
+            String EndTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempEndTime());
+            EndTime = EndTime + " 06:59:00";
+            Timestamp time1 = Timestamp.valueOf(StartTime);
+            Timestamp time2 = Timestamp.valueOf(EndTime);
+            criteria.setStartTime(time1);
+            criteria.setEndTime(time2);
         }
         Page<ChemicalFiberProductionReport> page = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberProductionReportMapper::toDto));
