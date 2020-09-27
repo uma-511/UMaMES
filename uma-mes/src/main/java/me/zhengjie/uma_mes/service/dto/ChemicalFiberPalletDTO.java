@@ -57,7 +57,6 @@ public class ChemicalFiberPalletDTO  implements Serializable {
     // 包装员
     private String packer;
 
-
     // 新增时间
     private Timestamp createDate;
 

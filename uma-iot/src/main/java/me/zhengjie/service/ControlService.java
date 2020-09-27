@@ -212,10 +212,10 @@ public class ControlService {
 
         ChemicalFiberProductionReport report = new ChemicalFiberProductionReport();
 
-        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        /*DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String time = sdf.format(labelDto.getPrintTime());
-
-        report = productionReportService.getReport(time, labelDto.getShifts(), labelDto.getMachine());
+*/
+        report = productionReportService.getReport(labelDto.getPrintTime(), labelDto.getShifts(), labelDto.getMachine());
 
         if (report != null) {
             BigDecimal productionPacketNumber = report.getProductionPacketNumber();
@@ -278,6 +278,7 @@ public class ControlService {
             }else{
                 productionReportService.delectReport(label);
                 ChemicalFiberPalletDetailQueryCeiteria ceieria = new ChemicalFiberPalletDetailQueryCeiteria();
+                ceieria.setLabelNumber(label.getLabelNumber());
                 List<ChemicalFiberPalletDetail> palletDetail = chemicalFiberPalletDetailRepository.findAll(((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,ceieria,criteriaBuilder)));
                 chemicalFiberPalletDetailRepository.deleteAll(palletDetail);
                 label.setStatus(3);
