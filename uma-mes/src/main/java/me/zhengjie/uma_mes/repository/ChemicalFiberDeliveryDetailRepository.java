@@ -2,11 +2,14 @@ package me.zhengjie.uma_mes.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author Tan Jun Ming
@@ -16,6 +19,15 @@ public interface ChemicalFiberDeliveryDetailRepository extends JpaRepository<Che
 
     @Query(value = "SELECT * FROM uma_chemical_fiber_delivery_detail where scan_number = :id",nativeQuery = true)
     List<ChemicalFiberDeliveryDetail> getDetailList(@Param("id") String id);
+
+    @Query(value = "select b.scan_number, b.delivery_date, b.customer_name, a.prod_name, a.unit, a.total_price, a.total_number, a.real_quantity, a.real_price   from uma_chemical_fiber_delivery_detail a\n" +
+            "join uma_chemical_fiber_delivery_note b on a.scan_number = b.scan_number where  b.delivery_date between ?1 and ?2 and b.note_status >= 3",
+            countQuery = "select count(*) as totalElements from uma_chemical_fiber_delivery_detail a\n" +
+            "join uma_chemical_fiber_delivery_note b on a.scan_number = b.scan_number where  b.delivery_date between ?1 and ?2 and b.note_status >= 3"
+            ,nativeQuery = true)
+    Page<Map<String, Object>> getSalesList(String date1, String date2, Pageable tempPageable);
+
+
 
 
 
