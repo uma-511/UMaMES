@@ -27,6 +27,11 @@ public interface ChemicalFiberDeliveryDetailRepository extends JpaRepository<Che
             ,nativeQuery = true)
     Page<Map<String, Object>> getSalesList(String date1, String date2, Pageable tempPageable);
 
+    @Query(value = "select b.scan_number, b.delivery_date, b.customer_name, a.prod_name, a.unit, a.total_price, a.total_number, a.real_quantity, a.real_price   from uma_chemical_fiber_delivery_detail a\n" +
+            "join uma_chemical_fiber_delivery_note b on a.scan_number = b.scan_number where  b.delivery_date between ?1 and ?2 and b.note_status >= 3",
+            nativeQuery = true)
+    List<Map<String, Object>> getSales(String date1, String date2);
+
 
 
 
