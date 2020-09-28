@@ -53,9 +53,9 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
     public Map<String, Object> queryAll(ChemicalFiberProductionReportQueryCriteria criteria, Pageable pageable) {
         if (criteria.getTempStartTime() != null) {
             String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempStartTime());
-            StartTime = StartTime + " 07:00:00";
+            StartTime = StartTime + " 07:30:00";
             String EndTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempEndTime());
-            EndTime = EndTime + " 06:59:00";
+            EndTime = EndTime + " 07:30:00";
             Timestamp time1 = Timestamp.valueOf(StartTime);
             Timestamp time2 = Timestamp.valueOf(EndTime);
             criteria.setStartTime(time1);
@@ -74,9 +74,9 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
     public Result getProductionReportSummaries(ChemicalFiberProductionReportQueryCriteria criteria) {
         if (criteria.getTempStartTime() != null) {
             String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempStartTime());
-            StartTime = StartTime + " 07:00:00";
+            StartTime = StartTime + " 07:30:00";
             String EndTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempEndTime());
-            EndTime = EndTime + " 06:59:00";
+            EndTime = EndTime + " 07:30:00";
             Timestamp time1 = Timestamp.valueOf(StartTime);
             Timestamp time2 = Timestamp.valueOf(EndTime);
             criteria.setStartTime(time1);
@@ -159,7 +159,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         String day = timeMap.get("day").toString();
         return chemicalFiberProductionReportRepository.getReport(year + "-" + month + "-" + day, shifts, machine);*/
         String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(time);
-        StartTime = StartTime + " 07:00:00";
+        StartTime = StartTime + " 07:30:00";
         Timestamp ttime1 = Timestamp.valueOf(StartTime);
         Timestamp ttime2 = new Timestamp(ttime1.getTime() + (long)1000*3600*24);
         Timestamp ttime3 = new Timestamp(ttime1.getTime() - (long)1000*3600*24);
@@ -246,9 +246,9 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
     public void downloadProduct(ChemicalFiberProductionReportQueryCriteria criteria,  Pageable pageable, HttpServletResponse response) throws IOException {
         if (criteria.getTempStartTime() != null) {
             String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempStartTime());
-            StartTime = StartTime + " 07:00:00";
+            StartTime = StartTime + " 07:30:00";
             String EndTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempEndTime());
-            EndTime = EndTime + " 06:59:00";
+            EndTime = EndTime + " 07:30:00";
             Timestamp time1 = Timestamp.valueOf(StartTime);
             Timestamp time2 = Timestamp.valueOf(EndTime);
             criteria.setStartTime(time1);
