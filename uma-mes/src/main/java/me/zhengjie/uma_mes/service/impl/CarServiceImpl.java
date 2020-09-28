@@ -100,14 +100,14 @@ public class CarServiceImpl implements CarService {
         Car car = carRepository.findById(resources.getId()).orElseGet(Car::new);
         ValidationUtil.isNull( car.getId(),"Car","id",resources.getId());
         Integer offSetInt = 0;
-        if (null != car.getTrialCycle()){
-            if(car.getTrialCycle().equals("三个月")){
+        if (null != resources.getTrialCycle()){
+            if(resources.getTrialCycle().equals("三个月")){
                 offSetInt = 3;
             }
-            if(car.getTrialCycle().equals("六个月")){
+            if(resources.getTrialCycle().equals("六个月")){
                 offSetInt = 6;
             }
-            if(car.getTrialCycle().equals("十二个月")){
+            if(resources.getTrialCycle().equals("十二个月")){
                 offSetInt = 12;
             }
             if (null != resources.getLastTrial()) {

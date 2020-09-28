@@ -496,6 +496,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void doInvalid(Integer id) {
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         List<ChemicalFiberDeliveryNotePayDetailDTO> payDetailList
@@ -506,6 +507,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             chemicalFiberDeliveryNotePayDetailService.delete(payDetail.getId());
         }
         CustomerDTO customerDTO = customerService.findById(chemicalFiberDeliveryNote.getCustomerId());
+        if (null == customerDTO.getAccount()) {
+            customerDTO.setAccount(new BigDecimal(0));
+        }
         customerDTO.setAccount(customerDTO.getAccount().add(payedMoney));
         customerService.save(customerMapper.toEntity(customerDTO));
         chemicalFiberDeliveryNote.setRemainder(new BigDecimal(0));

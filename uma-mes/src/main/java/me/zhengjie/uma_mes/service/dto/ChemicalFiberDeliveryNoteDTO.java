@@ -109,4 +109,7 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
 
     // 目的地
     private String endPlace;
+
+    // 客户手持订单号码
+    private String externalNumber;
 }
