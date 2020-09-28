@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import com.lgmn.common.result.Result;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryDetailRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberSalesListService;
@@ -71,5 +72,12 @@ public class ChemicalFiberSalesListServiceImpl implements ChemicalFiberSalesList
         }
 
         return PageUtil.toPage(new PageImpl(pageList, pageable, page.getTotalElements()));
+    }
+
+
+    public Result getSalesSummaries(ChemicalFiberSalesListQueryCriteria criteria) {
+
+
+
     }
 }
