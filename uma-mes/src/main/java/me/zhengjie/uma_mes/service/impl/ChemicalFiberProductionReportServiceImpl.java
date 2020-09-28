@@ -151,7 +151,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         return Result.success(list);
     }
 
-    public ChemicalFiberProductionReport getReport(Timestamp time, String shifts, String machine) {
+    public ChemicalFiberProductionReport getReport(Timestamp time, String shifts, String machine, Integer prodctionId) {
 /*
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
@@ -169,11 +169,11 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         String time3 = simpleDateFormat.format(ttime3);
         if (ttime1.getTime() < time.getTime()) {
             if ( time.getTime() < ttime2.getTime()) {
-                return chemicalFiberProductionReportRepository.getReport(time1, time2, shifts, machine);
+                return chemicalFiberProductionReportRepository.getReport(time1, time2, shifts, machine, prodctionId);
             }
         } else if (ttime3.getTime() < time.getTime()) {
             if (time.getTime() < ttime1.getTime()) {
-                return chemicalFiberProductionReportRepository.getReport(time3, time1, shifts, machine);
+                return chemicalFiberProductionReportRepository.getReport(time3, time1, shifts, machine, prodctionId);
             }
 
         }
@@ -202,7 +202,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
     public void delectReport(ChemicalFiberLabel label) {
         /*DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String time = sdf.format(label.getPrintTime());*/
-        ChemicalFiberProductionReport report = getReport(label.getPrintTime(),label.getShifts(), label.getMachine());
+        ChemicalFiberProductionReport report = getReport(label.getPrintTime(),label.getShifts(), label.getMachine(), label.getProductionId());
         if (report != null) {
             BigDecimal toVoidPacketNumber = report.getToVoidPacketNumber();
             BigDecimal toVoidFactPerBagNumber = report.getToVoidFactPerBagNumber();

@@ -215,7 +215,7 @@ public class ControlService {
         /*DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String time = sdf.format(labelDto.getPrintTime());
 */
-        report = productionReportService.getReport(labelDto.getPrintTime(), labelDto.getShifts(), labelDto.getMachine());
+        report = productionReportService.getReport(labelDto.getPrintTime(), labelDto.getShifts(), labelDto.getMachine(), labelDto.getProductionId());
 
         if (report != null) {
             BigDecimal productionPacketNumber = report.getProductionPacketNumber();

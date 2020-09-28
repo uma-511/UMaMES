@@ -879,7 +879,7 @@ public class HandheldService {
         for (ChemicalFiberLabel dto : chemicalFiberLabels) {
             /*DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String time = sdf.format(dto.getPrintTime());*/
-            ChemicalFiberProductionReport report = productionReportService.getReport(dto.getPrintTime(),dto.getShifts(), dto.getMachine());
+            ChemicalFiberProductionReport report = productionReportService.getReport(dto.getPrintTime(),dto.getShifts(), dto.getMachine(), dto.getProductionId());
             if (report != null) {
                 BigDecimal warehousingPacketNumber = report.getWarehousingPacketNumber();
                 BigDecimal warehousingFactPerBagNumber = report.getWarehousingFactPerBagNumber();
