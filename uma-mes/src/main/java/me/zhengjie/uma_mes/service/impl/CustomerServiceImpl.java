@@ -193,16 +193,18 @@ public class CustomerServiceImpl implements CustomerService {
         criteria.setCodeAccurate(resources.getCode());
         criteria.setDelFlag(0);
         List<CustomerDTO> customerDTOs = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria,criteriaBuilder)));
+        if (customerDTOs.size() > 0 && customerDTOs.get(0).getCode().equals(resources.getCode())) {
+            throw new BadRequestException("请确保客户编号唯一");
+        }
+
         CustomerQueryCriteria criteria2 = new CustomerQueryCriteria();
         criteria2.setNameAccurate(resources.getName());
         criteria2.setDelFlag(0);
         List<CustomerDTO> customerDTOs2 = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria2,criteriaBuilder)));
-        if (customerDTOs.size() > 0 && customerDTOs.get(0).getCode().equals(resources.getCode()) && !resources.getId().equals(customerDTOs.get(0).getId())) {
-            throw new BadRequestException("请确保客户编号唯一");
-        }
-        if (customerDTOs2.size() > 0 && customerDTOs2.get(0).getName().equals(resources.getName()) && !resources.getId().equals(customerDTOs2.get(0).getId())) {
+        if (customerDTOs2.size() > 0 && customerDTOs2.get(0).getName().equals(resources.getName())) {
             throw new BadRequestException("请确保客户名称唯一");
         }
+
         CustomerQueryCriteria criteria3 = new CustomerQueryCriteria();
         criteria3.setFullNameAccurate(resources.getFullName());
         criteria3.setDelFlag(0);

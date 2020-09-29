@@ -77,6 +77,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     private final TravelPersionPerformanceRepository travelPersionPerformanceRepository;
 
+    private final TravelPersionPerformanceService travelPersionPerformanceService;
+
     @Autowired
     ChemicalFiberDeliveryNotePayDetailService chemicalFiberDeliveryNotePayDetailService;
 
@@ -107,7 +109,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                                                 CarMapper carMapper,
                                                 TravelExpensesService travelExpensesService,
                                                 TravelExpensesMapper travelExpensesMapper,
-                                                TravelPersionPerformanceRepository travelPersionPerformanceRepository){
+                                                TravelPersionPerformanceRepository travelPersionPerformanceRepository, TravelPersionPerformanceService travelPersionPerformanceService){
         this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
         this.chemicalFiberDeliveryNoteMapper = chemicalFiberDeliveryNoteMapper;
         this.customerService = customerService;
@@ -124,6 +126,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         this.travelExpensesService = travelExpensesService;
         this.travelExpensesMapper = travelExpensesMapper;
         this.travelPersionPerformanceRepository = travelPersionPerformanceRepository;
+        this.travelPersionPerformanceService = travelPersionPerformanceService;
     }
 
     @Override
@@ -390,7 +393,15 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         customerDTO.setAccount(customerDTO.getAccount().add(totalAmount));
         customerService.update(customerMapper.toEntity(customerDTO));
 
-        chemicalFiberDeliveryNote.setNoteStatus(3);
+        // 清除绩效
+        TravelPersionPerformanceQueryCriteria travelPersionPerformanceQueryCriteria = new TravelPersionPerformanceQueryCriteria();
+        travelPersionPerformanceQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        List<TravelPersionPerformanceDTO> travelPersionPerformanceDTOList = travelPersionPerformanceService.queryAll(travelPersionPerformanceQueryCriteria);
+        for(TravelPersionPerformanceDTO travelPersionPerformanceDTO:travelPersionPerformanceDTOList){
+            travelPersionPerformanceRepository.deleteById(travelPersionPerformanceDTO.getId());
+        }
+
+        chemicalFiberDeliveryNote.setNoteStatus(2);
         chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
     }
 
@@ -498,7 +509,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void doInvalid(Integer id) {
-        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+        /*ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         List<ChemicalFiberDeliveryNotePayDetailDTO> payDetailList
                 =chemicalFiberDeliveryNotePayDetailService.findListByScanNumber(chemicalFiberDeliveryNote.getScanNumber());
         BigDecimal payedMoney = new BigDecimal(0);
@@ -515,7 +526,54 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         chemicalFiberDeliveryNote.setRemainder(new BigDecimal(0));
         chemicalFiberDeliveryNote.setEnable(Boolean.FALSE);
         chemicalFiberDeliveryNote.setNoteStatus(2);
-        update(chemicalFiberDeliveryNote);
+        update(chemicalFiberDeliveryNote);*/
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+
+        // 找出产品并回仓
+        ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
+        chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
+        //处理库存
+        ChemicalFiberStockQueryCriteria chemicalFiberStockQueryCriteria;
+        for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO:chemicalFiberDeliveryDetailDTOS){
+            chemicalFiberStockQueryCriteria = new ChemicalFiberStockQueryCriteria();
+            chemicalFiberStockQueryCriteria.setProdName(chemicalFiberDeliveryDetailDTO.getProdName());
+            chemicalFiberStockQueryCriteria.setProdId(chemicalFiberDeliveryDetailDTO.getProdId());
+            chemicalFiberStockQueryCriteria.setProdUnit(chemicalFiberDeliveryDetailDTO.getUnit());
+            List<ChemicalFiberStockDTO> chemicalFiberStockDTOs = chemicalFiberStockService.queryAll(chemicalFiberStockQueryCriteria);
+            if(null == chemicalFiberStockDTOs || chemicalFiberStockDTOs.size() == 0)
+            {
+                throw new BadRequestException("没查到库存记录，操作失败");
+            }
+            for(ChemicalFiberStockDTO chemicalFiberStockDTO:chemicalFiberStockDTOs){
+                chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber().add(chemicalFiberDeliveryDetailDTO.getRealQuantity()));
+                chemicalFiberStockService.update(chemicalFiberStockMapper.toEntity(chemicalFiberStockDTO));
+            }
+        }
+
+
+        // 找出支付记录并回退金额
+        List<ChemicalFiberDeliveryNotePayDetailDTO> chemicalFiberDeliveryNotePayDetailDTOS = chemicalFiberDeliveryNotePayDetailService.findListByScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        BigDecimal totalAmount = new BigDecimal(0);
+        for (ChemicalFiberDeliveryNotePayDetailDTO chemicalFiberDeliveryNotePayDetailDTO : chemicalFiberDeliveryNotePayDetailDTOS){
+            totalAmount = totalAmount.add(chemicalFiberDeliveryNotePayDetailDTO.getAmount());
+            chemicalFiberDeliveryNotePayDetailService.delete(chemicalFiberDeliveryNotePayDetailDTO.getId());
+        }
+        CustomerDTO customerDTO = customerService.findById(chemicalFiberDeliveryNote.getCustomerId());
+        customerDTO.setAccount(customerDTO.getAccount().add(totalAmount));
+        customerService.update(customerMapper.toEntity(customerDTO));
+
+        // 清除绩效
+        TravelPersionPerformanceQueryCriteria travelPersionPerformanceQueryCriteria = new TravelPersionPerformanceQueryCriteria();
+        travelPersionPerformanceQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        List<TravelPersionPerformanceDTO> travelPersionPerformanceDTOList = travelPersionPerformanceService.queryAll(travelPersionPerformanceQueryCriteria);
+        for(TravelPersionPerformanceDTO travelPersionPerformanceDTO:travelPersionPerformanceDTOList){
+            travelPersionPerformanceRepository.deleteById(travelPersionPerformanceDTO.getId());
+        }
+
+        chemicalFiberDeliveryNote.setNoteStatus(2);
+        chemicalFiberDeliveryNote.setEnable(Boolean.FALSE);
+        chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
     }
 
     @Override

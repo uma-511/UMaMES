@@ -2,6 +2,7 @@ package me.zhengjie.modules.system.service.impl;
 
 import me.zhengjie.modules.system.domain.Role;
 import me.zhengjie.exception.EntityExistException;
+import me.zhengjie.modules.system.domain.User;
 import me.zhengjie.modules.system.repository.RoleRepository;
 import me.zhengjie.modules.system.service.RoleService;
 import me.zhengjie.modules.system.service.dto.RoleDTO;
@@ -48,10 +49,18 @@ public class RoleServiceImpl implements RoleService {
         this.roleSmallMapper = roleSmallMapper;
     }
 
-    @Override
+   /* @Override
     @Cacheable
     public Object queryAll(Pageable pageable) {
         return roleMapper.toDto(roleRepository.findAll(pageable).getContent());
+    }*/
+
+    @Override
+    @Cacheable
+    public Object queryAll(Pageable pageable) {
+        RoleQueryCriteria criteria = new RoleQueryCriteria();
+        criteria.setNameNOT_EQUAL("超级管理员");
+        return roleMapper.toDto(roleRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override

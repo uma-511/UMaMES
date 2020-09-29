@@ -129,10 +129,10 @@ public class UserServiceImpl implements UserService {
         if(userRepository.findByRealname(resources.getRealname())!=null){
             throw new EntityExistException(User.class,"真实姓名",resources.getRealname());
         }
-
+/*
         if(userRepository.findByEmail(resources.getEmail())!=null){
             throw new EntityExistException(User.class,"email",resources.getEmail());
-        }
+        }*/
 
         // 默认密码 123456，此密码是加密后的字符
         resources.setPassword("e10adc3949ba59abbe56e057f20f883e");
@@ -152,10 +152,12 @@ public class UserServiceImpl implements UserService {
         if(user1 !=null&&!user.getId().equals(user1.getId())){
             throw new EntityExistException(User.class,"username",resources.getUsername());
         }
+/*
 
         if(user2!=null&&!user.getId().equals(user2.getId())){
             throw new EntityExistException(User.class,"email",resources.getEmail());
         }
+*/
 
         if(user3!=null&&!user.getId().equals(user3.getId())){
             throw new EntityExistException(User.class,"真实姓名",resources.getRealname());
