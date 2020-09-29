@@ -1,6 +1,9 @@
 package me.zhengjie.uma_mes.service.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
+import me.zhengjie.uma_mes.utils.CustomerBigDecimalSerialize;
+
 import java.sql.Timestamp;
 import java.math.BigDecimal;
 import java.io.Serializable;
@@ -38,13 +41,17 @@ public class UmaChemicalFiberStatementDTO implements Serializable {
     private String contactPhone;
 
     // 应收金额
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal receivable;
 
     // 上期欠款
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal accumulatedArrears;
 
     // 总欠金额
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalArrears;
+
 
     private Timestamp upDate;
 

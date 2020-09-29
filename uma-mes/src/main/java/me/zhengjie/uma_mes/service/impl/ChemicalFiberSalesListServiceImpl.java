@@ -7,6 +7,7 @@ import me.zhengjie.uma_mes.service.ChemicalFiberSalesListService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberSalesDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberSalesListQueryCriteria;
 import me.zhengjie.utils.PageUtil;
+import me.zhengjie.utils.StringUtils;
 import org.hibernate.type.BigDecimalType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -39,7 +40,10 @@ public class ChemicalFiberSalesListServiceImpl implements ChemicalFiberSalesList
         String data1 = simpleDateFormat.format(criteria.getTempStartTime());
         String data2 = simpleDateFormat.format(criteria.getTempEndTime());
         Pageable tempPageable = new PageRequest(pageable.getPageNumber(), pageable.getPageSize());
-        Page<Map<String, Object>> page = chemicalFiberDeliveryDetailRepository.getSalesList(data1, data2, tempPageable);
+        Page<Map<String, Object>> page = chemicalFiberDeliveryDetailRepository.getSalesList(data1, data2,
+                StringUtils.isEmpty(criteria.getCustomerName()) ? "" : criteria.getCustomerName(),
+                StringUtils.isEmpty(criteria.getProdName()) ? "" : criteria.getProdName(),
+                tempPageable);
         List<Map<String, Object>> list = page.getContent();
         List<ChemicalFiberSalesDTO> pageList = new ArrayList<>();
         for (Map<String, Object> dto : list) {
@@ -78,7 +82,9 @@ public class ChemicalFiberSalesListServiceImpl implements ChemicalFiberSalesList
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String data1 = simpleDateFormat.format(criteria.getTempStartTime());
         String data2 = simpleDateFormat.format(criteria.getTempEndTime());
-        List<Map<String, Object>> list = chemicalFiberDeliveryDetailRepository.getSales(data1, data2);
+        List<Map<String, Object>> list = chemicalFiberDeliveryDetailRepository.getSales(data1, data2,
+                StringUtils.isEmpty(criteria.getCustomerName()) ? "" : criteria.getCustomerName(),
+                StringUtils.isEmpty(criteria.getProdName()) ? "" : criteria.getProdName());
         List<ChemicalFiberSalesDTO> pageList = new ArrayList<>();
         for (Map<String, Object> dto : list) {
             ChemicalFiberSalesDTO sale = new ChemicalFiberSalesDTO();
