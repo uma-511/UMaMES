@@ -241,7 +241,29 @@ public class ControlService {
             reportDTO.setProdId(labelDto.getProductId());
             reportDTO.setShifts(labelDto.getShifts());
             reportDTO.setMachine(labelDto.getMachine());
-            reportDTO.setTime(new Timestamp(System.currentTimeMillis()));
+
+
+            String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(labelDto.getPrintTime());
+            StartTime = StartTime + " 07:30:00";
+            Timestamp ttime1 = Timestamp.valueOf(StartTime);
+            Timestamp ttime2 = new Timestamp(ttime1.getTime() + (long)1000*3600*24);
+            Timestamp ttime3 = new Timestamp(ttime1.getTime() - (long)1000*3600*24);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String time1 = simpleDateFormat.format(ttime1);
+            String time2 = simpleDateFormat.format(ttime2);
+            String time3 = simpleDateFormat.format(ttime3);
+            if (ttime1.getTime() < labelDto.getPrintTime().getTime()) {
+                if ( labelDto.getPrintTime().getTime() < ttime2.getTime()) {
+                    Timestamp time01 = Timestamp.valueOf(time1);
+                    reportDTO.setTime(time01);
+                }
+            } else if (ttime3.getTime() < labelDto.getPrintTime().getTime()) {
+                if (labelDto.getPrintTime().getTime() < ttime1.getTime()) {
+                    Timestamp time01 = Timestamp.valueOf(time3);
+                    reportDTO.setTime(time01);
+                }
+
+            }
             productionReportService.create(reportDTO);
         }
         /**
