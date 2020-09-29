@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,10 @@ public interface ChemicalFiberDeliveryDetailRepository extends JpaRepository<Che
             "join uma_chemical_fiber_delivery_note b on a.scan_number = b.scan_number where  b.delivery_date between ?1 and ?2 and b.note_status >= 3",
             nativeQuery = true)
     List<Map<String, Object>> getSales(String date1, String date2);
+
+    @Query(value = "SELECT sum(total_price) FROM `uma_chemical_fiber_delivery_detail` where scan_number = ?1",
+            nativeQuery = true)
+    BigDecimal getTotal(String scanNumber);
 
 
 

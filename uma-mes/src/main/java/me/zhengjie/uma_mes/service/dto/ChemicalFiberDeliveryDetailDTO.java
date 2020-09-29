@@ -80,9 +80,11 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     private String warehouse;
 
     // 实收数量
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal realQuantity;
 
     // 实收金额
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal realPrice;
 
     // 产品列表编号

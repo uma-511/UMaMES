@@ -34,10 +34,13 @@ public class ChemicalFiberDeliveryNoteSalesReportDTO implements Serializable {
     private Integer noteStatus;
 
     // 结款后余数
-    private BigDecimal remainder;
+    private BigDecimal remainder = new BigDecimal(0.0);
 
     // 总价
-    private BigDecimal totalPrice;
+    private BigDecimal totalPrice = new BigDecimal(0.0);
+
+    // 总价
+    private BigDecimal sumTotalPrice = new BigDecimal(0.0);
 
     // 制单人
     private String createUser;
