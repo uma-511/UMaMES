@@ -342,9 +342,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             chemicalFiberDeliveryNote.setBalance(realTotalPrise);
             chemicalFiberDeliveryNote.setTotalPrice(realTotalPrise);
             update(chemicalFiberDeliveryNote);
-            StatementUp(id);
             // 生成司机绩效
             generatePerformanceByCar(chemicalFiberDeliveryNote.getCarNumber(),chemicalFiberDeliveryNote.getStartPlace(),chemicalFiberDeliveryNote.getEndPlace(),chemicalFiberDeliveryNote.getDriverMain(),chemicalFiberDeliveryNote.getDriverDeputy(), chemicalFiberDeliveryNote.getLoaderOne(), chemicalFiberDeliveryNote.getLoaderTwo(),totalWeight,chemicalFiberDeliveryNote.getScanNumber());
+            StatementUp(id);
         }catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             throw new BadRequestException("签收失败，请校验订单数据");
@@ -767,17 +767,24 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
             criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
         }
-
+        List<Boolean> booleanList = new ArrayList<>();
+        booleanList.add(Boolean.TRUE);
+        if (null != criteria.getShowUnEnable() && criteria.getShowUnEnable()) {
+            booleanList.add(Boolean.FALSE);
+        }
+        criteria.setEnableList(booleanList);
         List<ChemicalFiberDeliveryNoteSalesReportDTO> chemicalFiberDeliveryNoteSalesReportDTOS = new ArrayList<>();
         Page<ChemicalFiberDeliveryNote> page = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         for (ChemicalFiberDeliveryNote chemicalFiberDeliveryNote : page.getContent()) {
             ChemicalFiberDeliveryNoteSalesReportDTO chemicalFiberDeliveryNoteSalesReportDTO = new ChemicalFiberDeliveryNoteSalesReportDTO();
             ObjectTransfer.transValue(chemicalFiberDeliveryNote, chemicalFiberDeliveryNoteSalesReportDTO);
             List<ChemicalFiberDeliveryNotePayDetailDTO> pay = chemicalFiberDeliveryNotePayDetailService.findListByScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+            BigDecimal total = chemicalFiberDeliveryDetailRepository.getTotal(chemicalFiberDeliveryNote.getScanNumber());
             BigDecimal paySum = new BigDecimal(0);
             for (ChemicalFiberDeliveryNotePayDetailDTO payNote : pay) {
                 paySum = paySum.add(payNote.getAmount());
             }
+            chemicalFiberDeliveryNoteSalesReportDTO.setSumTotalPrice(total);
             chemicalFiberDeliveryNoteSalesReportDTO.setTotalCost(paySum);
             /*for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryNoteSalesReportDTO.getChemicalFiberDeliveryDetails()) {
                 *//*chemicalFiberDeliveryNoteSalesReportDTO.setOutOfStockPackageNumber(chemicalFiberDeliveryNoteSalesReportDTO.getOutOfStockPackageNumber().add(chemicalFiberDeliveryDetail.getTotalBag()));
@@ -790,7 +797,26 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             }*/
             chemicalFiberDeliveryNoteSalesReportDTOS.add(chemicalFiberDeliveryNoteSalesReportDTO);
         }
-        return PageUtil.toPage(new PageImpl<ChemicalFiberDeliveryNoteSalesReportDTO>(chemicalFiberDeliveryNoteSalesReportDTOS, pageable, page.getTotalElements()));
+
+        List<ChemicalFiberDeliveryNoteSalesReportDTO> salesDto = new ArrayList<>();
+        for (ChemicalFiberDeliveryNoteSalesReportDTO dto : chemicalFiberDeliveryNoteSalesReportDTOS) {
+
+            if ( dto.getSumTotalPrice() != null && dto.getSumTotalPrice().compareTo(new BigDecimal(0.00)) == 0) {
+                dto.setSumTotalPrice(null);
+            }
+            if (dto.getTotalCost() != null && dto.getTotalCost().compareTo(new BigDecimal(0.00)) == 0) {
+                dto.setTotalCost(null);
+            }
+            if (dto.getRemainder() != null && dto.getRemainder().compareTo(new BigDecimal(0.00)) == 0) {
+                dto.setRemainder(null);
+            }
+            if (dto.getTotalPrice() != null && dto.getTotalPrice().compareTo(new BigDecimal(0.00)) == 0) {
+                dto.setTotalPrice(null);
+            }
+            salesDto.add(dto);
+
+        }
+        return PageUtil.toPage(new PageImpl<ChemicalFiberDeliveryNoteSalesReportDTO>(salesDto, pageable, page.getTotalElements()));
     }
 
     @Override
@@ -871,6 +897,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             Date dateUp = simpleDateFormat.parse(dateTime);
             UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(), year + "-" + months);
             String accoun = getAccountCode();
+            CustomerDTO customer = customerService.findByIdWithTotalArrears(note.getCustomerId());
+            BigDecimal totalArreares = new BigDecimal(0.00);
             if (statement == null) {
                 UmaChemicalFiberStatement statementAdd = new UmaChemicalFiberStatement();
                 statementAdd.setAccountCode(accoun);
@@ -880,7 +908,14 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 statementAdd.setContacts(note.getContacts());
                 statementAdd.setContactPhone(note.getContactPhone());
                 statementAdd.setUpDate(new Timestamp(dateUp.getTime()));
-                statementAdd.setReceivable(note.getTotalPrice());
+                /*statementAdd.setReceivable(customer.getCurrentArrears());
+                statementAdd.setAccumulatedArrears(customer.getTotalArrears());
+                if (customer.getTotalArrears() != null) {
+                    totalArreares = note.getTotalPrice().add(customer.getTotalArrears());
+                } else {
+                    totalArreares = note.getTotalPrice();
+                }
+                statementAdd.setTotalArrears(totalArreares);*/
                 statementAdd = umaChemicalFiberStatementRepository.save(statementAdd);
                 List<UmaChemicalFiberStatementDetails> staementDetail = new ArrayList<>();
                 for (ChemicalFiberDeliveryDetail dto : detail) {
@@ -897,11 +932,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 }
                 umaChemicalFiberStatementDetailsRepository.saveAll(staementDetail);
             } else {
-                BigDecimal big = statement.getReceivable();
+                /*BigDecimal big = statement.getReceivable();
                 BigDecimal big1 = note.getTotalPrice();
                 BigDecimal big2 = big.add(big1);
                 statement.setReceivable(big2);
-                statement = umaChemicalFiberStatementRepository.save(statement);
+                statement = umaChemicalFiberStatementRepository.save(statement);*/
                 List<UmaChemicalFiberStatementDetails> staementDetail = new ArrayList<>();
                 for (ChemicalFiberDeliveryDetail dto : detail) {
                     UmaChemicalFiberStatementDetails add = new UmaChemicalFiberStatementDetails();
