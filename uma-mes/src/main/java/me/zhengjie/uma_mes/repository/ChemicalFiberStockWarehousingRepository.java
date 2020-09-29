@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface ChemicalFiberStockWarehousingRepository extends JpaRepository<ChemicalFiberStockWarehousing, Integer>, JpaSpecificationExecutor<ChemicalFiberStockWarehousing> {
 
@@ -30,4 +31,9 @@ public interface ChemicalFiberStockWarehousingRepository extends JpaRepository<C
 
     @Query(value = "SELECT b.id from uma_chemical_fiber_stock_warehousing b where b.invalid = 0 and b.warehousing_status = 2 and  supplier_name like %:name% and create_user like %:user% ",nativeQuery = true)
     List<Integer> getNotId(@Param("user") String user, @Param("name") String name);
+
+    @Query(value = "select a.scan_number, a.warehousing_date, a.supplier_name, b.prod_name, b.unit, b.warehousing_number, b.price, b.total_price, a.create_user, a.create_date\n" +
+            "from uma_chemical_fiber_stock_warehousing a join uma_chemical_fiber_stock_warehousing_detail b on a.id = b.warehousing_id where a.invalid = 0 and a.warehousing_status = 2 \n"+
+            "and a.warehousing_date between ?1 and ?2 and a.scan_number like %?3% and b.prod_name like %?4% and a.create_user like %?5% and a.supplier_name like %?6% ORDER BY a.warehousing_date desc",nativeQuery = true)
+    List<Map<String, Object>>  getReort(String data1, String data2, String scanNumber, String prodName, String createUser, String supplierName);
 }

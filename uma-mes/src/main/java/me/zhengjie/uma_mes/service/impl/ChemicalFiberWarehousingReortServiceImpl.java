@@ -1,6 +1,9 @@
 package me.zhengjie.uma_mes.service.impl;
 
 
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
+import cn.afterturn.easypoi.excel.entity.TemplateExportParams;
+import cn.hutool.extra.template.TemplateConfig;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockWarehousing;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockWarehousingDetail;
 import me.zhengjie.uma_mes.repository.ChemicalFiberStockWarehousingDetailRepository;
@@ -9,8 +12,11 @@ import me.zhengjie.uma_mes.service.ChemicalFiberWarehousingReortService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockWarehousingQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberWarehousingReortDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberWarehousingReortQueryCriteria;
+import me.zhengjie.utils.FileUtil;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
+import me.zhengjie.utils.StringUtils;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
@@ -20,8 +26,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -90,6 +98,86 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
             }
         }
         return PageUtil.toPage(new PageImpl(warehousingReortList, pageable, page1.getTotalElements()));
+    }
+
+    public List<Map<String, Object>> queryAlls(ChemicalFiberWarehousingReortQueryCriteria criteria){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date a = new Date(criteria.getTempStartTime());
+        Date b = new Date(criteria.getTempEndTime());
+        String data1 = simpleDateFormat.format(a);
+        String data2 = simpleDateFormat.format(b);
+
+        List<Map<String, Object>> reort = chemicalFiberStockWarehousingRepository.getReort(data1, data2,
+                StringUtils.isEmpty(criteria.getScanNumber()) ? "" : criteria.getScanNumber(),
+                StringUtils.isEmpty(criteria.getProdName()) ? "" : criteria.getProdName(),
+                StringUtils.isEmpty(criteria.getCreateUser()) ? "" : criteria.getCreateUser(),
+                StringUtils.isEmpty(criteria.getSupplierName()) ? "" : criteria.getSupplierName()
+                );
+
+        //List<ChemicalFiberWarehousingReortDTO> Warehousing = new ArrayList<>();
+        /*for (Map<String, Object> dto : reort) {
+            ChemicalFiberWarehousingReortDTO reortDto = new ChemicalFiberWarehousingReortDTO();
+            reortDto.setWarehousingDate(dto.get("warehousing_date"));
+            reortDto.setWarehousingNumber(dto.get("warehousing_number"));
+            reortDto.setSupplierName(dto.get("supplier_name"));
+            reortDto.setProdName(dto.get("prod_name"));
+            reortDto.setUnit(dto.get("unit"));
+            reortDto.setPrice(dto.get("price"));
+            reortDto.setTotalPrice(dto.get("total_price"));
+            reortDto.setCreateUser(dto.get("create_user"));
+            reortDto.setCreateDate(dto.get("create_date"));
+            Warehousing.add(reortDto);
+        }*/
+        return reort;
+    }
+
+    public void download(List<Map<String, Object>> all, HttpServletResponse response) {
+        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/roet.xls";
+        TemplateExportParams params = new TemplateExportParams(templatePath);
+        /*params.setReadonly(Boolean.TRUE);*/
+        Workbook workbook = null;
+        Map<String, Object> map = new HashMap();
+        BigDecimal sum = new BigDecimal(0);
+        BigDecimal sumTon = new BigDecimal(0);
+        BigDecimal sumBarch = new BigDecimal(0);
+        BigDecimal sumTotalPrice = new BigDecimal(0);
+        List<Map<String, Object>> listMap = new ArrayList<>();
+        for (int i = 1; i <= all.size(); i++) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Map<String, Object> in = new HashMap<>();
+            Map<String, Object> on = new HashMap<>();
+            in = all.get(i - 1);
+            on.put("index", i);
+            on.put("warehousing_date", simpleDateFormat.format(in.get("warehousing_date")));
+            on.put("warehousing_number", in.get("warehousing_number"));
+            on.put("supplier_name", in.get("supplier_name"));
+            on.put("scan_number", in.get("scan_number"));
+            on.put("prod_name", in.get("prod_name"));
+            on.put("unit", in.get("unit"));
+            on.put("price", in.get("price"));
+            on.put("total_price", in.get("total_price"));
+            on.put("create_user", in.get("create_user"));
+            on.put("create_date", simpleDateFormat.format(in.get("create_date")));
+            if (in.get("unit").equals("吨")) {
+                sumTon = sumTon.add(new BigDecimal(in.get("warehousing_number").toString()));
+            } else if (in.get("unit").equals("支")) {
+                sumBarch = sumBarch.add(new BigDecimal(in.get("warehousing_number").toString()));
+            }
+            sumTotalPrice = sumTotalPrice.add(new BigDecimal(in.get("total_price").toString()));
+
+            listMap.add(on);
+        }
+        String sumTonAndBarch = sumTon.toString() + "吨/" + sumBarch.toString() + "支";
+
+
+        map.put("list", listMap);
+        map.put("tonAndBarch", sumTonAndBarch);
+        map.put("sumTotalPrice", sumTotalPrice);
+
+
+        workbook = ExcelExportUtil.exportExcel(params, map);
+        FileUtil.downLoadExcel("导出.xlsx", response, workbook);
+
     }
 
     public Map<String,Object> getSummaryData(ChemicalFiberWarehousingReortQueryCriteria criteria){
