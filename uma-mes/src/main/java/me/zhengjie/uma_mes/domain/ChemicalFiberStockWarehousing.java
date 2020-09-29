@@ -49,7 +49,7 @@ public class ChemicalFiberStockWarehousing implements Serializable {
 
     // 批号
     @Column(name = "batch_number")
-    private Integer batchNumber;
+    private String batchNumber;
 
     // 备注
     @Column(name = "remark")

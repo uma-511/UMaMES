@@ -12,5 +12,9 @@ public class ChemicalFiberSalesListQueryCriteria {
     // 临时结束时间
     private Long tempEndTime;
 
+    private String customerName;
+
+    private String prodName;
+
 
 }

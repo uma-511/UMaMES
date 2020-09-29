@@ -8,9 +8,7 @@ import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.*;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
 import me.zhengjie.uma_mes.repository.ReceiptRepository;
-import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
-import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
-import me.zhengjie.uma_mes.service.UmaChemicalFiberStatementDetailsService;
+import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.dto.statement.CreateStatementDto;
 import me.zhengjie.uma_mes.service.dto.statement.StatementDetailsAllListDto;
@@ -18,7 +16,6 @@ import me.zhengjie.uma_mes.service.dto.statement.StatementDetailsListDto;
 import me.zhengjie.uma_mes.utils.NumberToCN;
 import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.UmaChemicalFiberStatementRepository;
-import me.zhengjie.uma_mes.service.UmaChemicalFiberStatementService;
 import me.zhengjie.uma_mes.service.mapper.UmaChemicalFiberStatementMapper;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -68,6 +65,9 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     private final UmaChemicalFiberStatementDetailsService umaChemicalFiberStatementDetailsService;
 
     private final ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository;
+
+    @Autowired
+    private CustomerService customerService;
 
     @Autowired
     private ReceiptRepository receiptRepository;
@@ -120,8 +120,26 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         int PageNumber = start * end;
         Map<String, Object> map = new HashMap<>();
         List<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd(PageNumber, start, customerName, accountCode, years + "-" + months);
+        List<UmaChemicalFiberStatementDTO> pageList = new ArrayList<>();
+        for (UmaChemicalFiberStatement dto : pages) {
+            CustomerDTO customer = customerService.findByIdWithTotalArrears(dto.getCustomerId());
+            UmaChemicalFiberStatementDTO dtoset = new UmaChemicalFiberStatementDTO();
+            ObjectTransfer.transValue(dto, dtoset);
+            dtoset.setReceivable(customer.getCurrentArrears());
+            dtoset.setAccumulatedArrears(customer.getTotalArrears());
+            BigDecimal totalArrears = new BigDecimal(0.00);
+            if (customer.getTotalArrears() != null) {
+                totalArrears = customer.getCurrentArrears().add(customer.getTotalArrears());
+                dtoset.setTotalArrears(totalArrears);
+            } else {
+                totalArrears = customer.getCurrentArrears();
+                dtoset.setTotalArrears(totalArrears);
+                dtoset.setAccumulatedArrears(null);
+            }
+            pageList.add(dtoset);
+        }
         Integer ListSeiz = umaChemicalFiberStatementRepository.findSize();
-        map.put("content", pages);
+        map.put("content", pageList);
         map.put("totalElements", ListSeiz);
         // Page<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd();
         return map;
@@ -340,6 +358,17 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
 
         }
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(id).orElseGet(UmaChemicalFiberStatement::new);
+        CustomerDTO customer = customerService.findByIdWithTotalArrears(umaChemicalFiberStatement.getCustomerId());
+        umaChemicalFiberStatement.setReceivable(customer.getCurrentArrears());
+        umaChemicalFiberStatement.setAccumulatedArrears(customer.getTotalArrears());
+        BigDecimal totalArrears = new BigDecimal(0.00);
+        if (customer.getTotalArrears() != null) {
+            totalArrears = customer.getCurrentArrears().add(customer.getTotalArrears());
+            umaChemicalFiberStatement.setTotalArrears(totalArrears);
+        } else {
+            totalArrears = customer.getCurrentArrears();
+            umaChemicalFiberStatement.setTotalArrears(totalArrears);
+        }
         UmaChemicalFiberStatementDetailsQueryCriteria umaChemicalFiberStatementDetailsQueryCriteria = new UmaChemicalFiberStatementDetailsQueryCriteria();
         umaChemicalFiberStatementDetailsQueryCriteria.setStatementId(umaChemicalFiberStatement.getId());
         List<UmaChemicalFiberStatementDetailsDTO> umaChemicalFiberStatementDetailsDTOS = umaChemicalFiberStatementDetailsService.queryAll(umaChemicalFiberStatementDetailsQueryCriteria);
