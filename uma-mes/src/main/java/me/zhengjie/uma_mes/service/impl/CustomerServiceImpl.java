@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -58,13 +59,31 @@ public class CustomerServiceImpl implements CustomerService {
         return map;
     }
 
+    private String getCurrenMonthStartTime(){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String firstday, lastday;
+        // 获取前月的第一天
+        Calendar cale = Calendar.getInstance();
+        cale = Calendar.getInstance();
+        cale.add(Calendar.MONTH, 0);
+        cale.set(Calendar.DAY_OF_MONTH, 1);
+        return format.format(cale.getTime());
+    }
+
+    private String getCurrenMonthEndTime(){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String firstday, lastday;
+        // 获取前月的最后一天
+        Calendar cale = Calendar.getInstance();
+        cale = Calendar.getInstance();
+        cale.add(Calendar.MONTH, 1);
+        cale.set(Calendar.DAY_OF_MONTH, 0);
+        return format.format(cale.getTime());
+    }
+
     @Override
     public Map<String,Object> queryAll(CustomerQueryCriteria criteria, Pageable pageable){
         criteria.setDelFlag(0);
-        Map<String, Object> timeMap = monthTimeInMillis();
-        String year = timeMap.get("year").toString();
-        String month = timeMap.get("month").toString();
-        String otherDate= year+"-"+month;
         int start = pageable.getPageSize();
         int end = pageable.getPageNumber();
         int PageNumber = start * end;
@@ -84,7 +103,9 @@ public class CustomerServiceImpl implements CustomerService {
         if (null == criteria.getContactPhone()){
             criteria.setContactPhone("");
         }
-        List<Customer> pages = customerRepository.findAllWithTotalArrears(PageNumber, start,otherDate,criteria.getName(),criteria.getCode(),criteria.getAddress(),criteria.getContacts(),criteria.getContactPhone());
+        String startTime = getCurrenMonthStartTime();
+        String endTime = getCurrenMonthEndTime();
+        List<Customer> pages = customerRepository.findAllWithTotalArrears(PageNumber, start,criteria.getName(),criteria.getCode(),criteria.getAddress(),criteria.getContacts(),criteria.getContactPhone(),startTime,endTime);
         for(Customer customer : pages){
             // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
             if (null == customer.getOverArrears()) {
@@ -109,10 +130,6 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<CustomerDTO> queryAll(CustomerQueryCriteria criteria){
         criteria.setDelFlag(0);
-        Map<String, Object> timeMap = monthTimeInMillis();
-        String year = timeMap.get("year").toString();
-        String month = timeMap.get("month").toString();
-        String otherDate= year+"-"+month;
         if (null == criteria.getName()){
             criteria.setName("");
         }
@@ -128,7 +145,9 @@ public class CustomerServiceImpl implements CustomerService {
         if (null == criteria.getContactPhone()){
             criteria.setContactPhone("");
         }
-        List<CustomerDTO> customerDTOList = customerMapper.toDto(customerRepository.findAllWithTotalArrearsForGetList(otherDate,criteria.getName(),criteria.getCode(),criteria.getAddress(),criteria.getContacts(),criteria.getContactPhone()));
+        String startTime = getCurrenMonthStartTime();
+        String endTime = getCurrenMonthEndTime();
+        List<CustomerDTO> customerDTOList = customerMapper.toDto(customerRepository.findAllWithTotalArrearsForGetList(criteria.getName(),criteria.getCode(),criteria.getAddress(),criteria.getContacts(),criteria.getContactPhone(),startTime,endTime));
         for (CustomerDTO customerDTO : customerDTOList){
             // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
             if (null == customerDTO.getOverArrears()) {
@@ -154,11 +173,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO findByIdWithTotalArrears(Integer id) {
-        Map<String, Object> timeMap = monthTimeInMillis();
-        String year = timeMap.get("year").toString();
-        String month = timeMap.get("month").toString();
-        String otherDate= year+"-"+month;
-        Customer customer = customerRepository.findByIdWithArrears(id,otherDate);
+        String startTime = getCurrenMonthStartTime();
+        String endTime = getCurrenMonthEndTime();
+        Customer customer = customerRepository.findByIdWithArrears(id,startTime,endTime);
         // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
         if (null == customer.getOverArrears()) {
             customer.setOverArrears(new BigDecimal(0));
@@ -180,17 +197,17 @@ public class CustomerServiceImpl implements CustomerService {
         criteria2.setNameAccurate(resources.getName());
         criteria2.setDelFlag(0);
         List<CustomerDTO> customerDTOs2 = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria2,criteriaBuilder)));
-        if (customerDTOs.size() > 0 && customerDTOs.get(0).getCode().equals(resources.getCode()) && resources.getId() != customerDTOs.get(0).getId()) {
+        if (customerDTOs.size() > 0 && customerDTOs.get(0).getCode().equals(resources.getCode()) && !resources.getId().equals(customerDTOs.get(0).getId())) {
             throw new BadRequestException("请确保客户编号唯一");
         }
-        if (customerDTOs2.size() > 0 && customerDTOs2.get(0).getName().equals(resources.getName()) && resources.getId() != customerDTOs2.get(0).getId()) {
+        if (customerDTOs2.size() > 0 && customerDTOs2.get(0).getName().equals(resources.getName()) && !resources.getId().equals(customerDTOs2.get(0).getId())) {
             throw new BadRequestException("请确保客户名称唯一");
         }
         CustomerQueryCriteria criteria3 = new CustomerQueryCriteria();
         criteria3.setFullNameAccurate(resources.getFullName());
         criteria3.setDelFlag(0);
         List<CustomerDTO> customerDTOs3 = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria3,criteriaBuilder)));
-        if (customerDTOs3.size() > 0 && customerDTOs3.get(0).getFullName().equals(resources.getFullName()) && resources.getId() != customerDTOs3.get(0).getId()){
+        if (customerDTOs3.size() > 0 && customerDTOs3.get(0).getFullName().equals(resources.getFullName())){
             throw new BadRequestException("请确保客户全称唯一");
         }
         else {
@@ -210,14 +227,14 @@ public class CustomerServiceImpl implements CustomerService {
         criteria.setCodeAccurate(resources.getCode());
         criteria.setDelFlag(0);
         List<CustomerDTO> customerDTOs = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria,criteriaBuilder)));
-        if (customerDTOs.size() > 0 && customerDTOs.get(0).getCode().equals(resources.getCode()) && resources.getId() != customerDTOs.get(0).getId()) {
+        if (customerDTOs.size() > 0 && customerDTOs.get(0).getCode().equals(resources.getCode()) && !resources.getId().equals(customerDTOs.get(0).getId())) {
             throw new BadRequestException("请确保客户编号唯一");
         }
         CustomerQueryCriteria criteria2 = new CustomerQueryCriteria();
         criteria2.setNameAccurate(resources.getName());
         criteria2.setDelFlag(0);
         List<CustomerDTO> customerDTOs2 = customerMapper.toDto(customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, criteria2,criteriaBuilder)));
-        if (customerDTOs2.size() > 0 && customerDTOs2.get(0).getName().equals(resources.getName()) && resources.getId() != customerDTOs2.get(0).getId()) {
+        if (customerDTOs2.size() > 0 && customerDTOs2.get(0).getName().equals(resources.getName()) && !resources.getId().equals(customerDTOs2.get(0).getId())) {
             throw new BadRequestException("请确保客户名称唯一");
         } else {
             Customer customer = customerRepository.findById(resources.getId()).orElseGet(Customer::new);

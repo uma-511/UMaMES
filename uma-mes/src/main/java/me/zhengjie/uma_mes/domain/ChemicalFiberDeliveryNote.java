@@ -148,6 +148,10 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "end_place")
     private String endPlace;
 
+    // 客户手持订单号码
+    @Column(name = "external_number")
+    private String externalNumber;
+
     @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;
 
