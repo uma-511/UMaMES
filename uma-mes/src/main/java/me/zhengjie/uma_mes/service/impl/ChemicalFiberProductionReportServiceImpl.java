@@ -55,7 +55,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempStartTime());
             StartTime = StartTime + " 07:30:00";
             String EndTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempEndTime());
-            EndTime = EndTime + " 07:30:00";
+            EndTime = EndTime + " 07:29:59";
             Timestamp time1 = Timestamp.valueOf(StartTime);
             Timestamp time2 = Timestamp.valueOf(EndTime);
             criteria.setStartTime(time1);
@@ -76,7 +76,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempStartTime());
             StartTime = StartTime + " 07:30:00";
             String EndTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempEndTime());
-            EndTime = EndTime + " 07:30:00";
+            EndTime = EndTime + " 07:29:59";
             Timestamp time1 = Timestamp.valueOf(StartTime);
             Timestamp time2 = Timestamp.valueOf(EndTime);
             criteria.setStartTime(time1);
@@ -161,8 +161,8 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(time);
         StartTime = StartTime + " 07:30:00";
         Timestamp ttime1 = Timestamp.valueOf(StartTime);
-        Timestamp ttime2 = new Timestamp(ttime1.getTime() + (long)1000*3600*24);
-        Timestamp ttime3 = new Timestamp(ttime1.getTime() - (long)1000*3600*24);
+        Timestamp ttime2 = new Timestamp(ttime1.getTime() + (long)86399999);
+        Timestamp ttime3 = new Timestamp(ttime1.getTime() - (long)86399999);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String time1 = simpleDateFormat.format(ttime1);
         String time2 = simpleDateFormat.format(ttime2);
@@ -248,7 +248,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempStartTime());
             StartTime = StartTime + " 07:30:00";
             String EndTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempEndTime());
-            EndTime = EndTime + " 07:30:00";
+            EndTime = EndTime + " 07:29:59";
             Timestamp time1 = Timestamp.valueOf(StartTime);
             Timestamp time2 = Timestamp.valueOf(EndTime);
             criteria.setStartTime(time1);
