@@ -59,4 +59,12 @@ public class CustomerQueryCriteria{
     private Long otherDate;
 
     private BigDecimal overArrears;
+
+    private Boolean showAll;
+
+    @Query(type = Query.Type.NOT_EQUAL,propName = "overArrears")
+    private BigDecimal NotEqualZero;
+
+    @Query(type = Query.Type.NOT_EQUAL,propName = "overArrears")
+    private Object NotEqualNull;
 }

@@ -347,6 +347,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             update(chemicalFiberDeliveryNote);
             // 生成司机绩效
             generatePerformanceByCar(chemicalFiberDeliveryNote.getCarNumber(),chemicalFiberDeliveryNote.getStartPlace(),chemicalFiberDeliveryNote.getEndPlace(),chemicalFiberDeliveryNote.getDriverMain(),chemicalFiberDeliveryNote.getDriverDeputy(), chemicalFiberDeliveryNote.getLoaderOne(), chemicalFiberDeliveryNote.getLoaderTwo(),totalWeight,chemicalFiberDeliveryNote.getScanNumber());
+
             StatementUp(id);
         }catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -458,6 +459,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 generateDriverPermission(driverMain,totalWeight,travelExpensesPrice,scanNumber);
                 generateDriverPermission(driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
             }
+            // 生成放酸人员绩效
+            generateDriverPermission(loaderOne,BigDecimal.ZERO,BigDecimal.ZERO,scanNumber);
+            generateDriverPermission(loaderTwo,BigDecimal.ZERO,BigDecimal.ZERO,scanNumber);
         }
     }
 

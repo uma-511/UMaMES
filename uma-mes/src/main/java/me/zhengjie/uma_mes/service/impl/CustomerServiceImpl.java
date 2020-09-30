@@ -60,7 +60,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private String getCurrenMonthStartTime(){
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
         String firstday, lastday;
         // 获取前月的第一天
         Calendar cale = Calendar.getInstance();
@@ -71,7 +71,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private String getCurrenMonthEndTime(){
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
         String firstday, lastday;
         // 获取前月的最后一天
         Calendar cale = Calendar.getInstance();
@@ -110,6 +110,9 @@ public class CustomerServiceImpl implements CustomerService {
             // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
             if (null == customer.getOverArrears()) {
                 customer.setOverArrears(new BigDecimal(0));
+            }
+            if(null == customer.getTotalArrears()) {
+                customer.setTotalArrears(new BigDecimal(0));
             }
             customer.setTotalArrears(customer.getTotalArrears().add(customer.getOverArrears()));
 
@@ -153,6 +156,9 @@ public class CustomerServiceImpl implements CustomerService {
             if (null == customerDTO.getOverArrears()) {
                 customerDTO.setOverArrears(new BigDecimal(0));
             }
+            if(null == customerDTO.getTotalArrears()) {
+                customerDTO.setTotalArrears(new BigDecimal(0));
+            }
             customerDTO.setTotalArrears(customerDTO.getTotalArrears().add(customerDTO.getOverArrears()));
         }
         return customerDTOList;
@@ -179,6 +185,9 @@ public class CustomerServiceImpl implements CustomerService {
         // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
         if (null == customer.getOverArrears()) {
             customer.setOverArrears(new BigDecimal(0));
+        }
+        if(null == customer.getTotalArrears()) {
+            customer.setTotalArrears(new BigDecimal(0));
         }
         customer.setTotalArrears(customer.getTotalArrears().add(customer.getOverArrears()));
         ValidationUtil.isNull(customer.getId(),"Customer","id",id);

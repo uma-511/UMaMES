@@ -30,6 +30,9 @@ public class AcidPersionPerformanceDTO implements Serializable {
     // 产品名称
     private String productName;
 
+    // 产品编号
+    private String productCode;
+
     // 桶数
     @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal number;

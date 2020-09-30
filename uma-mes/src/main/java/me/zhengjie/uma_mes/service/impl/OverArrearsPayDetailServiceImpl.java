@@ -22,6 +22,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,12 @@ public class OverArrearsPayDetailServiceImpl implements OverArrearsPayDetailServ
 
     @Override
     public Map<String,Object> queryAll(CustomerQueryCriteria criteria, Pageable pageable){
+        if (!criteria.getShowAll())
+        {
+            // 不显示全部，添加判断非0非空
+            criteria.setNotEqualZero(new BigDecimal(0));
+            criteria.setNotEqualNull("");
+        }
         Page<Customer> page = customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(customerMapper::toDto));
     }

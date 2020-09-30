@@ -50,6 +50,12 @@ public class AcidPersionPerformance implements Serializable {
     private String productName;
 
     /**
+     * 产品编号
+     */
+    @Column(name = "product_code")
+    private String productCode;
+
+    /**
      * 桶数
      */
     @Column(name = "number")
