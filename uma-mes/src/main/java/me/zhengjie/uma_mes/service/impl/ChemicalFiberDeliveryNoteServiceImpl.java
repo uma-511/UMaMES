@@ -383,6 +383,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 chemicalFiberStockDTO.setTotalNumber(chemicalFiberStockDTO.getTotalNumber().add(chemicalFiberDeliveryDetailDTO.getRealQuantity()));
                 chemicalFiberStockService.update(chemicalFiberStockMapper.toEntity(chemicalFiberStockDTO));
             }
+            umaChemicalFiberStatementService.StatementUp(id);
         }
 
 
@@ -590,7 +591,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         chemicalFiberDeliveryNote.setEnable(Boolean.TRUE);
         update(chemicalFiberDeliveryNote);
-        umaChemicalFiberStatementService.StatementUp(id);
     }
 
     @Override
