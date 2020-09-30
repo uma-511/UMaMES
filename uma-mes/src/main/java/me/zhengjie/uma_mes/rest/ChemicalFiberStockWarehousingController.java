@@ -1,11 +1,13 @@
 package me.zhengjie.uma_mes.rest;
 
+import com.lgmn.common.result.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockWarehousing;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockWarehousingDetail;
 import me.zhengjie.uma_mes.service.ChemicalFiberStockWarehousingService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberSalesListQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberStockWarehousingQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -53,6 +55,14 @@ public class ChemicalFiberStockWarehousingController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PostMapping(value = "/getWarehousingSummaries")
+    @Log("获取报表合计")
+    @ApiOperation("获取报表合计")
+    //@PreAuthorize("@el.check('chemicalFiberProduction:productionReport')")
+    public Result getWarehousingSummaries(@RequestBody ChemicalFiberStockWarehousingQueryCriteria criteria) {
+        return chemicalFiberStockWarehousingService.getWarehousingSummaries(criteria);
+    }
+
     @PutMapping(value = "/warehousing")
     @Log("入库")
     @ApiOperation("入库")
@@ -61,6 +71,8 @@ public class ChemicalFiberStockWarehousingController {
         chemicalFiberStockWarehousingService.warehousing(resources);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
 
     @DeleteMapping(value = "/{id}")
     @Log("删除ChemicalFiberStockWarehousing")

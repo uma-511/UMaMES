@@ -8,6 +8,7 @@ import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
+import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryDetailRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryDetailService;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNotePayDetailService;
 import me.zhengjie.uma_mes.service.ChemicalFiberDeliveryNoteService;
@@ -47,6 +48,8 @@ public class ChemicalFiberDeliveryNoteController {
 
     @Autowired
     private ChemicalFiberDeliveryNotePayDetailService chemicalFiberDeliveryNotePayDetailService;
+    @Autowired
+    private ChemicalFiberDeliveryDetailRepository chemicalFiberDeliveryDetailRepository;
 
     public ChemicalFiberDeliveryNoteController(ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService,
                                                ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService,
@@ -184,6 +187,7 @@ public class ChemicalFiberDeliveryNoteController {
         BigDecimal sumTotalCost = new BigDecimal(0);
         BigDecimal sumTotalPrice = new BigDecimal(0);
         BigDecimal sumRemainder = new BigDecimal(0);
+        BigDecimal sumTotal = new BigDecimal(0);
         if (criteria.getTempStartTime() != null) {
             criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
@@ -197,6 +201,7 @@ public class ChemicalFiberDeliveryNoteController {
         criteria.setEnableList(booleanList);
         List<ChemicalFiberDeliveryNoteDTO> ChemicalFiberDeliveryNoteList = chemicalFiberDeliveryNoteService.queryAll(criteria);
         for (ChemicalFiberDeliveryNoteDTO Note : ChemicalFiberDeliveryNoteList) {
+            BigDecimal total = chemicalFiberDeliveryDetailRepository.getTotal(Note.getScanNumber());
             BigDecimal paySum = new BigDecimal(0);
             List<ChemicalFiberDeliveryNotePayDetailDTO> pay = chemicalFiberDeliveryNotePayDetailService.findListByScanNumber(Note.getScanNumber());
             for (ChemicalFiberDeliveryNotePayDetailDTO payNote : pay) {
@@ -211,12 +216,16 @@ public class ChemicalFiberDeliveryNoteController {
             if (Note.getRemainder() != null) {
                 sumRemainder = sumRemainder.add(Note.getRemainder());
             }
+            if (total != null) {
+                sumTotal = sumTotal.add(total);
+            }
         }
         //sumNetWeight =  sumNetWeight.multiply(new BigDecimal(1000));
         Map<String, Object> map = new HashMap<>();
         map.put("sumTotalCost", sumTotalCost);
         map.put("sumTotalPrice", sumTotalPrice);
         map.put("sumRemainder", sumRemainder);
+        map.put("sumTotal", sumTotal);
         return Result.success(map);
     }
 }

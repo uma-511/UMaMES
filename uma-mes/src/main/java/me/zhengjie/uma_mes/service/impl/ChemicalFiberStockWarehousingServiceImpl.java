@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import com.lgmn.common.result.Result;
 import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockWarehousing;
@@ -272,5 +273,54 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
             Warehousing.setInvalid(1);
             chemicalFiberStockWarehousingRepository.save(Warehousing);
         }
+    }
+
+    public Result getWarehousingSummaries(ChemicalFiberStockWarehousingQueryCriteria criteria) {
+
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+        }
+        List<Integer> invalidList = new ArrayList<>();
+        invalidList.add(0);
+        if (null != criteria.getQueryWithInvalid() && criteria.getQueryWithInvalid())
+        {
+            invalidList.add(1);
+        }
+        criteria.setInvalidList(invalidList);
+        List<ChemicalFiberStockWarehousing> list  = chemicalFiberStockWarehousingRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+        List<Map<String, Object>> tonAndBranch = chemicalFiberStockWarehousingDetailRepository.getTonAndBranch();
+        Map<Integer, BigDecimal> tonMap = new HashMap<>();
+        Map<Integer, BigDecimal> branchMap = new HashMap<>();
+        for (Map<String, Object> dto : tonAndBranch) {
+            BigDecimal ton = new BigDecimal(dto.get("ton").toString());
+            tonMap.put((Integer)dto.get("warehousing_id"), ton);
+        }
+        for (Map<String, Object> dto : tonAndBranch) {
+            BigDecimal branch = new BigDecimal(dto.get("branch").toString());
+            branchMap.put((Integer)dto.get("warehousing_id"), branch);
+        }
+        List<ChemicalFiberStockWarehousingDTO> warehousingDTO = new ArrayList<>();
+        BigDecimal sumTon = new BigDecimal(0.00);
+        BigDecimal sumBranch = new BigDecimal(0.00);
+        BigDecimal sumTotal = new BigDecimal(0.00);
+        for (ChemicalFiberStockWarehousing dto : list) {
+            if (tonMap.get(dto.getId()) != null) {
+                sumTon = sumTon.add(tonMap.get(dto.getId()));
+                sumBranch = sumBranch.add(branchMap.get(dto.getId()));
+            }
+            if (dto.getTotalPrice() != null) {
+                sumTotal = sumTotal.add(dto.getTotalPrice());
+            }
+        }
+        String sumTonAndBranch = sumTon.toString() + "吨/" + sumBranch.toString() + "支";
+        List<Object> lists = new ArrayList<>();
+
+        lists.add("合计");
+        lists.add("");
+        lists.add("");
+        lists.add(sumTonAndBranch);
+        lists.add(sumTotal);
+        return Result.success(lists);
     }
 }
