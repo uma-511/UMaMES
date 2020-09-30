@@ -39,4 +39,7 @@ public class ChemicalFiberProductQueryCriteria{
 
     @Query
     private Integer menusId;
+
+    @Query
+    private String menus;
 }

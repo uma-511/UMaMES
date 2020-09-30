@@ -44,7 +44,7 @@ public class UmaChemicalFiberStatementDetailsServiceImpl implements UmaChemicalF
     }
 
     @Override
-    @Cacheable
+    /*@Cacheable*/
     public Map<String,Object> queryAll(UmaChemicalFiberStatementDetailsQueryCriteria criteria, Pageable pageable){
         Page<UmaChemicalFiberStatementDetails> page = umaChemicalFiberStatementDetailsRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(umaChemicalFiberStatementDetailsMapper::toDto));

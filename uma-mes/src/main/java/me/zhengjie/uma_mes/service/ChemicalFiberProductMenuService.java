@@ -13,4 +13,6 @@ public interface ChemicalFiberProductMenuService {
 
     ChemicalFiberProductMenuDTO create(ChemicalFiberProductMenu resources);
 
+    void delect(ChemicalFiberProductMenu resources);
+
 }

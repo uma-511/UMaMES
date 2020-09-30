@@ -1,13 +1,14 @@
 package me.zhengjie.uma_mes.service.dto;
 
+import lombok.Data;
 import me.zhengjie.annotation.Query;
 
-
+@Data
 public class ChemicalFiberProductMenuQueryCriteria {
 
-    @Query(type = Query.Type.INNER_LIKE)
+    @Query
     private Integer id;
 
-    @Query(type = Query.Type.INNER_LIKE)
+    @Query
     private String productMenusName;
 }

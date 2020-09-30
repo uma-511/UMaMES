@@ -58,4 +58,8 @@ public interface UmaChemicalFiberStatementService {
     Result getSums(StatementDetailsAllListDto statementDetailsAllListDto);
 
     void exportStatement(HttpServletResponse response, Integer id);
+
+    void StatementUp(Integer id);
+
+    void delectStatemen(Integer id);
 }

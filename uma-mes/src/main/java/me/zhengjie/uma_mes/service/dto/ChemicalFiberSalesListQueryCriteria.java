@@ -16,5 +16,7 @@ public class ChemicalFiberSalesListQueryCriteria {
 
     private String prodName;
 
+    private String scanNumber;
+
 
 }

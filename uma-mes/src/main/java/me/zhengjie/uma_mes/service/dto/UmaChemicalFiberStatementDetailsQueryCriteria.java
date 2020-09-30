@@ -21,4 +21,7 @@ public class UmaChemicalFiberStatementDetailsQueryCriteria{
     // 小于等于
     @Query(type = Query.Type.LESS_THAN, propName = "scanDate")
     private Timestamp endTime;
+
+    @Query
+    private String scanNumber;
 }
