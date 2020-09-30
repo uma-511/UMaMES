@@ -502,12 +502,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         travelPersionPerformance.setEnable(Boolean.TRUE);
         travelPersionPerformance.setCreateTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         travelPersionPerformance.setMileageFee(expensesPrice);
-        travelPersionPerformance.setTotalPerformance(expensesPrice.add(surchargePrice));
+        travelPersionPerformance.setTotalPerformance(expensesPrice);
         travelPersionPerformance.setPersonId(userId);
         travelPersionPerformance.setPermission(userPermission);
         travelPersionPerformance.setOvertimePay(new BigDecimal(0));
         travelPersionPerformance.setAllowance(new BigDecimal(0));
-        travelPersionPerformance.setSurcharge(surchargePrice);
         travelPersionPerformance.setHandlingCost(new BigDecimal(0));
         travelPersionPerformance.setPersonName(user);
         travelPersionPerformance.setScanNumber(scanNumber);
