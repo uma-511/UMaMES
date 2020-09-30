@@ -69,7 +69,7 @@ public class ChemicalFiberProductMenuServiceImpl implements ChemicalFiberProduct
         ChemicalFiberProductMenuQueryCriteria criteria1 = new ChemicalFiberProductMenuQueryCriteria();
         criteria1.setProductMenusName(resources.getProductMenusName());
         List<ChemicalFiberProductMenu> menu =  chemicalFiberProductMenuRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria1,criteriaBuilder));
-        chemicalFiberProductMenuRepository.delete(menu);
+        chemicalFiberProductMenuRepository.deleteAll(menu);
 
     }
 
