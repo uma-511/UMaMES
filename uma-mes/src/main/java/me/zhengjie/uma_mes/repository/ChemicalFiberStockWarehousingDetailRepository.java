@@ -26,4 +26,9 @@ public interface ChemicalFiberStockWarehousingDetailRepository extends JpaReposi
 
     @Query(value = "select * from(SELECT warehousing_id , sum( CASE WHEN unit = '吨' THEN warehousing_number ELSE 0 END ) AS ton, sum( CASE WHEN unit = '支' THEN warehousing_number ELSE 0 END ) AS branch FROM uma_chemical_fiber_stock_warehousing_detail GROUP BY warehousing_id ) as temp ",nativeQuery = true)
     List<Map<String, Object>> getTonAndBranch();
+
+    @Query(value = "select sum( CASE WHEN unit = '吨' THEN warehousing_number ELSE 0 END ) AS ton, sum( CASE WHEN unit = '支' THEN warehousing_number ELSE 0 END ) AS branch from uma_chemical_fiber_stock_warehousing a join uma_chemical_fiber_stock_warehousing_detail b on a.id = b.warehousing_id where a.invalid = 0 GROUP BY unit",nativeQuery = true)
+    Map<String, Object> getSumTonAndBranch();
+
+
 }

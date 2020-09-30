@@ -43,6 +43,7 @@ public class ChemicalFiberSalesListServiceImpl implements ChemicalFiberSalesList
         Page<Map<String, Object>> page = chemicalFiberDeliveryDetailRepository.getSalesList(data1, data2,
                 StringUtils.isEmpty(criteria.getCustomerName()) ? "" : criteria.getCustomerName(),
                 StringUtils.isEmpty(criteria.getProdName()) ? "" : criteria.getProdName(),
+                StringUtils.isEmpty(criteria.getScanNumber()) ? "" : criteria.getScanNumber(),
                 tempPageable);
         List<Map<String, Object>> list = page.getContent();
         List<ChemicalFiberSalesDTO> pageList = new ArrayList<>();
@@ -84,7 +85,8 @@ public class ChemicalFiberSalesListServiceImpl implements ChemicalFiberSalesList
         String data2 = simpleDateFormat.format(criteria.getTempEndTime());
         List<Map<String, Object>> list = chemicalFiberDeliveryDetailRepository.getSales(data1, data2,
                 StringUtils.isEmpty(criteria.getCustomerName()) ? "" : criteria.getCustomerName(),
-                StringUtils.isEmpty(criteria.getProdName()) ? "" : criteria.getProdName());
+                StringUtils.isEmpty(criteria.getProdName()) ? "" : criteria.getProdName(),
+                StringUtils.isEmpty(criteria.getScanNumber()) ? "" : criteria.getScanNumber());
         List<ChemicalFiberSalesDTO> pageList = new ArrayList<>();
         for (Map<String, Object> dto : list) {
             ChemicalFiberSalesDTO sale = new ChemicalFiberSalesDTO();

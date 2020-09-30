@@ -46,5 +46,14 @@ public class ChemicalFiberProductMenuController {
         return new ResponseEntity<>(chemicalFiberProductMenuService.create(resources), HttpStatus.CREATED);
     }
 
+    @GetMapping(value = "/delect")
+    @Log("删除ChemicalFiberProductMenu")
+    @ApiOperation("删除ChemicalFiberProductMenu")
+    //@PreAuthorize("@el.check('chemicalFiberProductMenu:add')")
+    public ResponseEntity delect(ChemicalFiberProductMenu resources){
+        chemicalFiberProductMenuService.delect(resources);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 
 }
