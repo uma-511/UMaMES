@@ -62,4 +62,8 @@ public class ChemicalFiberStockWarehousingDTO implements Serializable {
 
     private String tonAndBranch;
 
+    private BigDecimal ton;
+
+    private BigDecimal branch;
+
 }

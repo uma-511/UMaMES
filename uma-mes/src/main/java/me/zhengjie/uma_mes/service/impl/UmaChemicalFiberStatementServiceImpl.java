@@ -100,6 +100,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         //Page<UmaChemicalFiberStatement> page = umaChemicalFiberStatementRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         String years = "";
         String months = "";
+        Integer yesr;
         if (criteria.getCreateDate() != null) {
             Long createDate = criteria.getCreateDate();
             Date date = new Date(createDate);
@@ -130,11 +131,21 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         List<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd(PageNumber, start, customerName, accountCode, years + "-" + months);
         List<UmaChemicalFiberStatementDTO> pageList = new ArrayList<>();
         for (UmaChemicalFiberStatement dto : pages) {
-            CustomerDTO customer = customerService.findByIdWithTotalArrears(dto.getCustomerId());
+
+            Date date = dto.getCreateDate();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            Integer year = calendar.get(Calendar.MONTH) + 1;
+            String startTime = getCurrenMonthStartTime(year);
+            String endTime = getCurrenMonthEndTime(year);
+            CustomerDTO customer = new CustomerDTO();
+            customer = customerService.findByIdWithTotalArrearsStatement(dto.getCustomerId(), startTime, endTime);
             UmaChemicalFiberStatementDTO dtoset = new UmaChemicalFiberStatementDTO();
             ObjectTransfer.transValue(dto, dtoset);
             dtoset.setReceivable(customer.getCurrentArrears());
             dtoset.setAccumulatedArrears(customer.getTotalArrears());
+            dtoset.setRemainder(customer.getRemainder());
+            dtoset.setAccount(customer.getAccount());
             BigDecimal totalArrears = new BigDecimal(0.00);
             if (customer.getTotalArrears() != null) {
                 totalArrears = customer.getCurrentArrears().add(customer.getTotalArrears());
@@ -155,13 +166,13 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     }
 
     @Override
-    @Cacheable
+    //@Cacheable
     public List<UmaChemicalFiberStatementDTO> queryAll(UmaChemicalFiberStatementQueryCriteria criteria){
         return umaChemicalFiberStatementMapper.toDto(umaChemicalFiberStatementRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
+    //@Cacheable(key = "#p0")
     public UmaChemicalFiberStatementDTO findById(Integer id) {
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(id).orElseGet(UmaChemicalFiberStatement::new);
         ValidationUtil.isNull(umaChemicalFiberStatement.getId(),"UmaChemicalFiberStatement","id",id);
@@ -169,7 +180,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public UmaChemicalFiberStatementDTO create1(CreateStatementDto createStatementDto) {
         Calendar now = Calendar.getInstance();
@@ -208,7 +219,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         return chemicalFiberStatementDTO;
     }
 
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void create(Integer id) {
         ChemicalFiberDeliveryNote note = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
@@ -229,7 +240,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(UmaChemicalFiberStatement resources) {
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(resources.getId()).orElseGet(UmaChemicalFiberStatement::new);
@@ -239,7 +250,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         umaChemicalFiberStatementRepository.deleteById(id);
@@ -373,7 +384,17 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
 
         }
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(id).orElseGet(UmaChemicalFiberStatement::new);
-        CustomerDTO customer = customerService.findByIdWithTotalArrears(umaChemicalFiberStatement.getCustomerId());
+        umaChemicalFiberStatement.setPrintDate(new Timestamp(System.currentTimeMillis()));
+        umaChemicalFiberStatementRepository.save(umaChemicalFiberStatement);
+        Date date1 = umaChemicalFiberStatement.getCreateDate();
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTime(date1);
+        Integer year1 = calendar1.get(Calendar.MONTH) + 1;
+        String startTime = getCurrenMonthStartTime(year1);
+        String endTime = getCurrenMonthEndTime(year1);
+        CustomerDTO customer = new CustomerDTO();
+        customer = customerService.findByIdWithTotalArrearsStatement(umaChemicalFiberStatement.getCustomerId(), startTime, endTime);
+        //CustomerDTO customer = customerService.findByIdWithTotalArrears(umaChemicalFiberStatement.getCustomerId());
         umaChemicalFiberStatement.setReceivable(customer.getCurrentArrears());
         umaChemicalFiberStatement.setAccumulatedArrears(customer.getTotalArrears());
         BigDecimal totalArrears = new BigDecimal(0.00);
@@ -467,9 +488,9 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         map.put("capitTotal", NumberToCN.number2CNMontrayUnit(umaChemicalFiberStatement.getReceivable()));
         map.put("total", umaChemicalFiberStatement.getReceivable() + "");
         //map.put("onCredit", umaChemicalFiberStatement.getAccumulatedArrears() + "");//上期欠款
-        map.put("onCredit", onCredit + "");//上期欠款
-        map.put("sumTotal", sumTotal + ""); // 总欠款
-        map.put("totalSum", totalSum + ""); // 总金额
+        map.put("onCredit", umaChemicalFiberStatement.getAccumulatedArrears() + "");//上期欠款
+        map.put("sumTotal", umaChemicalFiberStatement.getTotalArrears() + ""); // 总欠款
+        map.put("totalSum", umaChemicalFiberStatement.getReceivable() + ""); // 总金额
         map.put("sumAmountOfMoney", sumAmountOfMoney + ""); // 总金额
         map.put("statementLists", listMap);
         map.put("receiptlistMap", receiptlistMap);
@@ -657,6 +678,27 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         map.put("month", month < 10 ? "0" + month : month);
         map.put("year", year);
         return map;
+    }
+
+    private String getCurrenMonthStartTime(Integer day){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        String firstday, lastday;
+        // 获取前月的第一天
+        Calendar cale = Calendar.getInstance();
+        cale = Calendar.getInstance();
+        cale.set(Calendar.MONTH, day - 1);
+        cale.set(Calendar.DAY_OF_MONTH, 1);
+        return format.format(cale.getTime());
+    }
+
+    private String getCurrenMonthEndTime(Integer day){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
+        String firstday, lastday;
+        // 获取前月的最后一天
+        Calendar cale = Calendar.getInstance();
+        cale.set(Calendar.MONTH, day);
+        cale.set(Calendar.DAY_OF_MONTH, 0);
+        return format.format(cale.getTime());
     }
 
 

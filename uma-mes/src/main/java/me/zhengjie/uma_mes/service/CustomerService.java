@@ -40,6 +40,8 @@ public interface CustomerService {
 
     CustomerDTO findByIdWithTotalArrears(Integer id);
 
+    CustomerDTO findByIdWithTotalArrearsStatement(Integer id, String startTime, String endTime);
+
     CustomerDTO create(Customer resources);
 
     void update(Customer resources);
