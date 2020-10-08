@@ -4,6 +4,7 @@ package me.zhengjie.uma_mes.service.impl;
 import cn.afterturn.easypoi.excel.ExcelExportUtil;
 import cn.afterturn.easypoi.excel.entity.TemplateExportParams;
 import cn.hutool.extra.template.TemplateConfig;
+import com.lgmn.common.result.Result;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockWarehousing;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStockWarehousingDetail;
 import me.zhengjie.uma_mes.repository.ChemicalFiberStockWarehousingDetailRepository;
@@ -180,7 +181,7 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
 
     }
 
-    public Map<String,Object> getSummaryData(ChemicalFiberWarehousingReortQueryCriteria criteria){
+    public Result getSummaryData(ChemicalFiberWarehousingReortQueryCriteria criteria){
         Map<String, Object> map = new HashMap<>();
         ChemicalFiberStockWarehousingQueryCriteria ca = new ChemicalFiberStockWarehousingQueryCriteria();
         String createUser = "";
@@ -227,10 +228,21 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
                 }
             }
         }
-        map.put("sumTotalPrice",sumTotalPrice);
+        String tonAndBarch = sumTon.toString() + "吨/" + sum.toString() + "支";
+        List<Object> lists = new ArrayList<>();
+        lists.add("合计");
+        lists.add("");
+        lists.add("");
+        lists.add("");
+        lists.add("");
+        lists.add("");
+        lists.add(tonAndBarch);
+        lists.add("");
+        lists.add(sumTotalPrice);
+       /* map.put("sumTotalPrice",sumTotalPrice);
         map.put("sumTon",sumTon);
-        map.put("sum",sum);
-        return map;
+        map.put("sum",sum);*/
+        return Result.success(lists);
     }
 
 

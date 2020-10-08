@@ -51,13 +51,13 @@ public class UmaChemicalFiberStatementDetailsServiceImpl implements UmaChemicalF
     }
 
     @Override
-    @Cacheable
+    //@Cacheable
     public List<UmaChemicalFiberStatementDetailsDTO> queryAll(UmaChemicalFiberStatementDetailsQueryCriteria criteria){
         return umaChemicalFiberStatementDetailsMapper.toDto(umaChemicalFiberStatementDetailsRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
+    //@Cacheable(key = "#p0")
     public UmaChemicalFiberStatementDetailsDTO findById(Integer id) {
         UmaChemicalFiberStatementDetails umaChemicalFiberStatementDetails = umaChemicalFiberStatementDetailsRepository.findById(id).orElseGet(UmaChemicalFiberStatementDetails::new);
         ValidationUtil.isNull(umaChemicalFiberStatementDetails.getId(),"UmaChemicalFiberStatementDetails","id",id);
@@ -65,14 +65,14 @@ public class UmaChemicalFiberStatementDetailsServiceImpl implements UmaChemicalF
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public UmaChemicalFiberStatementDetailsDTO create(UmaChemicalFiberStatementDetails resources) {
         return umaChemicalFiberStatementDetailsMapper.toDto(umaChemicalFiberStatementDetailsRepository.save(resources));
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(UmaChemicalFiberStatementDetails resources) {
         UmaChemicalFiberStatementDetails umaChemicalFiberStatementDetails = umaChemicalFiberStatementDetailsRepository.findById(resources.getId()).orElseGet(UmaChemicalFiberStatementDetails::new);
@@ -82,7 +82,7 @@ public class UmaChemicalFiberStatementDetailsServiceImpl implements UmaChemicalF
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         umaChemicalFiberStatementDetailsRepository.deleteById(id);

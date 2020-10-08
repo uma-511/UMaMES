@@ -74,16 +74,26 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         Page<ChemicalFiberStockWarehousing> page = chemicalFiberStockWarehousingRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         List<ChemicalFiberStockWarehousing> list = page.getContent();
         List<Map<String, Object>> tonAndBranch = chemicalFiberStockWarehousingDetailRepository.getTonAndBranch();
-        Map<Integer, String> tonanBranchMap = new HashMap<>();
+        Map<Integer, Map<String, BigDecimal>> tonanBranchMap = new HashMap<>();
         for (Map<String, Object> dto : tonAndBranch) {
+            Map<String, BigDecimal> dig = new HashMap<>();
+            dig.put("吨", new BigDecimal(dto.get("ton").toString()));
+            dig.put("支", new BigDecimal(dto.get("branch").toString()));
             String tonAndBranchStr = dto.get("ton") + "吨" + "/" + dto.get("branch") + "支";
-            tonanBranchMap.put((Integer)dto.get("warehousing_id"), tonAndBranchStr);
+            tonanBranchMap.put((Integer)dto.get("warehousing_id"), dig);
         }
         List<ChemicalFiberStockWarehousingDTO> warehousingDTO = new ArrayList<>();
         for (ChemicalFiberStockWarehousing dto : list) {
             ChemicalFiberStockWarehousingDTO war = new ChemicalFiberStockWarehousingDTO();
             ObjectTransfer.transValue(dto, war);
-            war.setTonAndBranch(tonanBranchMap.get(dto.getId()));
+            war.setTon(tonanBranchMap.get(dto.getId()).get("吨"));
+            if ( war.getTon() != null && war.getTon().compareTo(new BigDecimal(0.00)) == 0) {
+                war.setTon(null);
+            }
+            war.setBranch(tonanBranchMap.get(dto.getId()).get("支"));
+            if ( war.getBranch() != null && war.getBranch().compareTo(new BigDecimal(0.00)) == 0) {
+                war.setBranch(null);
+            }
             warehousingDTO.add(war);
         }
         /*return PageUtil.toPage(page.map(chemicalFiberStockWarehousingMapper::toDto));*/
@@ -320,7 +330,8 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         lists.add("");
         lists.add("");
         lists.add("");
-        lists.add(sumTonAndBranch);
+        lists.add(sumTon);
+        lists.add(sumBranch);
         lists.add(sumTotal);
         return Result.success(lists);
     }

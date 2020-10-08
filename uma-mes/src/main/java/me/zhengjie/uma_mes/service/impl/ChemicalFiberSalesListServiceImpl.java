@@ -61,8 +61,8 @@ public class ChemicalFiberSalesListServiceImpl implements ChemicalFiberSalesList
             sale.setRealPrice(new BigDecimal(dto.get("real_price").toString()));
             sale.setSumPrice(new BigDecimal(0));
             sale.setSumNumber(new BigDecimal(0));
-            sale.setSumPrice(sale.getTotalPrice().subtract(sale.getRealPrice()).negate());
-            sale.setSumNumber(sale.getTotalNumber().subtract(sale.getRealQuantity()).negate());
+            sale.setSumPrice(sale.getRealPrice().subtract(sale.getTotalPrice()).negate());
+            sale.setSumNumber(sale.getRealQuantity().subtract(sale.getTotalNumber()).negate());
             pageList.add(sale);
         }
 
@@ -93,10 +93,10 @@ public class ChemicalFiberSalesListServiceImpl implements ChemicalFiberSalesList
             sale.setSumPrice(new BigDecimal(0));
             sale.setSumNumber(new BigDecimal(0));
 
-            sale.setSumPrice(sale.getTotalPrice().subtract(sale.getRealPrice()).negate());
+            sale.setSumPrice(sale.getRealPrice().subtract(sale.getTotalPrice()).negate());
             /*sale.setSumPrice(sale.getTotalPrice().subtract(sale.getRealPrice()));
             sale.setSumNumber(sale.getRealQuantity().subtract(sale.getTotalNumber()));*/
-            sale.setSumNumber(sale.getTotalNumber().subtract(sale.getRealQuantity()).negate());
+            sale.setSumNumber(sale.getRealQuantity().subtract(sale.getTotalNumber()).negate());
             pageList.add(sale);
         }
 

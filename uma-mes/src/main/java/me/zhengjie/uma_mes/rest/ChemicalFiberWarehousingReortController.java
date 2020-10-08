@@ -39,8 +39,7 @@ public class ChemicalFiberWarehousingReortController {
     @Log("查询ChemicalFiberLabel")
     @ApiOperation("查询ChemicalFiberLabel")
     public Result getSummaryData(@RequestBody ChemicalFiberWarehousingReortQueryCriteria criteria) {
-        Map<String, Object> map = chemicalFiberWarehousingReortService.getSummaryData(criteria);
-        return Result.success(map);
+        return chemicalFiberWarehousingReortService.getSummaryData(criteria);
     }
 
     @Log("导出数据")
