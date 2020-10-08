@@ -61,18 +61,8 @@ public class ChemicalFiberSalesListServiceImpl implements ChemicalFiberSalesList
             sale.setRealPrice(new BigDecimal(dto.get("real_price").toString()));
             sale.setSumPrice(new BigDecimal(0));
             sale.setSumNumber(new BigDecimal(0));
-            int price = sale.getRealPrice().compareTo(sale.getTotalPrice()); //和0，ZERO比较
-            if ( price == 1 ) {
-                sale.setSumPrice(sale.getRealPrice().subtract(sale.getTotalPrice()));
-            } else if ( price == -1 ) {
-                sale.setSumPrice(sale.getTotalPrice().subtract(sale.getRealPrice()));
-            }
-            int number = sale.getTotalNumber().compareTo(sale.getRealQuantity()); //和0，ZERO比较
-            if ( number == 1 ) {
-                sale.setSumNumber(sale.getTotalNumber().subtract(sale.getRealQuantity()));
-            } else if ( number == -1 ) {
-                sale.setSumNumber(sale.getRealQuantity().subtract(sale.getTotalNumber()));
-            }
+            sale.setSumPrice(sale.getTotalPrice().subtract(sale.getRealPrice()).negate());
+            sale.setSumNumber(sale.getTotalNumber().subtract(sale.getRealQuantity()).negate());
             pageList.add(sale);
         }
 
@@ -102,18 +92,11 @@ public class ChemicalFiberSalesListServiceImpl implements ChemicalFiberSalesList
             sale.setRealPrice(new BigDecimal(dto.get("real_price").toString()));
             sale.setSumPrice(new BigDecimal(0));
             sale.setSumNumber(new BigDecimal(0));
-            int price = sale.getRealPrice().compareTo(sale.getTotalPrice()); //和0，ZERO比较
-            if ( price == 1 ) {
-                sale.setSumPrice(sale.getRealPrice().subtract(sale.getTotalPrice()));
-            } else if ( price == -1 ) {
-                sale.setSumPrice(sale.getTotalPrice().subtract(sale.getRealPrice()));
-            }
-            int number = sale.getTotalNumber().compareTo(sale.getRealQuantity()); //和0，ZERO比较
-            if ( number == 1 ) {
-                sale.setSumNumber(sale.getTotalNumber().subtract(sale.getRealQuantity()));
-            } else if ( number == -1 ) {
-                sale.setSumNumber(sale.getRealQuantity().subtract(sale.getTotalNumber()));
-            }
+
+            sale.setSumPrice(sale.getTotalPrice().subtract(sale.getRealPrice()).negate());
+            /*sale.setSumPrice(sale.getTotalPrice().subtract(sale.getRealPrice()));
+            sale.setSumNumber(sale.getRealQuantity().subtract(sale.getTotalNumber()));*/
+            sale.setSumNumber(sale.getTotalNumber().subtract(sale.getRealQuantity()).negate());
             pageList.add(sale);
         }
 

@@ -319,6 +319,7 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         lists.add("合计");
         lists.add("");
         lists.add("");
+        lists.add("");
         lists.add(sumTonAndBranch);
         lists.add(sumTotal);
         return Result.success(lists);
