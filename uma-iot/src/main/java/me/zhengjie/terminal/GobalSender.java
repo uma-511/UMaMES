@@ -41,7 +41,7 @@ public class GobalSender extends SendCommand {
     }
     
     public void send(String command){
-        sendDeloy(command,1500);
+        sendDeloy(command,300);
     }
 
     public void send(Vector<Byte> command){
