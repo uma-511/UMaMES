@@ -43,11 +43,11 @@ public class ChemicalFiberDeliveryNoteQueryCriteria{
     private String contactPhone;
 
     // 大于等于
-    @Query(type = Query.Type.GREATER_THAN, propName = "createDate")
+    @Query(type = Query.Type.GREATER_THAN, propName = "deliveryDate")
     private Timestamp startTime;
 
     // 小于等于
-    @Query(type = Query.Type.LESS_THAN, propName = "createDate")
+    @Query(type = Query.Type.LESS_THAN, propName = "deliveryDate")
     private Timestamp endTime;
 
     // 临时开始时间
