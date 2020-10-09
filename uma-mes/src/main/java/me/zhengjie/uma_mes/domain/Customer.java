@@ -86,6 +86,10 @@ public class Customer implements Serializable {
     @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal overArrears;
 
+    // 对账日
+    @Column(name = "reconciliation")
+    private String reconciliation;
+
     public void copy(Customer source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

@@ -131,13 +131,17 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         List<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd(PageNumber, start, customerName, accountCode, years + "-" + months);
         List<UmaChemicalFiberStatementDTO> pageList = new ArrayList<>();
         for (UmaChemicalFiberStatement dto : pages) {
-
             Date date = dto.getCreateDate();
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
             Integer year = calendar.get(Calendar.MONTH) + 1;
-            String startTime = getCurrenMonthStartTime(year);
-            String endTime = getCurrenMonthEndTime(year);
+            Integer day1 = calendar.get(Calendar.DAY_OF_MONTH);
+            if ( day1 < 15) {
+                year -= 1;
+            }
+            Integer day = Integer.valueOf(dto.getReconciliations());
+            String startTime = getCurrenMonthStartTime(year,day);
+            String endTime = getCurrenMonthEndTime(year,day);
             CustomerDTO customer = new CustomerDTO();
             customer = customerService.findByIdWithTotalArrearsStatement(dto.getCustomerId(), startTime, endTime);
             UmaChemicalFiberStatementDTO dtoset = new UmaChemicalFiberStatementDTO();
@@ -235,7 +239,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         } else {
             months = month + "";
         }
-        UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(), year + "-" + months);
+        //UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(), year + "-" + months);
 
     }
 
@@ -390,8 +394,9 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         Calendar calendar1 = Calendar.getInstance();
         calendar1.setTime(date1);
         Integer year1 = calendar1.get(Calendar.MONTH) + 1;
-        String startTime = getCurrenMonthStartTime(year1);
-        String endTime = getCurrenMonthEndTime(year1);
+        Integer day = Integer.valueOf(umaChemicalFiberStatement.getReconciliations());
+        String startTime = getCurrenMonthStartTime(year1, day);
+        String endTime = getCurrenMonthEndTime(year1, day);
         CustomerDTO customer = new CustomerDTO();
         customer = customerService.findByIdWithTotalArrearsStatement(umaChemicalFiberStatement.getCustomerId(), startTime, endTime);
         //CustomerDTO customer = customerService.findByIdWithTotalArrears(umaChemicalFiberStatement.getCustomerId());
@@ -553,32 +558,20 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             Date date = new Date(time.getTime());
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
+            CustomerDTO customer = customerService.findByIdWithTotalArrears(note.getCustomerId());
             Integer year = calendar.get(Calendar.YEAR);
             Integer month = calendar.get(Calendar.MONTH) + 1;
-            Integer da = 0;
-            Integer month1 = month - 1;
-            Integer day = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-            String months = "";
-            String months1 = "";
-            if (month < 10) {
-                months = "0" + month;
-            } else {
-                months = month + "";
+            Integer day1 = calendar.get(Calendar.DAY_OF_MONTH);
+            if ( day1 < 15) {
+                month -= 1;
             }
-            if (month1 == 0) {
-                year -= 1;
-                months1 = "12";
-            } else if (month1 < 10) {
-                months1 = "0" + month1;
-            } else {
-                months1 = month1 + "";
-            }
-            String dateTime = year + "-" + months + "-" + day;
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date dateUp = simpleDateFormat.parse(dateTime);
-            UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(), year + "-" + months);
+            Integer day = Integer.valueOf(customer.getReconciliation());
+            String startTime = getCurrenMonthStartTime(month,day);
+            String endTime = getCurrenMonthEndTime(month,day);
+            UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(),
+                    startTime,
+                    endTime);
             String accoun = getAccountCode();
-            CustomerDTO customer = customerService.findByIdWithTotalArrears(note.getCustomerId());
             BigDecimal totalArreares = new BigDecimal(0.00);
             if (statement == null) {
                 UmaChemicalFiberStatement statementAdd = new UmaChemicalFiberStatement();
@@ -588,7 +581,8 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
                 statementAdd.setCustomerName(note.getCustomerName());
                 statementAdd.setContacts(note.getContacts());
                 statementAdd.setContactPhone(note.getContactPhone());
-                statementAdd.setUpDate(new Timestamp(dateUp.getTime()));
+                statementAdd.setReconciliations(customer.getReconciliation());
+                //statementAdd.setUpDate(new Timestamp(dateUp.getTime()));
                 /*statementAdd.setReceivable(customer.getCurrentArrears());
                 statementAdd.setAccumulatedArrears(customer.getTotalArrears());
                 if (customer.getTotalArrears() != null) {
@@ -680,24 +674,24 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         return map;
     }
 
-    private String getCurrenMonthStartTime(Integer day){
+    private String getCurrenMonthStartTime(Integer month, Integer day){
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
         String firstday, lastday;
         // 获取前月的第一天
         Calendar cale = Calendar.getInstance();
         cale = Calendar.getInstance();
-        cale.set(Calendar.MONTH, day - 1);
-        cale.set(Calendar.DAY_OF_MONTH, 1);
+        cale.set(Calendar.MONTH, month - 1);
+        cale.set(Calendar.DAY_OF_MONTH, day);
         return format.format(cale.getTime());
     }
 
-    private String getCurrenMonthEndTime(Integer day){
+    private String getCurrenMonthEndTime(Integer month, Integer day){
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
         String firstday, lastday;
         // 获取前月的最后一天
         Calendar cale = Calendar.getInstance();
-        cale.set(Calendar.MONTH, day);
-        cale.set(Calendar.DAY_OF_MONTH, 0);
+        cale.set(Calendar.MONTH, month);
+        cale.set(Calendar.DAY_OF_MONTH, day);
         return format.format(cale.getTime());
     }
 

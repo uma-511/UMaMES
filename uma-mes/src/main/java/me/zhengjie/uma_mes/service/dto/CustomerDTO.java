@@ -70,4 +70,6 @@ public class CustomerDTO implements Serializable {
 
     @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal remainder;
+
+    private String reconciliation;
 }

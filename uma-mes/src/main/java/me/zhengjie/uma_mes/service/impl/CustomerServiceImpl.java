@@ -197,7 +197,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO findByIdWithTotalArrearsStatement(Integer id, String startTime, String endTime) {
-        Customer customer = customerRepository.findByIdWithArrears(id, startTime, endTime);
+        Customer customer = customerRepository.findByIdWithArrearsList(id, startTime, endTime);
         Map<String, Object> customerMap = customerRepository.findByIdWithArrearsMap(id, startTime, endTime);
         // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
         customer.setOverArrears(new BigDecimal(customerMap.get("over_arrears").toString()));
