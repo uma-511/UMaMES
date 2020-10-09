@@ -76,4 +76,13 @@ public class MonthlyWageStatisticsController {
         monthlyWageStatisticsService.update(resources);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
+
+    @DeleteMapping(value = "/{id}")
+    @Log("删除MonthlyWageStatistics")
+    @ApiOperation("删除MonthlyWageStatistics")
+    @PreAuthorize("@el.check('overArrearsPayDetail:del')")
+    public ResponseEntity delete(@PathVariable Integer id){
+        monthlyWageStatisticsService.delete(id);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

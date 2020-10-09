@@ -394,6 +394,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             chemicalFiberDeliveryNotePayDetailService.delete(chemicalFiberDeliveryNotePayDetailDTO.getId());
         }
         CustomerDTO customerDTO = customerService.findById(chemicalFiberDeliveryNote.getCustomerId());
+        if(null == customerDTO.getAccount()){
+            customerDTO.setAccount(new BigDecimal(0));
+        }
         customerDTO.setAccount(customerDTO.getAccount().add(totalAmount));
         customerService.update(customerMapper.toEntity(customerDTO));
 

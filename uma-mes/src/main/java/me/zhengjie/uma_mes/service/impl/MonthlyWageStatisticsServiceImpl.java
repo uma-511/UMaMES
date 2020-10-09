@@ -92,6 +92,11 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         monthlyWageStatisticsRepository.save(monthlyWageStatisticsMapper.toEntity(monthlyWageStatisticsDTO));
     }
 
+    @Override
+    public void delete(Integer id) {
+        monthlyWageStatisticsRepository.deleteById(id);
+    }
+
     public Timestamp getLastMonthStartTime() throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
         Date date = new Date();
