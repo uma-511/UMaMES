@@ -46,9 +46,6 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     private final ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository;
 
-    @Value("${globalCompanyName}")
-    private String globalCompanyName;
-
     public ReceiptServiceImpl(ReceiptRepository receiptRepository, ReceiptMapper receiptMapper, CustomerService customerService, CustomerMapper customerMapper, ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository) {
         this.receiptRepository = receiptRepository;
         this.receiptMapper = receiptMapper;

@@ -16,7 +16,6 @@ import me.zhengjie.uma_mes.utils.NumberToCN;
 import me.zhengjie.utils.*;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,7 +30,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static cn.afterturn.easypoi.excel.ExcelExportUtil.SHEET_NAME;
@@ -79,11 +77,10 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     private final TravelPersionPerformanceService travelPersionPerformanceService;
 
+    private final ConfigCodeRepository configCodeRepository;
+
     @Autowired
     ChemicalFiberDeliveryNotePayDetailService chemicalFiberDeliveryNotePayDetailService;
-
-    @Value("${globalCompanyName}")
-    private String globalCompanyName;
 
     @Autowired
     private UmaChemicalFiberStatementRepository umaChemicalFiberStatementRepository;
@@ -112,7 +109,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                                                 CarMapper carMapper,
                                                 TravelExpensesService travelExpensesService,
                                                 TravelExpensesMapper travelExpensesMapper,
-                                                TravelPersionPerformanceRepository travelPersionPerformanceRepository, TravelPersionPerformanceService travelPersionPerformanceService){
+                                                TravelPersionPerformanceRepository travelPersionPerformanceRepository, TravelPersionPerformanceService travelPersionPerformanceService, ConfigCodeRepository configCodeRepository){
         this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
         this.chemicalFiberDeliveryNoteMapper = chemicalFiberDeliveryNoteMapper;
         this.customerService = customerService;
@@ -130,6 +127,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         this.travelExpensesMapper = travelExpensesMapper;
         this.travelPersionPerformanceRepository = travelPersionPerformanceRepository;
         this.travelPersionPerformanceService = travelPersionPerformanceService;
+        this.configCodeRepository = configCodeRepository;
     }
 
     @Override
@@ -194,7 +192,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     public String getScanNumber () {
         String scanNumber;
-        String type = globalCompanyName;
+        String type = configCodeRepository.getSerialCode();
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
@@ -232,7 +230,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
     public String getScanNumberWithMaxNumber () {
         String scanNumber;
-        String type = globalCompanyName;
+        String type = configCodeRepository.getSerialCode();
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
@@ -487,20 +485,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         if ( null == driverPermission ) {
             throw new BadRequestException("签收失败，获取人员职位异常");
         }
-        // 附加费
-       /* BigDecimal surchargePrice = new BigDecimal(0);
-        if( globalCompanyName.equals("XQ") ){
-            surchargePrice = new BigDecimal(65);
-        }else{
-            surchargePrice = new BigDecimal(75);
-        }
-        if ( totalWeight.compareTo(new BigDecimal(15)) >= 0 ){
-            if ( totalWeight.compareTo(new BigDecimal(20)) >= 0 ){
-                surchargePrice = surchargePrice.add(new BigDecimal(10));
-            }else{
-                surchargePrice = surchargePrice.add(new BigDecimal(5));
-            }
-        }*/
         createPermission(driverRealName,driverId,driverPermission,travelExpensesPrice,scanNumber);
     }
 
@@ -643,11 +627,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
         List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
         String lastName = "";
-        if ( globalCompanyName.equals("XQ") ) {
-            lastName = "/delivery_temp_xq.xls";
-        } else {
-            lastName = "/delivery_temp_xq.xls";
-        }
+        lastName = "/delivery_temp_xq.xls";
         String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + lastName;
         // 加载模板
         TemplateExportParams params = new TemplateExportParams(templatePath);
@@ -694,8 +674,16 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 BigDecimal detailTotalPrice = chemicalFiberDeliveryDetailDTO.getSellingPrice().multiply(chemicalFiberDeliveryDetailDTO.getRealQuantity());
                 chemicalFiberDeliveryDetailDTO.setTotalPrice(detailTotalPrice);
                 totalPriceWhitRealQuantity = totalPriceWhitRealQuantity.add(detailTotalPrice);
-                lm.put("totalPrice", df.format(chemicalFiberDeliveryDetailDTO.getTotalPrice()) + "");
-                lm.put("realQuantity", chemicalFiberDeliveryDetailDTO.getRealQuantity() + "");
+                if(chemicalFiberDeliveryDetailDTO.getTotalPrice().compareTo(new BigDecimal(0.00)) == 0){
+                    lm.put("totalPrice","");
+                }else{
+                    lm.put("totalPrice", df.format(chemicalFiberDeliveryDetailDTO.getTotalPrice()) + "");
+                }
+                if(chemicalFiberDeliveryDetailDTO.getRealQuantity().compareTo(new BigDecimal(0.00)) == 0){
+                    lm.put("realQuantity","");
+                }else{
+                    lm.put("realQuantity", chemicalFiberDeliveryDetailDTO.getRealQuantity() + "");
+                }
             }else{
                 lm.put("realQuantity","");
                 lm.put("totalPrice","");

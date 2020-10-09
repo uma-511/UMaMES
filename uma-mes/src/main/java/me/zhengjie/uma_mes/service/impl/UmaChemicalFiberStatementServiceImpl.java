@@ -16,26 +16,17 @@ import me.zhengjie.uma_mes.service.mapper.UmaChemicalFiberStatementDetailsMapper
 import me.zhengjie.uma_mes.utils.NumberToCN;
 import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.service.mapper.UmaChemicalFiberStatementMapper;
-import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.IOException;
@@ -50,9 +41,6 @@ import javax.servlet.http.HttpServletResponse;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberStatementService {
 
-    @Value("${globalCompanyName}")
-    private String globalCompanyName;
-
     private final UmaChemicalFiberStatementRepository umaChemicalFiberStatementRepository;
 
     private final UmaChemicalFiberStatementMapper umaChemicalFiberStatementMapper;
@@ -64,6 +52,8 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     private final UmaChemicalFiberStatementDetailsService umaChemicalFiberStatementDetailsService;
 
     private final ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository;
+
+    private final ConfigCodeRepository configCodeRepository;
 
     @Autowired
     private CustomerService customerService;
@@ -85,13 +75,14 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
                                                 ChemicalFiberDeliveryNoteService chemicalFiberDeliveryNoteService,
                                                 ChemicalFiberDeliveryDetailService chemicalFiberDeliveryDetailService,
                                                 UmaChemicalFiberStatementDetailsService umaChemicalFiberStatementDetailsService,
-                                                ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository) {
+                                                ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository, ConfigCodeRepository configCodeRepository) {
         this.umaChemicalFiberStatementRepository = umaChemicalFiberStatementRepository;
         this.umaChemicalFiberStatementMapper = umaChemicalFiberStatementMapper;
         this.chemicalFiberDeliveryNoteService = chemicalFiberDeliveryNoteService;
         this.chemicalFiberDeliveryDetailService = chemicalFiberDeliveryDetailService;
         this.umaChemicalFiberStatementDetailsService = umaChemicalFiberStatementDetailsService;
         this.chemicalFiberDeliveryNoteRepository = chemicalFiberDeliveryNoteRepository;
+        this.configCodeRepository = configCodeRepository;
     }
 
     @Override
@@ -382,7 +373,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     public void exportStatement(HttpServletResponse response, Integer id) {
         String global = "";
         String templatePath = "";
-        if (globalCompanyName.equals("YQ")) {
+        if (configCodeRepository.getSerialCode().equals("YQ")) {
             global = "高明"+"永琪";
             templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_yq.xls";
         } else {
@@ -560,6 +551,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         return value + "";
     }
 
+    @Override
     public void StatementUp(Integer id) {
         try {
             ChemicalFiberDeliveryNote note = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
@@ -713,6 +705,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     }
 
 
+    @Override
     public void delectStatemen(Integer id){
         ChemicalFiberDeliveryNote note = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         UmaChemicalFiberStatementDetailsQueryCriteria criteria = new UmaChemicalFiberStatementDetailsQueryCriteria();
