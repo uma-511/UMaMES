@@ -66,4 +66,7 @@ public class UmaChemicalFiberStatementDTO implements Serializable {
 
     private Timestamp printDate;
 
+
+    private String reconciliations;
+
 }
