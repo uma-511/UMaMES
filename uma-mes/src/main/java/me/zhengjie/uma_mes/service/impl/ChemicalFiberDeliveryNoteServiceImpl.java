@@ -394,6 +394,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             chemicalFiberDeliveryNotePayDetailService.delete(chemicalFiberDeliveryNotePayDetailDTO.getId());
         }
         CustomerDTO customerDTO = customerService.findById(chemicalFiberDeliveryNote.getCustomerId());
+        if(null == customerDTO.getAccount()){
+            customerDTO.setAccount(new BigDecimal(0));
+        }
         customerDTO.setAccount(customerDTO.getAccount().add(totalAmount));
         customerService.update(customerMapper.toEntity(customerDTO));
 
@@ -471,6 +474,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     }
 
     private void generateDriverPermission(String driverRealName,BigDecimal totalWeight,BigDecimal travelExpensesPrice,String scanNumber){
+        if(null == driverRealName || driverRealName.equals("")) {
+            return;
+        }
         Integer driverId = null;
         driverId = chemicalFiberDeliveryNoteRepository.getIdByRealName(driverRealName);
         if ( null == driverId ) {
@@ -700,10 +706,16 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         }
         if(totalPriceWhitRealQuantity.compareTo(BigDecimal.ZERO) == 0){
             map.put("total", "");
-            map.put("capitalizationTotal","");
+            map.put("capitalizationTotal","   ¥                佰        拾        万        仟        佰       拾        元       角        分");
         }else {
             map.put("total",df.format(totalPriceWhitRealQuantity) + "");
-            map.put("capitalizationTotal", NumberToCN.number2CNMontrayUnit(totalPriceWhitRealQuantity));
+            String s = NumberToCN.number2CNMontrayUnit(totalPriceWhitRealQuantity);
+            StringBuffer sb = new StringBuffer();
+            for(char c : s.toCharArray()){
+                sb.append(c);
+                sb.append("  ");
+            }
+            map.put("capitalizationTotal","   ¥    "+sb.toString());
         }
         map.put("deliveryList", listMap);
         workbook = ExcelExportUtil.exportExcel(params, map);

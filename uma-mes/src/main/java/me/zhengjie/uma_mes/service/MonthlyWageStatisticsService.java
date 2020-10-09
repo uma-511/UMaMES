@@ -39,6 +39,10 @@ public interface MonthlyWageStatisticsService {
 
     MonthlyWageStatisticsDTO create(MonthlyWageStatistics resources);
 
+    void doFinish(Integer id);
+
+    void delete(Integer id);
+
     void generateWage();
 
     void update(MonthlyWageStatistics resources);

@@ -1,7 +1,12 @@
 package me.zhengjie.uma_mes.service.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
+import me.zhengjie.uma_mes.utils.CustomerBigDecimalSerialize;
+
+import javax.persistence.Column;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 
 /**
@@ -22,4 +27,10 @@ public class AttenceTypeDTO implements Serializable {
      * 状态
      */
     private Boolean enable;
+
+    /**
+     * 金额
+     */
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal price;
 }

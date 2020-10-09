@@ -135,7 +135,7 @@ public class UserServiceImpl implements UserService {
         }*/
 
         // 默认密码 123456，此密码是加密后的字符
-        resources.setPassword("e10adc3949ba59abbe56e057f20f883e");
+        resources.setPassword("202cb962ac59075b964b07152d234b70");
         return userMapper.toDto(userRepository.save(resources));
     }
 
@@ -146,7 +146,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(resources.getId()).orElseGet(User::new);
         ValidationUtil.isNull(user.getId(),"User","id",resources.getId());
         User user1 = userRepository.findByUsername(user.getUsername());
-        User user2 = userRepository.findByEmail(user.getEmail());
+        /*User user2 = userRepository.findByEmail(user.getEmail());*/
         User user3 = userRepository.findByRealname(user.getRealname());
 
         if(user1 !=null&&!user.getId().equals(user1.getId())){

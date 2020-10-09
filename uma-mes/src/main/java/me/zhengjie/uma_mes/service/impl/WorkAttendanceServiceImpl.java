@@ -85,7 +85,7 @@ public class WorkAttendanceServiceImpl implements WorkAttendanceService {
         String currenNumber=workAttendanceRepository.getCurrenAttendanceCountWithMaxNumber(year+"-"+month);
 
         if (null == currenNumber || currenNumber.equals("")) {
-            serialNumber = year.substring(2,4) + month + "00001";
+            serialNumber = "C" + year.substring(2,4) + month + "00001";
         } else {
             Integer lastNumber = Integer.parseInt(currenNumber.substring(currenNumber.length()-5,currenNumber.length()));
             Integer number = lastNumber+ 1;
