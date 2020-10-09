@@ -136,10 +136,13 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             calendar.setTime(date);
             Integer year = calendar.get(Calendar.MONTH) + 1;
             Integer day1 = calendar.get(Calendar.DAY_OF_MONTH);
-            if ( day1 < 15) {
-                year -= 1;
+            Integer day = 1;
+            if (dto.getReconciliations() != null) {
+                day = Integer.valueOf(dto.getReconciliations());
+                if ( day1 < day) {
+                    year -= 1;
+                }
             }
-            Integer day = Integer.valueOf(dto.getReconciliations());
             String startTime = getCurrenMonthStartTime(year,day);
             String endTime = getCurrenMonthEndTime(year,day);
             CustomerDTO customer = new CustomerDTO();
@@ -394,7 +397,14 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         Calendar calendar1 = Calendar.getInstance();
         calendar1.setTime(date1);
         Integer year1 = calendar1.get(Calendar.MONTH) + 1;
-        Integer day = Integer.valueOf(umaChemicalFiberStatement.getReconciliations());
+        Integer day1 = calendar1.get(Calendar.DAY_OF_MONTH);
+        Integer day = 1;
+        if (umaChemicalFiberStatement.getReconciliations() != null) {
+            day = Integer.valueOf(umaChemicalFiberStatement.getReconciliations());
+            if ( day1 < day) {
+                year1 -= 1;
+            }
+        }
         String startTime = getCurrenMonthStartTime(year1, day);
         String endTime = getCurrenMonthEndTime(year1, day);
         CustomerDTO customer = new CustomerDTO();
@@ -562,10 +572,17 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             Integer year = calendar.get(Calendar.YEAR);
             Integer month = calendar.get(Calendar.MONTH) + 1;
             Integer day1 = calendar.get(Calendar.DAY_OF_MONTH);
-            if ( day1 < 15) {
+            Integer day = 1;
+            /*if ( day1 < customer.getReconciliation()) {
                 month -= 1;
+            }*/
+            if (customer.getReconciliation() != null) {
+                day = Integer.valueOf(customer.getReconciliation());
+                if ( day1 < day) {
+                    month -= 1;
+                }
+
             }
-            Integer day = Integer.valueOf(customer.getReconciliation());
             String startTime = getCurrenMonthStartTime(month,day);
             String endTime = getCurrenMonthEndTime(month,day);
             UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(),
