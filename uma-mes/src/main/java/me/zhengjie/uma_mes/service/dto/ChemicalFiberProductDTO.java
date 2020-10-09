@@ -1,6 +1,8 @@
 package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.io.Serializable;
 
@@ -38,6 +40,9 @@ public class ChemicalFiberProductDTO implements Serializable {
     private Integer menusId;
 
     private String menus;
+
+    // 删除标识
+    private BigDecimal machining;
 
 
 }

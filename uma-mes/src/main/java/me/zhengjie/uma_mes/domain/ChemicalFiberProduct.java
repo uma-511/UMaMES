@@ -4,6 +4,7 @@ import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.io.Serializable;
 
@@ -57,6 +58,9 @@ public class ChemicalFiberProduct implements Serializable {
     @Column(name = "menus")
     private String menus;
 
+    // 加工单价
+    @Column(name = "machining")
+    private BigDecimal machining;
 
 
     public void copy(ChemicalFiberProduct source){

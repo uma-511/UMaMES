@@ -384,10 +384,10 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         String templatePath = "";
         if (globalCompanyName.equals("YQ")) {
             global = "高明"+"永琪";
-            templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_yq.xls";
+            templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList.xls";
         } else {
             global = "南海" + "祥琪";
-            templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList_xq.xls";
+            templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/statementList.xls";
 
         }
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(id).orElseGet(UmaChemicalFiberStatement::new);
@@ -593,7 +593,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             List<ChemicalFiberDeliveryDetail> detailDate = chemicalFiberDeliveryDetailRepository.getDetailListData(note.getCustomerCode(),
                     startTime,
                     endTime);
-            String accoun = getAccountCode();
+            String accoun = getAccountCode(month);
             BigDecimal totalArreares = new BigDecimal(0.00);
             if (statement == null) {
                 UmaChemicalFiberStatement statementAdd = new UmaChemicalFiberStatement();
@@ -655,12 +655,12 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         }
     }
 
-    public String getAccountCode () {
+    public String getAccountCode (Integer months) {
         String scanNumber;
         String type = "DZ";
         Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
-        String month = timeMap.get("month").toString();
+        String month = months.toString();
 
         Integer currenCount=umaChemicalFiberStatementRepository.getCurrenNoteCount(year+"-"+month);
 
