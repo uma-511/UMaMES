@@ -21,6 +21,9 @@ public interface ChemicalFiberDeliveryDetailRepository extends JpaRepository<Che
     @Query(value = "SELECT * FROM uma_chemical_fiber_delivery_detail where scan_number = :id",nativeQuery = true)
     List<ChemicalFiberDeliveryDetail> getDetailList(@Param("id") String id);
 
+    @Query(value = "SELECT * FROM uma_chemical_fiber_delivery_detail a join uma_chemical_fiber_delivery_note b on a.scan_number = b.scan_number where b.customer_code = :code and b.delivery_date between :start and :end",nativeQuery = true)
+    List<ChemicalFiberDeliveryDetail> getDetailListData(@Param("code") String code, @Param("start") String start, @Param("end") String end );
+
     @Query(value = "select b.scan_number, b.delivery_date, b.customer_name, a.prod_name, a.unit, a.total_price, a.total_number, a.real_quantity, a.real_price   from uma_chemical_fiber_delivery_detail a\n" +
             "join uma_chemical_fiber_delivery_note b on a.scan_number = b.scan_number where  b.delivery_date between ?1 and ?2 and b.note_status >= 3 and b.invalid = 0 and b.customer_name like %?3% and a.prod_name like %?4% and a.scan_number like %?5%",
             countQuery = "select count(*) as totalElements from uma_chemical_fiber_delivery_detail a\n" +

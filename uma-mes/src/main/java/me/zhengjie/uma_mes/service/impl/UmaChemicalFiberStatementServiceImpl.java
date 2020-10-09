@@ -583,9 +583,14 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
                 }
 
             }
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date dateUp = sdf.parse(year + "-" + month + "-" + day);
             String startTime = getCurrenMonthStartTime(month,day);
             String endTime = getCurrenMonthEndTime(month,day);
             UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(),
+                    startTime,
+                    endTime);
+            List<ChemicalFiberDeliveryDetail> detailDate = chemicalFiberDeliveryDetailRepository.getDetailListData(note.getCustomerCode(),
                     startTime,
                     endTime);
             String accoun = getAccountCode();
@@ -598,8 +603,8 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
                 statementAdd.setCustomerName(note.getCustomerName());
                 statementAdd.setContacts(note.getContacts());
                 statementAdd.setContactPhone(note.getContactPhone());
-                statementAdd.setReconciliations(customer.getReconciliation());
-                //statementAdd.setUpDate(new Timestamp(dateUp.getTime()));
+                statementAdd.setReconciliations(day.toString());
+                statementAdd.setUpDate(new Timestamp(dateUp.getTime()));
                 /*statementAdd.setReceivable(customer.getCurrentArrears());
                 statementAdd.setAccumulatedArrears(customer.getTotalArrears());
                 if (customer.getTotalArrears() != null) {
@@ -610,7 +615,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
                 statementAdd.setTotalArrears(totalArreares);*/
                 statementAdd = umaChemicalFiberStatementRepository.save(statementAdd);
                 List<UmaChemicalFiberStatementDetails> staementDetail = new ArrayList<>();
-                for (ChemicalFiberDeliveryDetail dto : detail) {
+                for (ChemicalFiberDeliveryDetail dto : detailDate) {
                     UmaChemicalFiberStatementDetails add = new UmaChemicalFiberStatementDetails();
                     add.setStatementId(statementAdd.getId());
                     add.setScanNumber(dto.getScanNumber());
@@ -698,7 +703,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         Calendar cale = Calendar.getInstance();
         cale = Calendar.getInstance();
         cale.set(Calendar.MONTH, month - 1);
-        cale.set(Calendar.DAY_OF_MONTH, day);
+        cale.set(Calendar.DAY_OF_MONTH, day + 1);
         return format.format(cale.getTime());
     }
 
