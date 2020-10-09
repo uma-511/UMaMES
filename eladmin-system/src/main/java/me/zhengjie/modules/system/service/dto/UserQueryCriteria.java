@@ -48,4 +48,7 @@ public class UserQueryCriteria implements Serializable {
 
     @Query(type = Query.Type.NOT_EQUAL, propName = "username")
     private String username_NOT_EQUAL;
+
+    @Query(type = Query.Type.NOT_EQUAL, propName = "username")
+    private String username2_NOT_EQUAL;
 }
