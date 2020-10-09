@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,26 @@ public class TravelPersionPerformanceServiceImpl implements TravelPersionPerform
         }
         criteria.setEnableList(booleanList);
         Page<TravelPersionPerformance> page = travelPersionPerformanceRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        for(TravelPersionPerformance travelPersionPerformance:page) {
+            if (null == travelPersionPerformance.getMileageFee() || travelPersionPerformance.getMileageFee().compareTo(new BigDecimal(0.00)) == 0){
+                travelPersionPerformance.setMileageFee(null);
+            }
+            if (null == travelPersionPerformance.getOvertimePay() || travelPersionPerformance.getOvertimePay().compareTo(new BigDecimal(0.00)) == 0){
+                travelPersionPerformance.setOvertimePay(null);
+            }
+            if (null == travelPersionPerformance.getAllowance() || travelPersionPerformance.getAllowance().compareTo(new BigDecimal(0.00)) == 0){
+                travelPersionPerformance.setAllowance(null);
+            }
+            if (null == travelPersionPerformance.getSurcharge() || travelPersionPerformance.getSurcharge().compareTo(new BigDecimal(0.00)) == 0){
+                travelPersionPerformance.setSurcharge(null);
+            }
+            if (null == travelPersionPerformance.getHandlingCost() || travelPersionPerformance.getHandlingCost().compareTo(new BigDecimal(0.00)) == 0){
+                travelPersionPerformance.setHandlingCost(null);
+            }
+            if (null == travelPersionPerformance.getTotalPerformance() || travelPersionPerformance.getTotalPerformance().compareTo(new BigDecimal(0.00)) == 0){
+                travelPersionPerformance.setTotalPerformance(null);
+            }
+        }
         return PageUtil.toPage(page.map(travelPersionPerformanceMapper::toDto));
     }
 

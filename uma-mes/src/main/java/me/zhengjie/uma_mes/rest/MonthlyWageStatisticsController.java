@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.rest;
 
+import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.MonthlyWageStatistics;
 import me.zhengjie.uma_mes.service.MonthlyWageStatisticsService;
@@ -51,6 +52,14 @@ public class MonthlyWageStatisticsController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Log("工资记录确认")
+    @ApiOperation("工资记录确认")
+    @GetMapping(value = "/doFinish/{id}")
+    @AnonymousAccess()
+    public ResponseEntity doFinish(@PathVariable Integer id) {
+        monthlyWageStatisticsService.doFinish(id);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
 
     @PostMapping

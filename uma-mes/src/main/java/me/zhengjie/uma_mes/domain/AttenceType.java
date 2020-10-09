@@ -1,10 +1,14 @@
 package me.zhengjie.uma_mes.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
+import me.zhengjie.uma_mes.utils.CustomerBigDecimalSerialize;
+
 import javax.persistence.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
 * @author wave
@@ -31,6 +35,13 @@ public class AttenceType implements Serializable {
      */
     @Column(name = "enable")
     private Boolean enable;
+
+    /**
+     * 金额
+     */
+    @Column(name = "price")
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal price;
 
     public void copy(AttenceType source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

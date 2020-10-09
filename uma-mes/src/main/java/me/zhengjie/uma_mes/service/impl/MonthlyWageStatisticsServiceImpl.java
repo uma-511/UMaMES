@@ -84,7 +84,16 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         return monthlyWageStatisticsMapper.toDto(monthlyWageStatisticsRepository.save(resources));
     }
 
-    public Timestamp getLastMonthStartTime() {
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void doFinish(Integer id) {
+        MonthlyWageStatisticsDTO monthlyWageStatisticsDTO = findById(id);
+        monthlyWageStatisticsDTO.setStatus(1);
+        monthlyWageStatisticsRepository.save(monthlyWageStatisticsMapper.toEntity(monthlyWageStatisticsDTO));
+    }
+
+    public Timestamp getLastMonthStartTime() throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         // 设置为当前时间
@@ -94,9 +103,12 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         calendar.set(Calendar.DAY_OF_MONTH,1);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
+        date=sdf.parse(sdf.format(calendar.getTime()));
+        calendar.setTime(date);
         return new Timestamp(calendar.getTimeInMillis());
     }
-    public Timestamp getLastMonthEndTime() {
+    public Timestamp getLastMonthEndTime() throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         // 设置为当前时间
@@ -106,7 +118,8 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         calendar.set(Calendar.DAY_OF_MONTH,0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        date = calendar.getTime();
+        date=sdf.parse(sdf.format(calendar.getTime()));
+        calendar.setTime(date);
         return new Timestamp(calendar.getTimeInMillis());
     }
 
@@ -204,6 +217,15 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void generateWage() {
+        // 查询上月已生成记录
+        MonthlyWageStatisticsQueryCriteria monthlyWageStatisticsQueryCriteria = new MonthlyWageStatisticsQueryCriteria();
+        try {
+            monthlyWageStatisticsQueryCriteria.setStartTime(getLastMonthStartTime());
+            monthlyWageStatisticsQueryCriteria.setEndTime(getLastMonthEndTime());
+        }catch (Exception e){
+            throw new BadRequestException("生成失败");
+        }
+        List<MonthlyWageStatisticsDTO> monthlyWageStatisticsDTOS = this.queryAll(monthlyWageStatisticsQueryCriteria);
         BigDecimal zero = new BigDecimal(0);
         String monthCn = getMonthCn();
         List<Boolean> booleanList = new ArrayList<>();
@@ -218,15 +240,23 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         // 上月放酸绩效
         AcidPersionPerformanceQueryCriteria acidPersionPerformanceQueryCriteria = new AcidPersionPerformanceQueryCriteria();
         acidPersionPerformanceQueryCriteria.setEnableList(booleanList);
-        acidPersionPerformanceQueryCriteria.setStartTime(getLastMonthStartTime());
-        acidPersionPerformanceQueryCriteria.setEndTime(getLastMonthEndTime());
+        try {
+            acidPersionPerformanceQueryCriteria.setStartTime(getLastMonthStartTime());
+            acidPersionPerformanceQueryCriteria.setEndTime(getLastMonthEndTime());
+        }catch (Exception e){
+            throw new BadRequestException("生成失败");
+        }
         List<AcidPersionPerformanceDTO> acidPersonPerformanceDTOS = acidPersionPerformanceService.queryAll(acidPersionPerformanceQueryCriteria);
 
         // 上月司机绩效列表
         TravelPersionPerformanceQueryCriteria travelPersionPerformanceQueryCriteria = new TravelPersionPerformanceQueryCriteria();
         travelPersionPerformanceQueryCriteria.setEnableList(booleanList);
-        travelPersionPerformanceQueryCriteria.setStartTime(getLastMonthStartTime());
-        travelPersionPerformanceQueryCriteria.setEndTime(getLastMonthEndTime());
+        try{
+            travelPersionPerformanceQueryCriteria.setStartTime(getLastMonthStartTime());
+            travelPersionPerformanceQueryCriteria.setEndTime(getLastMonthEndTime());
+        }catch (Exception e){
+            throw new BadRequestException("生成失败");
+        }
         List<TravelPersionPerformanceDTO> travelPersionPerformanceDTOList = travelPersionPerformanceService.queryAll(travelPersionPerformanceQueryCriteria);
 
         // 奖金、补贴列表
@@ -236,36 +266,57 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         // 考勤统计
         WorkAttendanceQueryCriteria workAttendanceQueryCriteria = new WorkAttendanceQueryCriteria();
         workAttendanceQueryCriteria.setEnableList(booleanList);
-        workAttendanceQueryCriteria.setStartTime(getLastMonthStartTime());
-        workAttendanceQueryCriteria.setEndTime(getLastMonthEndTime());
+        try{
+            workAttendanceQueryCriteria.setStartTime(getLastMonthStartTime());
+            workAttendanceQueryCriteria.setEndTime(getLastMonthEndTime());
+        }catch (Exception e){
+            throw new BadRequestException("生成失败");
+        }
         List<WorkAttendanceDTO> workAttendanceDTOS = workAttendanceService.queryAll(workAttendanceQueryCriteria);
 
         List<WageUser> wageUserList = wageUserRepository.getWageUser(Boolean.TRUE);
         for(WageUser w : wageUserList) {
-            if(!w.getRealName().equals("拖头车司机") && !w.getRealName().equals("槽罐车司机")){continue;}
+            Boolean isGen = Boolean.FALSE;
+            for(MonthlyWageStatisticsDTO m : monthlyWageStatisticsDTOS){
+                if(w.getRealName().equals(m.getPersonName())){
+                    isGen = Boolean.TRUE;
+                    break;
+                }
+            }
+            if(isGen){continue;}
             monthlyWageStatistics = new MonthlyWageStatistics();
+            BigDecimal performance = zero;
+            if(null == w.getRealName() || w.getRealName().equals("")){
+                throw new BadRequestException("请完用户信息，用户id:"+w.getId());
+            }
+            if(null == w.getJob() || null == w.getDept() || w.getJob().equals("") || w.getDept().equals("")){
+                throw new BadRequestException("请完用户信息，用户名:"+w.getRealName());
+            }
             monthlyWageStatistics.setPersonName(w.getRealName());
             monthlyWageStatistics.setJob(w.getJob());
             monthlyWageStatistics.setDept(w.getDept());
+            if(null == w.getBasicSalary() || w.getBasicSalary().compareTo(new BigDecimal(0.00)) == 0 ){
+                w.setBasicSalary(new BigDecimal(0));
+            }
             monthlyWageStatistics.setBasicSalary(w.getBasicSalary());
+            if(w.getRealName().equals("拖头车司机") && w.getRealName().equals("槽罐车司机")) {
 
-            // 绩效统计
-            // 出车绩效
-            BigDecimal performance = zero;
-            for (TravelPersionPerformanceDTO travelPersionPerformanceDTO : travelPersionPerformanceDTOList) {
-                if (travelPersionPerformanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
-                    performance = performance.add(travelPersionPerformanceDTO.getTotalPerformance());
+                // 绩效统计
+                // 出车绩效
+                for (TravelPersionPerformanceDTO travelPersionPerformanceDTO : travelPersionPerformanceDTOList) {
+                    if (travelPersionPerformanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
+                        performance = performance.add(travelPersionPerformanceDTO.getTotalPerformance());
+                    }
                 }
-            }
-            //放酸绩效
-            for (AcidPersionPerformanceDTO acidPersionPerformanceDTO : acidPersonPerformanceDTOS) {
-                if (acidPersionPerformanceDTO.getPerson().equals(monthlyWageStatistics.getPersonName())){
-                    performance = performance.add(acidPersionPerformanceDTO.getPrice());
+                //放酸绩效
+                for (AcidPersionPerformanceDTO acidPersionPerformanceDTO : acidPersonPerformanceDTOS) {
+                    if (acidPersionPerformanceDTO.getPerson().equals(monthlyWageStatistics.getPersonName())) {
+                        performance = performance.add(acidPersionPerformanceDTO.getPrice());
+                    }
                 }
+                monthlyWageStatistics.setPerformance(performance.equals(zero) ? null : performance);
+
             }
-            monthlyWageStatistics.setPerformance(performance.equals(zero)? null : performance);
-
-
             // 打卡奖
             BigDecimal cardPrize = zero;
             // 安全奖
@@ -392,7 +443,11 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
             monthlyWageStatistics.setNetSalary(netSalary);
 
             // 日期
-            monthlyWageStatistics.setDateTime(getLastMonthStartTime());
+            try {
+                monthlyWageStatistics.setDateTime(getLastMonthStartTime());
+            } catch (ParseException e) {
+                throw new BadRequestException("生成失败");
+            }
             monthlyWageStatistics.setStatus(0);
             monthlyWageStatisticsRepository.save(monthlyWageStatistics);
         }
@@ -410,6 +465,15 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
     @Override
     public void download(List<MonthlyWageStatisticsDTO> all, HttpServletResponse response) throws IOException {
         List<Map<String, Object>> list = new ArrayList<>();
+        MonthlyWageStatisticsQueryCriteria monthlyWageStatisticsQueryCriteria = new MonthlyWageStatisticsQueryCriteria();
+        try {
+            monthlyWageStatisticsQueryCriteria.setStartTime(getLastMonthStartTime());
+            monthlyWageStatisticsQueryCriteria.setEndTime(getLastMonthEndTime());
+        }catch (Exception e){
+            throw new BadRequestException("获取上月时间失败");
+        }
+        monthlyWageStatisticsQueryCriteria.setStatus("1");
+        all = this.queryAll(monthlyWageStatisticsQueryCriteria);
         for (MonthlyWageStatisticsDTO monthlyWageStatistics : all) {
             Map<String,Object> map = new LinkedHashMap<>();
             map.put("姓名", monthlyWageStatistics.getPersonName());
