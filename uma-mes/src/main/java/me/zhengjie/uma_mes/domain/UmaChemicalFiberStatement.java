@@ -73,6 +73,13 @@ public class UmaChemicalFiberStatement implements Serializable {
     @Column(name = "up_date")
     private Timestamp upDate;
 
+    // 总欠金额
+    @Column(name = "print_date")
+    private Timestamp printDate;
+
+    @Column(name = "reconciliations")
+    private String reconciliations;
+
     public void copy(UmaChemicalFiberStatement source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

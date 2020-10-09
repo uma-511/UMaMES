@@ -72,17 +72,23 @@ public class Customer implements Serializable {
     private Integer delFlag;
 
     // 客户当前总欠款
+    @Column(name = "total_arrears")
     @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalArrears;
 
     // 客户当月总欠款
+    @Column(name = "current_arrears")
     @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal currentArrears;
 
     // 旧有欠款
-    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     @Column(name = "over_arrears")
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal overArrears;
+
+    // 对账日
+    @Column(name = "reconciliation")
+    private String reconciliation;
 
     public void copy(Customer source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

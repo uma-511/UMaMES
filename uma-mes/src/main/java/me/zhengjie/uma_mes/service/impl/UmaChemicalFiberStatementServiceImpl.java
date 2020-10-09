@@ -100,6 +100,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         //Page<UmaChemicalFiberStatement> page = umaChemicalFiberStatementRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         String years = "";
         String months = "";
+        Integer yesr;
         if (criteria.getCreateDate() != null) {
             Long createDate = criteria.getCreateDate();
             Date date = new Date(createDate);
@@ -130,11 +131,25 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         List<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd(PageNumber, start, customerName, accountCode, years + "-" + months);
         List<UmaChemicalFiberStatementDTO> pageList = new ArrayList<>();
         for (UmaChemicalFiberStatement dto : pages) {
-            CustomerDTO customer = customerService.findByIdWithTotalArrears(dto.getCustomerId());
+            Date date = dto.getCreateDate();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            Integer year = calendar.get(Calendar.MONTH) + 1;
+            Integer day1 = calendar.get(Calendar.DAY_OF_MONTH);
+            if ( day1 < 15) {
+                year -= 1;
+            }
+            Integer day = Integer.valueOf(dto.getReconciliations());
+            String startTime = getCurrenMonthStartTime(year,day);
+            String endTime = getCurrenMonthEndTime(year,day);
+            CustomerDTO customer = new CustomerDTO();
+            customer = customerService.findByIdWithTotalArrearsStatement(dto.getCustomerId(), startTime, endTime);
             UmaChemicalFiberStatementDTO dtoset = new UmaChemicalFiberStatementDTO();
             ObjectTransfer.transValue(dto, dtoset);
             dtoset.setReceivable(customer.getCurrentArrears());
             dtoset.setAccumulatedArrears(customer.getTotalArrears());
+            dtoset.setRemainder(customer.getRemainder());
+            dtoset.setAccount(customer.getAccount());
             BigDecimal totalArrears = new BigDecimal(0.00);
             if (customer.getTotalArrears() != null) {
                 totalArrears = customer.getCurrentArrears().add(customer.getTotalArrears());
@@ -155,13 +170,13 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     }
 
     @Override
-    @Cacheable
+    //@Cacheable
     public List<UmaChemicalFiberStatementDTO> queryAll(UmaChemicalFiberStatementQueryCriteria criteria){
         return umaChemicalFiberStatementMapper.toDto(umaChemicalFiberStatementRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
 
     @Override
-    @Cacheable(key = "#p0")
+    //@Cacheable(key = "#p0")
     public UmaChemicalFiberStatementDTO findById(Integer id) {
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(id).orElseGet(UmaChemicalFiberStatement::new);
         ValidationUtil.isNull(umaChemicalFiberStatement.getId(),"UmaChemicalFiberStatement","id",id);
@@ -169,7 +184,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public UmaChemicalFiberStatementDTO create1(CreateStatementDto createStatementDto) {
         Calendar now = Calendar.getInstance();
@@ -208,7 +223,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         return chemicalFiberStatementDTO;
     }
 
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void create(Integer id) {
         ChemicalFiberDeliveryNote note = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
@@ -224,12 +239,12 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         } else {
             months = month + "";
         }
-        UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(), year + "-" + months);
+        //UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(), year + "-" + months);
 
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void update(UmaChemicalFiberStatement resources) {
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(resources.getId()).orElseGet(UmaChemicalFiberStatement::new);
@@ -239,7 +254,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         umaChemicalFiberStatementRepository.deleteById(id);
@@ -373,7 +388,18 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
 
         }
         UmaChemicalFiberStatement umaChemicalFiberStatement = umaChemicalFiberStatementRepository.findById(id).orElseGet(UmaChemicalFiberStatement::new);
-        CustomerDTO customer = customerService.findByIdWithTotalArrears(umaChemicalFiberStatement.getCustomerId());
+        umaChemicalFiberStatement.setPrintDate(new Timestamp(System.currentTimeMillis()));
+        umaChemicalFiberStatementRepository.save(umaChemicalFiberStatement);
+        Date date1 = umaChemicalFiberStatement.getCreateDate();
+        Calendar calendar1 = Calendar.getInstance();
+        calendar1.setTime(date1);
+        Integer year1 = calendar1.get(Calendar.MONTH) + 1;
+        Integer day = Integer.valueOf(umaChemicalFiberStatement.getReconciliations());
+        String startTime = getCurrenMonthStartTime(year1, day);
+        String endTime = getCurrenMonthEndTime(year1, day);
+        CustomerDTO customer = new CustomerDTO();
+        customer = customerService.findByIdWithTotalArrearsStatement(umaChemicalFiberStatement.getCustomerId(), startTime, endTime);
+        //CustomerDTO customer = customerService.findByIdWithTotalArrears(umaChemicalFiberStatement.getCustomerId());
         umaChemicalFiberStatement.setReceivable(customer.getCurrentArrears());
         umaChemicalFiberStatement.setAccumulatedArrears(customer.getTotalArrears());
         BigDecimal totalArrears = new BigDecimal(0.00);
@@ -467,9 +493,9 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         map.put("capitTotal", NumberToCN.number2CNMontrayUnit(umaChemicalFiberStatement.getReceivable()));
         map.put("total", umaChemicalFiberStatement.getReceivable() + "");
         //map.put("onCredit", umaChemicalFiberStatement.getAccumulatedArrears() + "");//上期欠款
-        map.put("onCredit", onCredit + "");//上期欠款
-        map.put("sumTotal", sumTotal + ""); // 总欠款
-        map.put("totalSum", totalSum + ""); // 总金额
+        map.put("onCredit", umaChemicalFiberStatement.getAccumulatedArrears() + "");//上期欠款
+        map.put("sumTotal", umaChemicalFiberStatement.getTotalArrears() + ""); // 总欠款
+        map.put("totalSum", umaChemicalFiberStatement.getReceivable() + ""); // 总金额
         map.put("sumAmountOfMoney", sumAmountOfMoney + ""); // 总金额
         map.put("statementLists", listMap);
         map.put("receiptlistMap", receiptlistMap);
@@ -532,32 +558,20 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             Date date = new Date(time.getTime());
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
+            CustomerDTO customer = customerService.findByIdWithTotalArrears(note.getCustomerId());
             Integer year = calendar.get(Calendar.YEAR);
             Integer month = calendar.get(Calendar.MONTH) + 1;
-            Integer da = 0;
-            Integer month1 = month - 1;
-            Integer day = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-            String months = "";
-            String months1 = "";
-            if (month < 10) {
-                months = "0" + month;
-            } else {
-                months = month + "";
+            Integer day1 = calendar.get(Calendar.DAY_OF_MONTH);
+            if ( day1 < 15) {
+                month -= 1;
             }
-            if (month1 == 0) {
-                year -= 1;
-                months1 = "12";
-            } else if (month1 < 10) {
-                months1 = "0" + month1;
-            } else {
-                months1 = month1 + "";
-            }
-            String dateTime = year + "-" + months + "-" + day;
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date dateUp = simpleDateFormat.parse(dateTime);
-            UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(), year + "-" + months);
+            Integer day = Integer.valueOf(customer.getReconciliation());
+            String startTime = getCurrenMonthStartTime(month,day);
+            String endTime = getCurrenMonthEndTime(month,day);
+            UmaChemicalFiberStatement statement = umaChemicalFiberStatementRepository.getOneId(note.getCustomerId(),
+                    startTime,
+                    endTime);
             String accoun = getAccountCode();
-            CustomerDTO customer = customerService.findByIdWithTotalArrears(note.getCustomerId());
             BigDecimal totalArreares = new BigDecimal(0.00);
             if (statement == null) {
                 UmaChemicalFiberStatement statementAdd = new UmaChemicalFiberStatement();
@@ -567,7 +581,8 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
                 statementAdd.setCustomerName(note.getCustomerName());
                 statementAdd.setContacts(note.getContacts());
                 statementAdd.setContactPhone(note.getContactPhone());
-                statementAdd.setUpDate(new Timestamp(dateUp.getTime()));
+                statementAdd.setReconciliations(customer.getReconciliation());
+                //statementAdd.setUpDate(new Timestamp(dateUp.getTime()));
                 /*statementAdd.setReceivable(customer.getCurrentArrears());
                 statementAdd.setAccumulatedArrears(customer.getTotalArrears());
                 if (customer.getTotalArrears() != null) {
@@ -657,6 +672,27 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         map.put("month", month < 10 ? "0" + month : month);
         map.put("year", year);
         return map;
+    }
+
+    private String getCurrenMonthStartTime(Integer month, Integer day){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        String firstday, lastday;
+        // 获取前月的第一天
+        Calendar cale = Calendar.getInstance();
+        cale = Calendar.getInstance();
+        cale.set(Calendar.MONTH, month - 1);
+        cale.set(Calendar.DAY_OF_MONTH, day);
+        return format.format(cale.getTime());
+    }
+
+    private String getCurrenMonthEndTime(Integer month, Integer day){
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
+        String firstday, lastday;
+        // 获取前月的最后一天
+        Calendar cale = Calendar.getInstance();
+        cale.set(Calendar.MONTH, month);
+        cale.set(Calendar.DAY_OF_MONTH, day);
+        return format.format(cale.getTime());
     }
 
 

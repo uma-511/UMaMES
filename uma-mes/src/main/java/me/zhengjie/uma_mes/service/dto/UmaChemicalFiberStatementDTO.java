@@ -40,7 +40,7 @@ public class UmaChemicalFiberStatementDTO implements Serializable {
     // 客户联系电话
     private String contactPhone;
 
-    // 应收金额
+    // 本月欠款
     @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal receivable;
 
@@ -52,7 +52,21 @@ public class UmaChemicalFiberStatementDTO implements Serializable {
     @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal totalArrears;
 
+    // 总欠金额
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal remainder;
+
+    // 总欠金额
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal account;
+
 
     private Timestamp upDate;
+
+
+    private Timestamp printDate;
+
+
+    private String reconciliations;
 
 }

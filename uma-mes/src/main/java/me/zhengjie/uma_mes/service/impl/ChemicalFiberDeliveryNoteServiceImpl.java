@@ -407,6 +407,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
         chemicalFiberDeliveryNote.setNoteStatus(2);
         chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
+        //umaChemicalFiberStatementService.StatementUp(id);
+        umaChemicalFiberStatementService.delectStatemen(id);
     }
 
     public void generatePerformanceByCar(String carNumber,String startPlace,String endPlace,String driverMain,String driverDeputy,String loaderOne,String loaderTwo,BigDecimal totalWeight,String scanNumber) {
@@ -593,7 +595,6 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
         chemicalFiberDeliveryNote.setEnable(Boolean.TRUE);
         update(chemicalFiberDeliveryNote);
-        umaChemicalFiberStatementService.StatementUp(id);
     }
 
     @Override
@@ -853,10 +854,14 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         List<ChemicalFiberDeliveryNoteSalesReportDTO> chemicalFiberDeliveryNoteSalesReportDTOS = new ArrayList<>();
         Page<ChemicalFiberDeliveryNote> page = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         for (ChemicalFiberDeliveryNote chemicalFiberDeliveryNote : page.getContent()) {
+
             ChemicalFiberDeliveryNoteSalesReportDTO chemicalFiberDeliveryNoteSalesReportDTO = new ChemicalFiberDeliveryNoteSalesReportDTO();
             ObjectTransfer.transValue(chemicalFiberDeliveryNote, chemicalFiberDeliveryNoteSalesReportDTO);
+
             List<ChemicalFiberDeliveryNotePayDetailDTO> pay = chemicalFiberDeliveryNotePayDetailService.findListByScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+
             BigDecimal total = chemicalFiberDeliveryDetailRepository.getTotal(chemicalFiberDeliveryNote.getScanNumber());
+
             BigDecimal paySum = new BigDecimal(0);
             for (ChemicalFiberDeliveryNotePayDetailDTO payNote : pay) {
                 paySum = paySum.add(payNote.getAmount());

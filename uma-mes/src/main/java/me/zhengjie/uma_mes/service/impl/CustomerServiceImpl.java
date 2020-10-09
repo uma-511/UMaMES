@@ -8,6 +8,7 @@ import me.zhengjie.uma_mes.service.dto.CustomerDTO;
 import me.zhengjie.uma_mes.service.dto.CustomerQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.CustomerMapper;
 import me.zhengjie.utils.*;
+import org.hibernate.type.BigDecimalType;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -192,6 +193,27 @@ public class CustomerServiceImpl implements CustomerService {
         customer.setTotalArrears(customer.getTotalArrears().add(customer.getOverArrears()));
         ValidationUtil.isNull(customer.getId(),"Customer","id",id);
         return customerMapper.toDto(customer);
+    }
+
+    @Override
+    public CustomerDTO findByIdWithTotalArrearsStatement(Integer id, String startTime, String endTime) {
+        Customer customer = customerRepository.findByIdWithArrearsList(id, startTime, endTime);
+        Map<String, Object> customerMap = customerRepository.findByIdWithArrearsMap(id, startTime, endTime);
+        // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
+        customer.setOverArrears(new BigDecimal(customerMap.get("over_arrears").toString()));
+        customer.setTotalArrears(new BigDecimal(customerMap.get("total_arrears").toString()));
+        customer.setCurrentArrears(new BigDecimal(customerMap.get("current_arrears").toString()));
+        if (null == customerMap.get("over_arrears")) {
+            customer.setOverArrears(new BigDecimal(0));
+        }
+        if(null == customer.getTotalArrears()) {
+            customer.setTotalArrears(new BigDecimal(0));
+        }
+        customer.setTotalArrears(customer.getTotalArrears().add(customer.getOverArrears()));
+        ValidationUtil.isNull(customer.getId(),"Customer","id",id);
+        CustomerDTO customerDTO = customerMapper.toDto(customer);
+        customerDTO.setRemainder(new BigDecimal(customerMap.get("remainder").toString()));
+        return customerDTO;
     }
 
     @Override

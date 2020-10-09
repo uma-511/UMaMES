@@ -67,4 +67,9 @@ public class CustomerDTO implements Serializable {
     // 旧有欠款
     @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal overArrears;
+
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal remainder;
+
+    private String reconciliation;
 }
