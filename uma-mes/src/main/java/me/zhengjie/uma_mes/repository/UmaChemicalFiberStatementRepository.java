@@ -28,8 +28,8 @@ public interface UmaChemicalFiberStatementRepository extends JpaRepository<UmaCh
     @Query(value = "SELECT * FROM uma_chemical_fiber_statement a where  a.customer_name like %:customerName% and a.account_code like %:accountCode% and a.up_date like %:createDate% ORDER BY a.id DESC LIMIT :Start,:End",nativeQuery = true)
     List<UmaChemicalFiberStatement> findadd(@Param("Start") Integer Start, @Param("End") Integer End, @Param("customerName") String customerName,  @Param("accountCode") String accountCode, @Param("createDate") String createDate);
 
-    @Query(value = "SELECT COUNT(id) FROM uma_chemical_fiber_statement",nativeQuery = true)
-    Integer findSize();
+    @Query(value = "SELECT COUNT(id) FROM uma_chemical_fiber_statement where customer_name like %:customerName% and account_code like %:accountCode% and up_date like %:createDate%",nativeQuery = true)
+    Integer findSize(@Param("customerName") String customerName,  @Param("accountCode") String accountCode, @Param("createDate") String createDate);
 
 
 }
