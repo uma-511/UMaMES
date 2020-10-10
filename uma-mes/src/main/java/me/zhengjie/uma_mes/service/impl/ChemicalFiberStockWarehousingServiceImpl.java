@@ -77,8 +77,16 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         Map<Integer, Map<String, BigDecimal>> tonanBranchMap = new HashMap<>();
         for (Map<String, Object> dto : tonAndBranch) {
             Map<String, BigDecimal> dig = new HashMap<>();
-            dig.put("吨", new BigDecimal(dto.get("ton").toString()));
-            dig.put("支", new BigDecimal(dto.get("branch").toString()));
+            if (null == dto.get("ton")) {
+                dig.put("吨", new BigDecimal(0));
+            } else {
+                dig.put("吨", new BigDecimal(dto.get("ton").toString()));
+            }
+            if (null == dto.get("branch")) {
+                dig.put("支", new BigDecimal(0));
+            } else {
+                dig.put("支", new BigDecimal(dto.get("branch").toString()));
+            }
             String tonAndBranchStr = dto.get("ton") + "吨" + "/" + dto.get("branch") + "支";
             tonanBranchMap.put((Integer)dto.get("warehousing_id"), dig);
         }
@@ -86,11 +94,16 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         for (ChemicalFiberStockWarehousing dto : list) {
             ChemicalFiberStockWarehousingDTO war = new ChemicalFiberStockWarehousingDTO();
             ObjectTransfer.transValue(dto, war);
-            war.setTon(tonanBranchMap.get(dto.getId()).get("吨"));
+            if (tonanBranchMap.containsKey(dto.getId())) {
+                war.setTon(tonanBranchMap.get(dto.getId()).get("吨"));
+                war.setBranch(tonanBranchMap.get(dto.getId()).get("支"));
+            } else {
+                war.setTon(new BigDecimal(0));
+                war.setBranch(new BigDecimal(0));
+            }
             if ( war.getTon() != null && war.getTon().compareTo(new BigDecimal(0.00)) == 0) {
                 war.setTon(null);
             }
-            war.setBranch(tonanBranchMap.get(dto.getId()).get("支"));
             if ( war.getBranch() != null && war.getBranch().compareTo(new BigDecimal(0.00)) == 0) {
                 war.setBranch(null);
             }
@@ -307,8 +320,13 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
             tonMap.put((Integer)dto.get("warehousing_id"), ton);
         }
         for (Map<String, Object> dto : tonAndBranch) {
-            BigDecimal branch = new BigDecimal(dto.get("branch").toString());
-            branchMap.put((Integer)dto.get("warehousing_id"), branch);
+            if (null == dto.get("branch")) {
+                BigDecimal branch = new BigDecimal(0);
+                branchMap.put((Integer)dto.get("warehousing_id"), branch);
+            } else {
+                BigDecimal branch = new BigDecimal(dto.get("branch").toString());
+                branchMap.put((Integer)dto.get("warehousing_id"), branch);
+            }
         }
         List<ChemicalFiberStockWarehousingDTO> warehousingDTO = new ArrayList<>();
         BigDecimal sumTon = new BigDecimal(0.00);

@@ -200,14 +200,18 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = customerRepository.findByIdWithArrearsList(id, startTime, endTime);
         Map<String, Object> customerMap = customerRepository.findByIdWithArrearsMap(id, startTime, endTime);
         // 客户往期欠款=往期系统内订单欠款+用系统之前的旧账
-        customer.setOverArrears(new BigDecimal(customerMap.get("over_arrears").toString()));
         customer.setTotalArrears(new BigDecimal(customerMap.get("total_arrears").toString()));
         customer.setCurrentArrears(new BigDecimal(customerMap.get("current_arrears").toString()));
         if (null == customerMap.get("over_arrears")) {
             customer.setOverArrears(new BigDecimal(0));
+        } else {
+            customer.setOverArrears(new BigDecimal(customerMap.get("over_arrears").toString()));
         }
         if(null == customer.getTotalArrears()) {
             customer.setTotalArrears(new BigDecimal(0));
+        }
+        if (null == customer.getAccount()) {
+            customer.setAccount(new BigDecimal(0));
         }
         customer.setTotalArrears(customer.getTotalArrears().add(customer.getOverArrears()));
         ValidationUtil.isNull(customer.getId(),"Customer","id",id);
