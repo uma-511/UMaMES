@@ -157,17 +157,17 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     }
 
     @Override
-    @CacheEvict(allEntries = true)
+    //@CacheEvict(allEntries = true)
     @Transactional(rollbackFor = Exception.class)
     public void delete(Integer id) {
         ChemicalFiberProduct chemicalFiberProduct = chemicalFiberProductRepository.findById(id).orElseGet(ChemicalFiberProduct::new);
-        int countTotalStock = 0;
+        Double countTotalStock = 0.00;
         if(null != chemicalFiberProductRepository.countStock(chemicalFiberProduct.getModel())){
-            countTotalStock = Integer.parseInt(chemicalFiberProductRepository.countStock(chemicalFiberProduct.getModel()));
+            countTotalStock = Double.parseDouble(chemicalFiberProductRepository.countStock(chemicalFiberProduct.getModel()));
         }
         if (countTotalStock == 0){
-            chemicalFiberProduct.setDelFlag(1);
-            chemicalFiberProductRepository.save(chemicalFiberProduct);
+            //chemicalFiberProduct.setDelFlag(1);
+            chemicalFiberProductRepository.delete(chemicalFiberProduct);
         }else{
             throw new BadRequestException("当前产品库存数量不为0，无法删除");
         }
