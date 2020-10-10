@@ -155,7 +155,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             }
             pageList.add(dtoset);
         }
-        Integer ListSeiz = umaChemicalFiberStatementRepository.findSize();
+        Integer ListSeiz = umaChemicalFiberStatementRepository.findSize(customerName, accountCode, years + "-" + months);
         map.put("content", pageList);
         map.put("totalElements", ListSeiz);
         // Page<UmaChemicalFiberStatement> pages = umaChemicalFiberStatementRepository.findadd();
