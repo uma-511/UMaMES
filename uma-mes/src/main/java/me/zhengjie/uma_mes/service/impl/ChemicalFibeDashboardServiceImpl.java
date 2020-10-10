@@ -38,14 +38,48 @@ public class ChemicalFibeDashboardServiceImpl implements ChemicalFibeDashboardSe
         String dateTime = DashboardTime(criteria);
 
         ChemicalFibeDashboardDTO dto = new ChemicalFibeDashboardDTO();
-        dto.setWarehousingNumber((BigDecimal)chemicalFiberStockWarehousingRepository.getWarehousingOrders(dateTime));
-        dto.setWarehousingTonNumber((BigDecimal)chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "吨"));
-        dto.setWarehousingBranchNumber((BigDecimal)chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "支"));
+        if (null == chemicalFiberStockWarehousingRepository.getWarehousingOrders(dateTime)) {
 
-        dto.setDeliveryNumber(chemicalFiberDeliveryNoteRepository.getCurrenNoteCount(dateTime));
-        dto.setDeliveryTonNumber((BigDecimal)chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "吨"));
-        dto.setDeliveryBranchNumber((BigDecimal)chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "支"));
-        dto.setDeliveryTotalNumber((BigDecimal)chemicalFiberDeliveryNoteRepository.getDeliveryAmount(dateTime));
+            dto.setWarehousingNumber(new BigDecimal(0));
+        } else {
+            dto.setWarehousingNumber((BigDecimal)chemicalFiberStockWarehousingRepository.getWarehousingOrders(dateTime));
+        }
+        if (null == chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "吨")) {
+            dto.setWarehousingTonNumber(new BigDecimal(0));
+        } else {
+            dto.setWarehousingTonNumber((BigDecimal)chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "吨"));
+        }
+
+        if (null == chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "支")) {
+            dto.setWarehousingBranchNumber(new BigDecimal(0));
+        } else {
+
+            dto.setWarehousingBranchNumber((BigDecimal)chemicalFiberStockWarehousingRepository.getTonnageInStorage(dateTime, "支"));
+        }
+
+        if (null == chemicalFiberDeliveryNoteRepository.getCurrenNoteCount(dateTime)) {
+            dto.setDeliveryNumber(0);
+        } else {
+            dto.setDeliveryNumber(chemicalFiberDeliveryNoteRepository.getCurrenNoteCount(dateTime));
+
+        }
+        if (null == chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "吨")) {
+            dto.setDeliveryTonNumber(new BigDecimal(0));
+        } else {
+            dto.setDeliveryTonNumber((BigDecimal)chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "吨"));
+        }
+
+        if (null == chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "支")) {
+            dto.setDeliveryBranchNumber(new BigDecimal(0));
+        } else {
+            dto.setDeliveryBranchNumber((BigDecimal)chemicalFiberDeliveryNoteRepository.getTonnageInStorage(dateTime, "支"));
+        }
+
+        if (null == chemicalFiberDeliveryNoteRepository.getDeliveryAmount(dateTime)) {
+            dto.setDeliveryTotalNumber(new BigDecimal(0));
+        } else {
+            dto.setDeliveryTotalNumber((BigDecimal)chemicalFiberDeliveryNoteRepository.getDeliveryAmount(dateTime));
+        }
 
         dto.setStockTonNumber((BigDecimal)chemicalFiberStockRepository.getTonnageInStorage("吨"));
         dto.setStockBranchNumber((BigDecimal)chemicalFiberStockRepository.getTonnageInStorage("支"));
