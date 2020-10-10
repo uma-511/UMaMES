@@ -316,8 +316,13 @@ public class ChemicalFiberStockWarehousingServiceImpl implements ChemicalFiberSt
         Map<Integer, BigDecimal> tonMap = new HashMap<>();
         Map<Integer, BigDecimal> branchMap = new HashMap<>();
         for (Map<String, Object> dto : tonAndBranch) {
-            BigDecimal ton = new BigDecimal(dto.get("ton").toString());
-            tonMap.put((Integer)dto.get("warehousing_id"), ton);
+            if (null == dto.get("ton")) {
+                BigDecimal ton = new BigDecimal(0);
+                tonMap.put((Integer)dto.get("warehousing_id"), ton);
+            } else {
+                BigDecimal ton = new BigDecimal(dto.get("ton").toString());
+                tonMap.put((Integer)dto.get("warehousing_id"), ton);
+            }
         }
         for (Map<String, Object> dto : tonAndBranch) {
             if (null == dto.get("branch")) {
