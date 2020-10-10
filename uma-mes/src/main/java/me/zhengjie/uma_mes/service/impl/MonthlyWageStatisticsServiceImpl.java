@@ -62,6 +62,15 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
 
     @Override
     public Map<String,Object> queryAll(MonthlyWageStatisticsQueryCriteria criteria, Pageable pageable){
+        if(null != criteria.getMonthTime() && !criteria.getMonthTime().equals("")){
+            Date date = new Date(criteria.getMonthTime());
+            try{
+                criteria.setStartTime(changeToStartTime(date));
+                criteria.setEndTime(changeToEndTime(date));
+            }catch (Exception e){
+                throw new BadRequestException("日期条件转换异常");
+            }
+        }
         Page<MonthlyWageStatistics> page = monthlyWageStatisticsRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(monthlyWageStatisticsMapper::toDto));
     }
@@ -97,6 +106,25 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         monthlyWageStatisticsRepository.deleteById(id);
     }
 
+    public Date changeToEndTime(Date date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH,0);
+        date=sdf.parse(sdf.format(calendar.getTime()));
+        return date;
+    }
+
+    public Date changeToStartTime(Date date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH,1);
+        date=sdf.parse(sdf.format(calendar.getTime()));
+        return date;
+    }
+
     public Timestamp getLastMonthStartTime() throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
         Date date = new Date();
@@ -113,7 +141,7 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         return new Timestamp(calendar.getTimeInMillis());
     }
     public Timestamp getLastMonthEndTime() throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         // 设置为当前时间

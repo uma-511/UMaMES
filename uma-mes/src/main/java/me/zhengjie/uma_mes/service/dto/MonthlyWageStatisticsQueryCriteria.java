@@ -4,6 +4,7 @@ import lombok.Data;
 import me.zhengjie.annotation.Query;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 /**
 * @author wave
@@ -28,17 +29,17 @@ public class MonthlyWageStatisticsQueryCriteria{
     @Query(type = Query.Type.INNER_LIKE)
     private String job;
 
-
+    private Long monthTime;
 
     /**
      * 大于等于
      */
     @Query(type = Query.Type.GREATER_THAN, propName = "dateTime")
-    private Timestamp startTime;
+    private Date startTime;
 
     /**
      * 小于等于
      */
     @Query(type = Query.Type.LESS_THAN, propName = "dateTime")
-    private Timestamp endTime;
+    private Date endTime;
 }
