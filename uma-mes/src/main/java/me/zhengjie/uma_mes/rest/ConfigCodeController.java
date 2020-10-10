@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.rest;
 
+import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.domain.ConfigCode;
 import me.zhengjie.uma_mes.service.ConfigCodeService;
@@ -45,25 +46,12 @@ public class ConfigCodeController {
         return new ResponseEntity<>(configCodeService.queryAll(criteria,pageable),HttpStatus.OK);
     }
 
-    @GetMapping(value = "/getCompanyName")
-    @Log("查询getCompanyName")
-    @ApiOperation("查询getCompanyName")
-    public ResponseEntity getCompanyName(){
-        return new ResponseEntity<>(configCodeService.getCompanyName(),HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/getSerialCode")
-    @Log("查询getSerialCode")
-    @ApiOperation("查询getSerialCode")
-    public ResponseEntity getSerialCode(){
-        return new ResponseEntity<>(configCodeService.getSerialCode(),HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/getAddress")
     @Log("查询getAddress")
     @ApiOperation("查询getAddress")
+    @GetMapping(value = "/getAddress")
     public ResponseEntity getAddress(){
-        return new ResponseEntity<>(configCodeService.getAddress(),HttpStatus.OK);
+        ConfigCodeQueryCriteria configCodeQueryCriteria = new ConfigCodeQueryCriteria();
+        return new ResponseEntity<>(configCodeService.queryAll(configCodeQueryCriteria),HttpStatus.OK);
     }
 
     @PostMapping

@@ -43,11 +43,5 @@ public interface ConfigCodeService {
 
     void delete(Integer id);
 
-    String getCompanyName();
-
-    String getSerialCode();
-
-    String getAddress();
-
     void download(List<ConfigCodeDTO> all, HttpServletResponse response) throws IOException;
 }
