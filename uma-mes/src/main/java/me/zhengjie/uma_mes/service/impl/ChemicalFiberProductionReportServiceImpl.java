@@ -8,9 +8,11 @@ import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProductionReport;
+import me.zhengjie.uma_mes.repository.ChemicalFiberLabelRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductionReportRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductionRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductionReportService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionReportDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionReportQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberProductionReportMapper;
@@ -21,6 +23,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -49,6 +52,9 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
     @Autowired
     private ChemicalFiberProductionRepository chemicalFiberProductionRepository;
 
+    @Autowired
+    private ChemicalFiberLabelRepository chemicalFiberLabelRepository;
+
 
     public Map<String, Object> queryAll(ChemicalFiberProductionReportQueryCriteria criteria, Pageable pageable) {
         if (criteria.getTempStartTime() != null) {
@@ -67,8 +73,116 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             criteria.setStartTime(time1);
             criteria.setEndTime(time2);*/
         }
+        List<ChemicalFiberProductionReportDTO> pageList = test(criteria);
+        List<ChemicalFiberProductionReportDTO> pageListSize = new ArrayList<>();
         Page<ChemicalFiberProductionReport> page = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
-        return PageUtil.toPage(page.map(chemicalFiberProductionReportMapper::toDto));
+        int size = pageable.getPageSize();
+        int pageNumber = pageable.getPageNumber();
+        for (int i = 0; i < size; i++) {
+            if (pageNumber == 0) {
+                if ( pageList.size() > i) {
+                    pageListSize.add(pageList.get(i));
+                } else {
+                    break;
+                }
+            } else {
+                int max = (size * pageNumber) + i;
+                if (pageList.size() > max) {
+                    pageListSize.add(pageList.get(max));
+                } else {
+                    break;
+                }
+            }
+        }
+        //return PageUtil.toPage(page.map(chemicalFiberProductionReportMapper::toDto));
+        return PageUtil.toPage(new PageImpl(pageListSize, pageable, pageList.size()));
+    }
+
+    public List<ChemicalFiberProductionReportDTO> test(ChemicalFiberProductionReportQueryCriteria criteria) {
+        String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempStartTime());
+        StartTime = StartTime + " 07:30:00";
+        String EndTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempEndTime());
+        EndTime = EndTime + " 07:29:59";
+        Timestamp time1 = Timestamp.valueOf(StartTime);
+        Timestamp time2 = Timestamp.valueOf(EndTime);
+
+
+        ChemicalFiberLabelQueryCriteria ca = new ChemicalFiberLabelQueryCriteria();
+        ca.setShifts(criteria.getShifts());
+        ca.setMachine(criteria.getMachine());
+        ca.setFineness(criteria.getFineness());
+        ca.setColor(criteria.getColor());
+        ca.setStartTime(time1);
+        ca.setEndTime(time2);
+
+        List<ChemicalFiberLabel> list = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,ca,criteriaBuilder));
+        List<ChemicalFiberLabel> prodctionNumber = chemicalFiberLabelRepository.getProductionId(StartTime, EndTime);
+        List<ChemicalFiberLabel> shifts = chemicalFiberLabelRepository.getShiftsList(StartTime, EndTime);
+        List<ChemicalFiberLabel> machine = chemicalFiberLabelRepository.getMachine(StartTime, EndTime);
+        List<ChemicalFiberProduction> prod = chemicalFiberProductionRepository.findAll();
+        Map<String, String> prodMap = new HashMap<>();
+        for (ChemicalFiberProduction dtoprod : prod) {
+            prodMap.put(dtoprod.getId().toString(), dtoprod.getNumber());
+        }
+
+        List<Map<String, Object>> mapList = new ArrayList<>();
+
+        for (ChemicalFiberLabel dto : machine) {
+            for (ChemicalFiberLabel dto1 : shifts) {
+                for (ChemicalFiberLabel dto2 : prodctionNumber) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("machine", dto.getMachine());
+                    map.put("shifts", dto1.getShifts());
+                    map.put("prodctionNumber", dto2.getProductionId());
+                    mapList.add(map);
+                }
+            }
+        }
+
+        List<ChemicalFiberProductionReportDTO> productionList = new ArrayList<>();
+        for (Map<String, Object> dtoMap : mapList) {
+            ChemicalFiberProductionReportDTO production = new ChemicalFiberProductionReportDTO();
+            for (ChemicalFiberLabel dtoList : list) {
+                if (dtoMap.get("machine").toString().equals(dtoList.getMachine())) {
+                    if (dtoMap.get("shifts").toString().equals(dtoList.getShifts())) {
+                        if (dtoMap.get("prodctionNumber").toString().equals(dtoList.getProductionId().toString())) {
+                            production.setProductionId(dtoList.getProductionId());
+                            production.setMachine(dtoList.getMachine());
+                            production.setShifts(dtoList.getShifts());
+                            production.setFineness(dtoList.getFineness());
+                            production.setColor(dtoList.getColor());
+                            production.setProductionNumber(prodMap.get(dtoList.getProductionId().toString()));
+                            if (dtoList.getStatus() != 3) {
+                                production.setProductionPacketNumber(production.getProductionPacketNumber().add(new BigDecimal(1)));
+                                production.setProductionFactPerBagNumber(production.getProductionFactPerBagNumber().add(new BigDecimal(dtoList.getFactPerBagNumber()) ));
+                                production.setProductionNetWeight(production.getProductionNetWeight().add(dtoList.getNetWeight()));
+                                production.setProductionGrossWeight(production.getProductionGrossWeight().add(dtoList.getGrossWeight()));
+                            }
+                            if (dtoList.getStatus() != 3 && dtoList.getStatus() != 0) {
+                                production.setWarehousingPacketNumber(production.getWarehousingPacketNumber().add(new BigDecimal(1)));
+                                production.setWarehousingFactPerBagNumber(production.getWarehousingFactPerBagNumber().add(new BigDecimal(dtoList.getFactPerBagNumber())));
+                                production.setWarehousingNetWeight(production.getWarehousingNetWeight().add(dtoList.getNetWeight()));
+                                production.setWarehousingGrossWeight(production.getWarehousingGrossWeight().add(dtoList.getGrossWeight()));
+                            }
+                            if (dtoList.getStatus() == 3) {
+                                production.setToVoidPacketNumber(production.getToVoidPacketNumber().add(new BigDecimal(1)));
+                            }
+                        }
+
+                    }
+
+                }
+
+            }
+            if (production.getProductionId() != null) {
+                productionList.add(production);
+            }
+
+        }
+        return productionList;
+
+
+
     }
 
     public Result getProductionReportSummaries(ChemicalFiberProductionReportQueryCriteria criteria) {
@@ -84,7 +198,8 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             /*criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));*/
         }
-        List<ChemicalFiberProductionReport> reportList = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+        //List<ChemicalFiberProductionReport> reportList = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+        List<ChemicalFiberProductionReportDTO> reportList = test(criteria);
 
 
         // 生产包数
@@ -122,7 +237,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         list.add("");
         list.add("");
         list.add("");
-        for (ChemicalFiberProductionReport dto : reportList) {
+        for (ChemicalFiberProductionReportDTO dto : reportList) {
             productionPacketNumber = productionPacketNumber.add(dto.getProductionPacketNumber());
             productionFactPerBagNumber = productionFactPerBagNumber.add(dto.getProductionFactPerBagNumber());
             productionNetWeight = productionNetWeight.add(dto.getProductionNetWeight());
@@ -160,16 +275,18 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         return chemicalFiberProductionReportRepository.getReport(year + "-" + month + "-" + day, shifts, machine);*/
         String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(time);
         StartTime = StartTime + " 07:30:00";
-        Timestamp ttime1 = Timestamp.valueOf(StartTime);
-        Timestamp ttime2 = new Timestamp(ttime1.getTime() + (long)86399999);
+        Timestamp ttime = Timestamp.valueOf(StartTime);
+        Timestamp ttime1 = new Timestamp(ttime.getTime() - (long)1);
+        Timestamp ttime2 = new Timestamp(ttime1.getTime() + (long)86399998);
         Timestamp ttime3 = new Timestamp(ttime1.getTime() - (long)86399999);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String time4 = simpleDateFormat.format(ttime);
         String time1 = simpleDateFormat.format(ttime1);
         String time2 = simpleDateFormat.format(ttime2);
         String time3 = simpleDateFormat.format(ttime3);
         if (ttime1.getTime() < time.getTime()) {
             if ( time.getTime() < ttime2.getTime()) {
-                return chemicalFiberProductionReportRepository.getReport(time1, time2, shifts, machine, prodctionId);
+                return chemicalFiberProductionReportRepository.getReport(time4, time2, shifts, machine, prodctionId);
             }
         } else if (ttime3.getTime() < time.getTime()) {
             if (time.getTime() < ttime1.getTime()) {
@@ -260,14 +377,15 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             criteria.setStartTime(time1);
             criteria.setEndTime(time2);*/
         }
-        List<ChemicalFiberProductionReport> procuctionReportList = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+        //List<ChemicalFiberProductionReport> procuctionReportList = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+        List<ChemicalFiberProductionReportDTO> procuctionReportList = test(criteria);
 
         List<Map<String, Object>> listMap = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
         ChemicalFiberProductionReportDTO sum = new ChemicalFiberProductionReportDTO();
         for (int i = 1; i <= procuctionReportList.size(); i++) {
             Map<String, Object> maps = new HashMap<>();
-            ChemicalFiberProductionReport dto = procuctionReportList.get(i - 1);
+            ChemicalFiberProductionReportDTO dto = procuctionReportList.get(i - 1);
             DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String time = sdf.format(dto.getTime());
             maps.put("index", i);

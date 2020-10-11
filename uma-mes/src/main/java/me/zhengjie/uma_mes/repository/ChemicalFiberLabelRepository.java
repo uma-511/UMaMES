@@ -27,4 +27,13 @@ public interface ChemicalFiberLabelRepository extends JpaRepository<ChemicalFibe
     @Query(value = "select * from uma_chemical_fiber_label  GROUP BY shifts",nativeQuery = true)
     List<ChemicalFiberLabel> getShifts();
 
+    @Query(value = "select * from uma_chemical_fiber_label WHERE print_time BETWEEN ?1 AND ?2 GROUP BY shifts",nativeQuery = true)
+    List<ChemicalFiberLabel> getShiftsList(String stater, String end);
+
+    @Query(value = "select * from uma_chemical_fiber_label WHERE print_time BETWEEN ?1 AND ?2 GROUP BY machine",nativeQuery = true)
+    List<ChemicalFiberLabel> getMachine(String stater, String end);
+
+    @Query(value = "select * from uma_chemical_fiber_label WHERE print_time BETWEEN ?1 AND ?2 GROUP BY production_id",nativeQuery = true)
+    List<ChemicalFiberLabel> getProductionId(String stater, String end);
+
 }

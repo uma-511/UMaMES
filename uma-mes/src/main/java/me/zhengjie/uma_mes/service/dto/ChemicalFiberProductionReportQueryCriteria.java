@@ -13,6 +13,10 @@ public class ChemicalFiberProductionReportQueryCriteria {
     @Query
     private String shifts;
 
+    // 班次
+    @Query
+    private String machine;
+
     // 纤度
     @Query(type = Query.Type.INNER_LIKE)
     private String fineness;

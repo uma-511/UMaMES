@@ -35,7 +35,7 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name = "product_id", nullable = false)
     private Integer productId;
 
-    // 便签状态 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货
+    // 便签状态 0：待入库 1：入库 2：出库 3：作废 4：退库 5：退货 9:托板入库
     @Column(name = "status")
     private Integer status;
 
