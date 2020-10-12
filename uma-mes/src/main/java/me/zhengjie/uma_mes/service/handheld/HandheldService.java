@@ -67,9 +67,9 @@ public class HandheldService {
 
     @Autowired
     private ChemicalFiberProductionRepository chemicalFiberProductionRepository;
-
+/*
     @Autowired
-    private ChemicalFiberProductionReportService productionReportService;
+    private ChemicalFiberProductionReportService productionReportService;*/
 
     @Autowired
     private ViewScanRecordService viewScanRecordService;
@@ -879,7 +879,7 @@ public class HandheldService {
         for (ChemicalFiberLabel dto : chemicalFiberLabels) {
             /*DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String time = sdf.format(dto.getPrintTime());*/
-            ChemicalFiberProductionReport report = productionReportService.getReport(dto.getPrintTime(),dto.getShifts(), dto.getMachine(), dto.getProductionId());
+            //ChemicalFiberProductionReport report = productionReportService.getReport(dto.getPrintTime(),dto.getShifts(), dto.getMachine(), dto.getProductionId());
             if (report != null) {
                 BigDecimal warehousingPacketNumber = report.getWarehousingPacketNumber();
                 BigDecimal warehousingFactPerBagNumber = report.getWarehousingFactPerBagNumber();
@@ -890,7 +890,7 @@ public class HandheldService {
                 report.setWarehousingFactPerBagNumber(warehousingFactPerBagNumber.add(new BigDecimal(dto.getFactPerBagNumber())));
                 report.setWarehousingNetWeight(warehousingNetWeight.add(dto.getNetWeight()));
                 report.setWarehousingGrossWeight(warehousingGrossWeight.add(dto.getGrossWeight()));
-                productionReportService.update(report);
+                //productionReportService.update(report);
 
             } else {
                 ChemicalFiberProductionReportDTO reportDTO = new ChemicalFiberProductionReportDTO();
@@ -908,7 +908,7 @@ public class HandheldService {
                 reportDTO.setShifts(dto.getShifts());
                 reportDTO.setMachine(dto.getMachine());
                 reportDTO.setTime(dto.getPrintTime());
-                productionReportService.create(reportDTO);
+                //productionReportService.create(reportDTO);
             }
         }
     }

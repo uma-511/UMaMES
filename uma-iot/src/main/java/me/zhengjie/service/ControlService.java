@@ -298,7 +298,7 @@ public class ControlService {
             }else if(label.getStatus()==3){
                 gobalSender.sendImmediate(cancelPage.sendTip("标签已作废",ip));
             }else{
-                productionReportService.delectReport(label);
+                //productionReportService.delectReport(label);
                 ChemicalFiberPalletDetailQueryCeiteria ceieria = new ChemicalFiberPalletDetailQueryCeiteria();
                 ceieria.setLabelNumber(label.getLabelNumber());
                 List<ChemicalFiberPalletDetail> palletDetail = chemicalFiberPalletDetailRepository.findAll(((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,ceieria,criteriaBuilder)));
