@@ -43,4 +43,11 @@ public class ChemicalFiberProductionReportQueryCriteria {
     // 临时结束时间
     private Integer is;
 
+    // 临时结束时间
+    private String name;
+
+    // 临时结束时间
+    @Query
+    private Integer prodId;
+
 }

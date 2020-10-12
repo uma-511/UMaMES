@@ -69,4 +69,8 @@ public class ChemicalFiberLabelQueryCriteria{
     // 托板id
     @Query
     private String palletId;
+
+    // 托板id
+    @Query
+    private Integer prodId;
 }

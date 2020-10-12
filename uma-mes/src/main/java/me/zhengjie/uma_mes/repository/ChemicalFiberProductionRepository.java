@@ -95,4 +95,7 @@ public interface ChemicalFiberProductionRepository extends JpaRepository<Chemica
             ") AS temp WHERE temp.del_flag = 0 AND temp.color LIKE %?3% AND temp.fineness LIKE %?4% and temp.machine_number like %?5% and temp.shifts like %?6% ORDER BY temp.print_time",
             nativeQuery = true)
     List<Map<String, Object>> getProductionReportSummaries(String data1, String data2, String color, String fineness, String machineNumber, String shifts);
+
+    @Query(value = "SELECT prod_id FROM `uma_chemical_fiber_production` where prod_model = ?1 GROUP BY prod_id",nativeQuery = true)
+    Integer getProductionId(String name);
 }

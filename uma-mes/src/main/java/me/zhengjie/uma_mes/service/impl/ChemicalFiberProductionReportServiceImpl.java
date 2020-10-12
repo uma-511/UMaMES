@@ -73,6 +73,8 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             criteria.setStartTime(time1);
             criteria.setEndTime(time2);*/
         }
+        Integer prodctionId = chemicalFiberProductionRepository.getProductionId(criteria.getName());
+        criteria.setProdId(prodctionId);
         Page<ChemicalFiberProductionReport> page = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
 
         if (criteria.getIs() == null) {
@@ -121,6 +123,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         ca.setMachine(criteria.getMachine());
         ca.setFineness(criteria.getFineness());
         ca.setColor(criteria.getColor());
+        ca.setProdId(criteria.getProdId());
         //ca.setStartTime(time1);
         //ca.setEndTime(time2);
 
