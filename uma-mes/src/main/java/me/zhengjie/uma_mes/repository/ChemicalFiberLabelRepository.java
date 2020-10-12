@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,12 @@ public interface ChemicalFiberLabelRepository extends JpaRepository<ChemicalFibe
 
     @Query(value = "select * from uma_chemical_fiber_label WHERE print_time BETWEEN ?1 AND ?2 GROUP BY machine",nativeQuery = true)
     List<ChemicalFiberLabel> getMachine(String stater, String end);
+
+    @Query(value = "select shifts, machine, production_id as prodctionNumber from uma_chemical_fiber_label WHERE print_time BETWEEN ?1 AND ?2 GROUP BY shifts, machine, production_id",nativeQuery = true)
+    List<Map<String, Object>> gets(String stater, String end);
+
+    @Query(value = "select max(print_time) as prodctionNumber from uma_chemical_fiber_label",nativeQuery = true)
+    Timestamp getTime();
 
     @Query(value = "select * from uma_chemical_fiber_label WHERE print_time BETWEEN ?1 AND ?2 GROUP BY production_id",nativeQuery = true)
     List<ChemicalFiberLabel> getProductionId(String stater, String end);

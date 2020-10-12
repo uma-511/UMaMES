@@ -73,7 +73,13 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             criteria.setStartTime(time1);
             criteria.setEndTime(time2);*/
         }
+        long startTime = System.currentTimeMillis();    //获取开始时间
+
         List<ChemicalFiberProductionReportDTO> pageList = test(criteria);
+
+        long endTime = System.currentTimeMillis();    //获取结束时间
+
+        System.out.println("程序运行时间：" + (endTime - startTime) + "ms");
         List<ChemicalFiberProductionReportDTO> pageListSize = new ArrayList<>();
         Page<ChemicalFiberProductionReport> page = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         int size = pageable.getPageSize();
@@ -106,19 +112,22 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         Timestamp time1 = Timestamp.valueOf(StartTime);
         Timestamp time2 = Timestamp.valueOf(EndTime);
 
-
         ChemicalFiberLabelQueryCriteria ca = new ChemicalFiberLabelQueryCriteria();
         ca.setShifts(criteria.getShifts());
         ca.setMachine(criteria.getMachine());
         ca.setFineness(criteria.getFineness());
         ca.setColor(criteria.getColor());
-        ca.setStartTime(time1);
-        ca.setEndTime(time2);
+        //ca.setStartTime(time1);
+        //ca.setEndTime(time2);
 
-        List<ChemicalFiberLabel> list = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,ca,criteriaBuilder));
+        Date star = new Timestamp(time1.getTime());
+        Date end = new Timestamp(time2.getTime());
+        List<Date> lDate = findDates(star, end);
+        List<ChemicalFiberLabel> listAll = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,ca,criteriaBuilder));
         List<ChemicalFiberLabel> prodctionNumber = chemicalFiberLabelRepository.getProductionId(StartTime, EndTime);
         List<ChemicalFiberLabel> shifts = chemicalFiberLabelRepository.getShiftsList(StartTime, EndTime);
         List<ChemicalFiberLabel> machine = chemicalFiberLabelRepository.getMachine(StartTime, EndTime);
+        Timestamp maxTime = chemicalFiberLabelRepository.getTime();
         List<ChemicalFiberProduction> prod = chemicalFiberProductionRepository.findAll();
         Map<String, String> prodMap = new HashMap<>();
         for (ChemicalFiberProduction dtoprod : prod) {
@@ -127,7 +136,8 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
 
         List<Map<String, Object>> mapList = new ArrayList<>();
 
-        for (ChemicalFiberLabel dto : machine) {
+        mapList = chemicalFiberLabelRepository.gets(StartTime, EndTime);
+        /*for (ChemicalFiberLabel dto : machine) {
             for (ChemicalFiberLabel dto1 : shifts) {
                 for (ChemicalFiberLabel dto2 : prodctionNumber) {
                     Map<String, Object> map = new HashMap<>();
@@ -137,48 +147,66 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
                     mapList.add(map);
                 }
             }
-        }
+        }*/
 
         List<ChemicalFiberProductionReportDTO> productionList = new ArrayList<>();
-        for (Map<String, Object> dtoMap : mapList) {
-            ChemicalFiberProductionReportDTO production = new ChemicalFiberProductionReportDTO();
-            for (ChemicalFiberLabel dtoList : list) {
-                if (dtoMap.get("machine").toString().equals(dtoList.getMachine())) {
-                    if (dtoMap.get("shifts").toString().equals(dtoList.getShifts())) {
-                        if (dtoMap.get("prodctionNumber").toString().equals(dtoList.getProductionId().toString())) {
-                            production.setProductionId(dtoList.getProductionId());
-                            production.setMachine(dtoList.getMachine());
-                            production.setShifts(dtoList.getShifts());
-                            production.setFineness(dtoList.getFineness());
-                            production.setColor(dtoList.getColor());
-                            production.setProductionNumber(prodMap.get(dtoList.getProductionId().toString()));
-                            if (dtoList.getStatus() != 3) {
-                                production.setProductionPacketNumber(production.getProductionPacketNumber().add(new BigDecimal(1)));
-                                production.setProductionFactPerBagNumber(production.getProductionFactPerBagNumber().add(new BigDecimal(dtoList.getFactPerBagNumber()) ));
-                                production.setProductionNetWeight(production.getProductionNetWeight().add(dtoList.getNetWeight()));
-                                production.setProductionGrossWeight(production.getProductionGrossWeight().add(dtoList.getGrossWeight()));
+        for (Date dtoDate : lDate) {
+            Timestamp tamp1 = new Timestamp(dtoDate.getTime());
+            Timestamp tamp2 = new Timestamp(dtoDate.getTime() + (long)86399998);
+            ca.setStartTime(tamp1);
+            ca.setEndTime(tamp2);
+            List<ChemicalFiberLabel> list = new ArrayList<>();
+            if (maxTime.getTime() >  tamp1.getTime()) {
+                list = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,ca,criteriaBuilder));
+            } else {
+                continue;
+            }
+            for (Map<String, Object> dtoMap : mapList) {
+                ChemicalFiberProductionReportDTO production = new ChemicalFiberProductionReportDTO();
+                for (ChemicalFiberLabel dtoList : list) {
+                    if (dtoMap.get("machine").toString().equals(dtoList.getMachine())) {
+                        if (dtoMap.get("shifts").toString().equals(dtoList.getShifts())) {
+                            if (dtoMap.get("prodctionNumber").toString().equals(dtoList.getProductionId().toString())) {
+                                //if (tamp1.getTime() < dtoList.getPrintTime().getTime() && dtoList.getPrintTime().getTime() < tamp2.getTime()) {
+                                    production.setProductionId(dtoList.getProductionId());
+                                    production.setMachine(dtoList.getMachine());
+                                    production.setShifts(dtoList.getShifts());
+                                    production.setFineness(dtoList.getFineness());
+                                    production.setColor(dtoList.getColor());
+                                    production.setTime(tamp1);
+                                    production.setProductionNumber(prodMap.get(dtoList.getProductionId().toString()));
+                                    if (dtoList.getStatus() != 3) {
+                                        production.setProductionPacketNumber(production.getProductionPacketNumber().add(new BigDecimal(1)));
+                                        production.setProductionFactPerBagNumber(production.getProductionFactPerBagNumber().add(new BigDecimal(dtoList.getFactPerBagNumber()) ));
+                                        production.setProductionNetWeight(production.getProductionNetWeight().add(dtoList.getNetWeight()));
+                                        production.setProductionGrossWeight(production.getProductionGrossWeight().add(dtoList.getGrossWeight()));
+                                    }
+                                    if (dtoList.getStatus() != 3 && dtoList.getStatus() != 0) {
+                                        production.setWarehousingPacketNumber(production.getWarehousingPacketNumber().add(new BigDecimal(1)));
+                                        production.setWarehousingFactPerBagNumber(production.getWarehousingFactPerBagNumber().add(new BigDecimal(dtoList.getFactPerBagNumber())));
+                                        production.setWarehousingNetWeight(production.getWarehousingNetWeight().add(dtoList.getNetWeight()));
+                                        production.setWarehousingGrossWeight(production.getWarehousingGrossWeight().add(dtoList.getGrossWeight()));
+                                    }
+                                    if (dtoList.getStatus() == 3) {
+                                        production.setToVoidPacketNumber(production.getToVoidPacketNumber().add(new BigDecimal(1)));
+                                    }
+                                //}
+
                             }
-                            if (dtoList.getStatus() != 3 && dtoList.getStatus() != 0) {
-                                production.setWarehousingPacketNumber(production.getWarehousingPacketNumber().add(new BigDecimal(1)));
-                                production.setWarehousingFactPerBagNumber(production.getWarehousingFactPerBagNumber().add(new BigDecimal(dtoList.getFactPerBagNumber())));
-                                production.setWarehousingNetWeight(production.getWarehousingNetWeight().add(dtoList.getNetWeight()));
-                                production.setWarehousingGrossWeight(production.getWarehousingGrossWeight().add(dtoList.getGrossWeight()));
-                            }
-                            if (dtoList.getStatus() == 3) {
-                                production.setToVoidPacketNumber(production.getToVoidPacketNumber().add(new BigDecimal(1)));
-                            }
+
                         }
 
                     }
 
                 }
+                if (production.getProductionId() != null) {
+                    productionList.add(production);
+                }
 
-            }
-            if (production.getProductionId() != null) {
-                productionList.add(production);
             }
 
         }
+
         return productionList;
 
 
@@ -459,6 +487,25 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         map.put("year", year);
         map.put("day", day < 10 ? "0" + day : day);
         return map;
+    }
+
+    public List<Date> findDates(Date dBegin, Date dEnd) {
+        List lDate = new ArrayList();
+        lDate.add(dBegin);
+        Calendar calBegin = Calendar.getInstance();
+        // 使用给定的 Date 设置此 Calendar 的时间
+        calBegin.setTime(dBegin);
+        Calendar calEnd = Calendar.getInstance();
+        // 使用给定的 Date 设置此 Calendar 的时间
+        calEnd.setTime(dEnd);
+        // 测试此日期是否在指定日期之后
+        while (dEnd.after(calBegin.getTime()))
+        {
+            // 根据日历的规则，为给定的日历字段添加或减去指定的时间量
+            calBegin.add(Calendar.DAY_OF_MONTH, 1);
+            lDate.add(calBegin.getTime());
+        }
+        return lDate;
     }
 }
 
