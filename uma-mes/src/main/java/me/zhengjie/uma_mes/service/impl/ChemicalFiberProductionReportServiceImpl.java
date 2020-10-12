@@ -73,35 +73,39 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             criteria.setStartTime(time1);
             criteria.setEndTime(time2);*/
         }
-        long startTime = System.currentTimeMillis();    //获取开始时间
-
-        List<ChemicalFiberProductionReportDTO> pageList = test(criteria);
-
-        long endTime = System.currentTimeMillis();    //获取结束时间
-
-        System.out.println("程序运行时间：" + (endTime - startTime) + "ms");
-        List<ChemicalFiberProductionReportDTO> pageListSize = new ArrayList<>();
         Page<ChemicalFiberProductionReport> page = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
-        int size = pageable.getPageSize();
-        int pageNumber = pageable.getPageNumber();
-        for (int i = 0; i < size; i++) {
-            if (pageNumber == 0) {
-                if ( pageList.size() > i) {
-                    pageListSize.add(pageList.get(i));
+
+        if (criteria.getIs() == null) {
+            return PageUtil.toPage(page.map(chemicalFiberProductionReportMapper::toDto));
+        } else {
+            long startTime = System.currentTimeMillis();    //获取开始时间
+
+            List<ChemicalFiberProductionReportDTO> pageList = test(criteria);
+
+            long endTime = System.currentTimeMillis();    //获取结束时间
+
+            System.out.println("程序运行时间：" + (endTime - startTime) + "ms");
+            List<ChemicalFiberProductionReportDTO> pageListSize = new ArrayList<>();
+            int size = pageable.getPageSize();
+            int pageNumber = pageable.getPageNumber();
+            for (int i = 0; i < size; i++) {
+                if (pageNumber == 0) {
+                    if ( pageList.size() > i) {
+                        pageListSize.add(pageList.get(i));
+                    } else {
+                        break;
+                    }
                 } else {
-                    break;
-                }
-            } else {
-                int max = (size * pageNumber) + i;
-                if (pageList.size() > max) {
-                    pageListSize.add(pageList.get(max));
-                } else {
-                    break;
+                    int max = (size * pageNumber) + i;
+                    if (pageList.size() > max) {
+                        pageListSize.add(pageList.get(max));
+                    } else {
+                        break;
+                    }
                 }
             }
+            return PageUtil.toPage(new PageImpl(pageListSize, pageable, pageList.size()));
         }
-        //return PageUtil.toPage(page.map(chemicalFiberProductionReportMapper::toDto));
-        return PageUtil.toPage(new PageImpl(pageListSize, pageable, pageList.size()));
     }
 
     public List<ChemicalFiberProductionReportDTO> test(ChemicalFiberProductionReportQueryCriteria criteria) {
@@ -121,7 +125,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         //ca.setEndTime(time2);
 
         Date star = new Timestamp(time1.getTime());
-        Date end = new Timestamp(time2.getTime());
+        Date end = new Timestamp(time2.getTime() - (long)86399999);
         List<Date> lDate = findDates(star, end);
         List<ChemicalFiberLabel> listAll = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,ca,criteriaBuilder));
         List<ChemicalFiberLabel> prodctionNumber = chemicalFiberLabelRepository.getProductionId(StartTime, EndTime);
@@ -148,8 +152,17 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
                 }
             }
         }*/
-
         List<ChemicalFiberProductionReportDTO> productionList = new ArrayList<>();
+
+        //List<Date> lDate = new ArrayList<>();
+        /*if (lDates.size() == 2) {
+            Date a = new Timestamp(time1.getTime());
+            lDate.add(a);
+        } else {
+            for (int i = 1; (i + 1) <= lDates.size(); i++) {
+                lDate.add(lDates.get(i - 1));
+            }
+        }*/
         for (Date dtoDate : lDate) {
             Timestamp tamp1 = new Timestamp(dtoDate.getTime());
             Timestamp tamp2 = new Timestamp(dtoDate.getTime() + (long)86399998);
@@ -168,49 +181,39 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
                         if (dtoMap.get("shifts").toString().equals(dtoList.getShifts())) {
                             if (dtoMap.get("prodctionNumber").toString().equals(dtoList.getProductionId().toString())) {
                                 //if (tamp1.getTime() < dtoList.getPrintTime().getTime() && dtoList.getPrintTime().getTime() < tamp2.getTime()) {
-                                    production.setProductionId(dtoList.getProductionId());
-                                    production.setMachine(dtoList.getMachine());
-                                    production.setShifts(dtoList.getShifts());
-                                    production.setFineness(dtoList.getFineness());
-                                    production.setColor(dtoList.getColor());
-                                    production.setTime(tamp1);
-                                    production.setProductionNumber(prodMap.get(dtoList.getProductionId().toString()));
-                                    if (dtoList.getStatus() != 3) {
-                                        production.setProductionPacketNumber(production.getProductionPacketNumber().add(new BigDecimal(1)));
-                                        production.setProductionFactPerBagNumber(production.getProductionFactPerBagNumber().add(new BigDecimal(dtoList.getFactPerBagNumber()) ));
-                                        production.setProductionNetWeight(production.getProductionNetWeight().add(dtoList.getNetWeight()));
-                                        production.setProductionGrossWeight(production.getProductionGrossWeight().add(dtoList.getGrossWeight()));
-                                    }
-                                    if (dtoList.getStatus() != 3 && dtoList.getStatus() != 0) {
-                                        production.setWarehousingPacketNumber(production.getWarehousingPacketNumber().add(new BigDecimal(1)));
-                                        production.setWarehousingFactPerBagNumber(production.getWarehousingFactPerBagNumber().add(new BigDecimal(dtoList.getFactPerBagNumber())));
-                                        production.setWarehousingNetWeight(production.getWarehousingNetWeight().add(dtoList.getNetWeight()));
-                                        production.setWarehousingGrossWeight(production.getWarehousingGrossWeight().add(dtoList.getGrossWeight()));
-                                    }
-                                    if (dtoList.getStatus() == 3) {
-                                        production.setToVoidPacketNumber(production.getToVoidPacketNumber().add(new BigDecimal(1)));
-                                    }
+                                production.setProductionId(dtoList.getProductionId());
+                                production.setMachine(dtoList.getMachine());
+                                production.setShifts(dtoList.getShifts());
+                                production.setFineness(dtoList.getFineness());
+                                production.setColor(dtoList.getColor());
+                                production.setTime(tamp1);
+                                production.setProductionNumber(prodMap.get(dtoList.getProductionId().toString()));
+                                if (dtoList.getStatus() != 3) {
+                                    production.setProductionPacketNumber(production.getProductionPacketNumber().add(new BigDecimal(1)));
+                                    production.setProductionFactPerBagNumber(production.getProductionFactPerBagNumber().add(new BigDecimal(dtoList.getFactPerBagNumber()) ));
+                                    production.setProductionNetWeight(production.getProductionNetWeight().add(dtoList.getNetWeight()));
+                                    production.setProductionGrossWeight(production.getProductionGrossWeight().add(dtoList.getGrossWeight()));
+                                }
+                                if (dtoList.getStatus() != 3 && dtoList.getStatus() != 0) {
+                                    production.setWarehousingPacketNumber(production.getWarehousingPacketNumber().add(new BigDecimal(1)));
+                                    production.setWarehousingFactPerBagNumber(production.getWarehousingFactPerBagNumber().add(new BigDecimal(dtoList.getFactPerBagNumber())));
+                                    production.setWarehousingNetWeight(production.getWarehousingNetWeight().add(dtoList.getNetWeight()));
+                                    production.setWarehousingGrossWeight(production.getWarehousingGrossWeight().add(dtoList.getGrossWeight()));
+                                }
+                                if (dtoList.getStatus() == 3) {
+                                    production.setToVoidPacketNumber(production.getToVoidPacketNumber().add(new BigDecimal(1)));
+                                }
                                 //}
-
                             }
-
                         }
-
                     }
-
                 }
                 if (production.getProductionId() != null) {
                     productionList.add(production);
                 }
-
             }
-
         }
-
         return productionList;
-
-
-
     }
 
     public Result getProductionReportSummaries(ChemicalFiberProductionReportQueryCriteria criteria) {
@@ -327,10 +330,10 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
 
     /*public ChemicalFiberProductionReport getDelectReport(String time, String shifts, String machine) {
 
-       *//* Map<String, Object> timeMap = monthTimeInMillis();
+        Map<String, Object> timeMap = monthTimeInMillis();
         String year = timeMap.get("year").toString();
         String month = timeMap.get("month").toString();
-        String day = timeMap.get("day").toString();*//*
+        String day = timeMap.get("day").toString();
         return chemicalFiberProductionReportRepository.getReport(time, time, shifts, machine);
     }*/
 

@@ -40,4 +40,7 @@ public class ChemicalFiberProductionReportQueryCriteria {
     // 临时结束时间
     private Long tempEndTime;
 
+    // 临时结束时间
+    private Integer is;
+
 }
