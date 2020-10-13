@@ -497,7 +497,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         map.put("sumTotalBag", sumTotalBag);
         map.put("global", global);
         workbook = ExcelExportUtil.exportExcel(params, map);
-        FileUtil.downLoadExcel("对账单导出.xlsx", response, workbook);
+        FileUtil.downLoadExcel(umaChemicalFiberStatement.getAccountCode() + "-对账单导出.xlsx", response, workbook);
     }
 
     private List<ChemicalFiberDeliveryDetailDTO> getStatementDetailsAllList(CreateStatementDto createStatementDto) {

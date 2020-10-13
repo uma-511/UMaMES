@@ -132,7 +132,7 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
         return reort;
     }
 
-    public void download(List<Map<String, Object>> all, HttpServletResponse response) {
+    public void download(List<Map<String, Object>> all,ChemicalFiberWarehousingReortQueryCriteria criteria, HttpServletResponse response) {
         String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/roet.xls";
         TemplateExportParams params = new TemplateExportParams(templatePath);
         /*params.setReadonly(Boolean.TRUE);*/
@@ -170,10 +170,17 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
         }
         String sumTonAndBarch = sumTon.toString() + "吨/" + sumBarch.toString() + "支";
 
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date a = new Date(criteria.getTempStartTime());
+        Date b = new Date(criteria.getTempEndTime());
+        String data1 = simpleDateFormat.format(a);
+        String data2 = simpleDateFormat.format(b);
 
         map.put("list", listMap);
         map.put("tonAndBarch", sumTonAndBarch);
         map.put("sumTotalPrice", sumTotalPrice);
+        map.put("startDate", data1);
+        map.put("endDate", data2);
 
 
         workbook = ExcelExportUtil.exportExcel(params, map);
