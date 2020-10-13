@@ -74,8 +74,15 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             criteria.setEndTime(time2);*/
         }
         Integer prodctionId = chemicalFiberProductionRepository.getProductionId(criteria.getName());
+        List<ChemicalFiberProduction> prod = chemicalFiberProductionRepository.findAll();
+        Map<String, String> prodMap = new HashMap<>();
+        Map<String, String> prodNameMap = new HashMap<>();
+        for (ChemicalFiberProduction dtoprod : prod) {
+            prodNameMap.put(dtoprod.getId().toString(), dtoprod.getProdName());
+        }
         criteria.setProdId(prodctionId);
         Page<ChemicalFiberProductionReport> page = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+
 
         if (criteria.getIs() == null) {
             return PageUtil.toPage(page.map(chemicalFiberProductionReportMapper::toDto));
@@ -137,8 +144,10 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         Timestamp maxTime = chemicalFiberLabelRepository.getTime();
         List<ChemicalFiberProduction> prod = chemicalFiberProductionRepository.findAll();
         Map<String, String> prodMap = new HashMap<>();
+        Map<String, String> prodNameMap = new HashMap<>();
         for (ChemicalFiberProduction dtoprod : prod) {
             prodMap.put(dtoprod.getId().toString(), dtoprod.getNumber());
+            prodNameMap.put(dtoprod.getId().toString(), dtoprod.getProdName());
         }
 
         List<Map<String, Object>> mapList = new ArrayList<>();
@@ -190,6 +199,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
                                 production.setFineness(dtoList.getFineness());
                                 production.setColor(dtoList.getColor());
                                 production.setTime(tamp1);
+                                production.setModel(prodNameMap.get(dtoList.getProductionId().toString()));
                                 production.setProductionNumber(prodMap.get(dtoList.getProductionId().toString()));
                                 if (dtoList.getStatus() != 3) {
                                     production.setProductionPacketNumber(production.getProductionPacketNumber().add(new BigDecimal(1)));
@@ -232,8 +242,14 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             /*criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));*/
         }
-        //List<ChemicalFiberProductionReport> reportList = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
-        List<ChemicalFiberProductionReportDTO> reportList = test(criteria);
+
+        List<ChemicalFiberProductionReportDTO> reportList = new ArrayList<>();
+        if (criteria.getIs() == null) {
+            reportList = chemicalFiberProductionReportMapper.toDto(chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+        } else {
+            reportList = test(criteria);
+        }
+
 
 
         // 生产包数
@@ -412,7 +428,12 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
             criteria.setEndTime(time2);*/
         }
         //List<ChemicalFiberProductionReport> procuctionReportList = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
-        List<ChemicalFiberProductionReportDTO> procuctionReportList = test(criteria);
+        List<ChemicalFiberProductionReportDTO> procuctionReportList = new ArrayList<>();
+        if (criteria.getIs() == null) {
+            procuctionReportList = chemicalFiberProductionReportMapper.toDto(chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+        } else {
+            procuctionReportList = test(criteria);
+        }
 
         List<Map<String, Object>> listMap = new ArrayList<>();
         Map<String, Object> map = new HashMap<>();
