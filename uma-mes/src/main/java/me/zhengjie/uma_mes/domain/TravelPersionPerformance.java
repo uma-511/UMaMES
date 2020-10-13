@@ -50,6 +50,12 @@ public class TravelPersionPerformance implements Serializable {
     private String permission;
 
     /**
+     * 客户名称
+     */
+    @Column(name = "customer_name")
+    private String customerName;
+
+    /**
      * 里程费
      */
     @Column(name = "mileage_fee")

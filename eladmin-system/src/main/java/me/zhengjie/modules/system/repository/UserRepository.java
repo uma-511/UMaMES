@@ -30,13 +30,13 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Query(value = "update user set email = ?2 where username = ?1",nativeQuery = true)
     void updateEmail(String username, String email);
 
-    @Query(value = "select * from user where dept_id = :id and realname like %:realname% ",nativeQuery = true)
+    @Query(value = "select * from user where dept_id = :id and realname like %:realname%  and is_worker = 1 ",nativeQuery = true)
     List<User> getUserList(Long id, String realname);
 
-    @Query(value = "select * from user where dept_id in (:ids) and realname like %:realname% ",nativeQuery = true)
+    @Query(value = "select * from user where dept_id in (:ids) and realname like %:realname%  and is_worker = 1 ",nativeQuery = true)
     List<User> getUserListByDept(List<Long> ids, String realname);
 
-    @Query(value = "select * from user where realname like %:realname% ",nativeQuery = true)
+    @Query(value = "select * from user where realname like %:realname% and is_worker = 1 ",nativeQuery = true)
     List<User> getUserListByRealName(String realname);
 
     @Query(value = "select j.`name` from job j where j.id=(select u.job_id from `user` u where u.id= :id) limit 1",nativeQuery = true)

@@ -44,4 +44,10 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
 
     @Query(value = "SELECT r.permission FROM role r WHERE r.id = (select ur.role_id  from users_roles ur where ur.user_id =(select u.id from user u where u.realname=:username)) limit 1",nativeQuery = true)
     String getPermissionByRealName(@Param("username") String username);
+
+    @Query(value = "select j.`name` from job j where j.id=(select u.job_id from `user` u where u.id= :id) limit 1",nativeQuery = true)
+    String getPermissionByUserId(Long id);
+
+    @Query(value = "SELECT n.customer_name FROM uma_chemical_fiber_delivery_note n where n.scan_number=:scanNumber limit 1",nativeQuery = true)
+    String getCusotmerNameByScanNumber(@Param("scanNumber") String scanNumber);
 }

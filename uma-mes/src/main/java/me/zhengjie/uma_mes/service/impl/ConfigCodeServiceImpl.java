@@ -51,7 +51,6 @@ public class ConfigCodeServiceImpl implements ConfigCodeService {
     }
 
     @Override
-    @Cacheable
     public List<ConfigCodeDTO> queryAll(ConfigCodeQueryCriteria criteria){
         return configCodeMapper.toDto(configCodeRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
     }
@@ -62,24 +61,6 @@ public class ConfigCodeServiceImpl implements ConfigCodeService {
         ConfigCode configCode = configCodeRepository.findById(id).orElseGet(ConfigCode::new);
         ValidationUtil.isNull(configCode.getId(),"ConfigCode","id",id);
         return configCodeMapper.toDto(configCode);
-    }
-
-    @Override
-    @Cacheable
-    public String getCompanyName() {
-        return configCodeRepository.getCompanyName();
-    }
-
-    @Override
-    @Cacheable
-    public String getSerialCode() {
-        return configCodeRepository.getSerialCode();
-    }
-
-    @Override
-    @Cacheable
-    public String getAddress() {
-        return configCodeRepository.getAddress();
     }
 
     @Override
