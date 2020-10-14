@@ -47,6 +47,8 @@ public class NettyTcpServer {
     public static Map<String, String> ipPortMap = new ConcurrentHashMap<String, String>();
 
     public static Map<String, Terminal> terminalMap = new ConcurrentHashMap<String, Terminal>();
+
+    public static String terminalIp;
     /**
      * 开启Netty tcp server服务
      *

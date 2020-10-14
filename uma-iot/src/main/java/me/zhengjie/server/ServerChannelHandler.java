@@ -57,6 +57,7 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
         String text = msg.toString().toUpperCase().replace("[", "").replace("]", "");
 //        String decodeText=CoderUtils.decoder(text.replaceAll(" ",""));
         String ip = getIPString(ctx);
+        //NettyTcpServer.terminalIp = getIPString(ctx);
 
         if (!checkTerminal(ip)) {
             initTerminal(ctx);
@@ -129,6 +130,7 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
 
     private void initTerminal(ChannelHandlerContext ctx) {
         String ip = getIPString(ctx);
+        NettyTcpServer.terminalIp = getIPString(ctx);
         String port = getIPPort(ctx);
         log.info("terminalIp:" + ip);
         Channel channel = ctx.channel();

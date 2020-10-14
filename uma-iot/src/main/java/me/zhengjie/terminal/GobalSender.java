@@ -32,6 +32,10 @@ public class GobalSender extends SendCommand {
         channel.writeAndFlush(command);
     }
 
+    public void sendImmediate1(String command, Channel ann){
+        ann.writeAndFlush(command);
+    }
+
     public void sendImmediate(byte[] command){
         channel.writeAndFlush(command);
     }

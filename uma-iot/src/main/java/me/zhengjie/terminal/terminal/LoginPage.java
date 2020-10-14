@@ -1,6 +1,7 @@
 package me.zhengjie.terminal.terminal;
 
 import com.alibaba.fastjson.JSONObject;
+import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.domain.ControlPannelInfo;
 import me.zhengjie.domain.UserInfo;
@@ -114,6 +115,7 @@ public class LoginPage extends SendCommand {
             status = 0;
             loginClicked = false;
             Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+            Channel chann = NettyTcpServer.map.get(ip);
             GobalSender gobalSender = terminal.getGobalSender();
 
             UserInfo userInfo = terminal.getUserinfo();
@@ -137,7 +139,9 @@ public class LoginPage extends SendCommand {
                 if (createByTerminal) {
                     ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
                     controlPannelInfo.setBanci(userInfo.getBanci());
+
                     gobalSender.sendImmediate(switchScreen("00 02"));
+                    //gobalSender.sendImmediate1(switchScreen("00 02"), chann);
                     gobalSender.addCommand(controllerPage.sendBanci(userInfo.getBanci(), ip));
                 } else {
                     gobalSender.addCommand(switchScreen("00 03"));
