@@ -176,9 +176,13 @@ public class ChemicalFiberWarehousingReortServiceImpl implements ChemicalFiberWa
         String data1 = simpleDateFormat.format(a);
         String data2 = simpleDateFormat.format(b);
 
+        SimpleDateFormat fir = new SimpleDateFormat("yyyy-MM");
+        Date c = new Date(criteria.getTempStartTime());
+        String data3 = fir.format(c);
         map.put("list", listMap);
         map.put("tonAndBarch", sumTonAndBarch);
         map.put("sumTotalPrice", sumTotalPrice);
+        map.put("startDateMum", data3);
         map.put("startDate", data1);
         map.put("endDate", data2);
 
