@@ -1,6 +1,11 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
+import cn.afterturn.easypoi.excel.entity.TemplateExportParams;
+import cn.hutool.extra.template.TemplateConfig;
 import me.zhengjie.uma_mes.domain.WorkAttendance;
+import me.zhengjie.uma_mes.service.dto.AcidPersionPerformanceDTO;
+import me.zhengjie.uma_mes.service.dto.AcidPersionPerformanceQueryCriteria;
 import me.zhengjie.utils.ValidationUtil;
 import me.zhengjie.utils.FileUtil;
 import me.zhengjie.uma_mes.repository.WorkAttendanceRepository;
@@ -8,6 +13,7 @@ import me.zhengjie.uma_mes.service.WorkAttendanceService;
 import me.zhengjie.uma_mes.service.dto.WorkAttendanceDTO;
 import me.zhengjie.uma_mes.service.dto.WorkAttendanceQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.WorkAttendanceMapper;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +25,10 @@ import org.springframework.data.domain.Pageable;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
@@ -52,6 +61,15 @@ public class WorkAttendanceServiceImpl implements WorkAttendanceService {
         }
         criteria.setEnableList(booleanList);
         Page<WorkAttendance> page = workAttendanceRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        BigDecimal zero = new BigDecimal(0.00);
+        for(WorkAttendance w:page){
+            if(null != w.getDay() && w.getDay().compareTo(zero) == 0){
+                w.setDay(null);
+            }
+            if(null != w.getPrice() && w.getPrice().compareTo(zero) == 0){
+                w.setPrice(null);
+            }
+        }
         return PageUtil.toPage(page.map(workAttendanceMapper::toDto));
     }
 
@@ -150,5 +168,92 @@ public class WorkAttendanceServiceImpl implements WorkAttendanceService {
             list.add(map);
         }
         FileUtil.downloadExcel(list, response);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void downloadWorkAttendance(WorkAttendanceQueryCriteria criteria, HttpServletResponse response) {
+        criteria.setEnable(Boolean.TRUE);
+        List<WorkAttendanceDTO> dtoList = this.queryAll(criteria);
+        String lastName = "";
+        lastName = "/workAttendance_temp.xls";
+        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + lastName;
+        // 加载模板
+        TemplateExportParams params = new TemplateExportParams(templatePath);
+        // params.setReadonly(Boolean.TRUE);
+        Workbook workbook = null;
+        // 单条记录
+        Map<String, Object> map = new HashMap<String, Object>();
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+        if(null != criteria.getMonthTime()){
+            map.put("lessDate", longDateTOStr(criteria.getMonthTime()));
+            map.put("longDate", sdf.format(criteria.getStartTime()) + " 至 " + sdf.format(criteria.getEndTime()));
+        }
+        BigDecimal countDay = BigDecimal.ZERO;
+        BigDecimal countPrice = BigDecimal.ZERO;
+        // 组装循环列表
+        List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
+        for(WorkAttendanceDTO t: dtoList){
+            Map<String, String> lm = new HashMap<String, String>();
+            lm.put("attenceDate", timestampToStr(t.getAttenceDate()));
+            lm.put("person", t.getPersonName());
+            lm.put("attenceType", t.getAttenceType());
+            lm.put("day", dayToString(t.getDay()));
+            lm.put("price", zeroDecimalToNull(t.getPrice()));
+            lm.put("remark", t.getRemark());
+            listMap.add(lm);
+            // 统计
+            countDay = addDecimalWithoutNull(countDay,t.getDay());
+            countPrice = addDecimalWithoutNull(countPrice,t.getPrice());
+        }
+        map.put("acidPersonPerformanceList", listMap);
+
+        map.put("totalDay",dayToString(countDay) + "天");
+        map.put("totalPrice",zeroDecimalToNull(countPrice) + "元");
+        workbook = ExcelExportUtil.exportExcel(params, map);
+        // String fileName = longDateTOStr(travelPersionPerformanceQueryCriteria.getMonthTime())+"送货绩效统计.xlsx";
+        FileUtil.downLoadExcel("fileName", response, workbook);
+    }
+
+
+
+    private BigDecimal addDecimalWithoutNull(BigDecimal self,BigDecimal count){
+        if(null == count){
+            return self;
+        }else{
+            return self.add(count);
+        }
+    }
+
+    private String zeroDecimalToNull(BigDecimal bigDecimal) {
+        if(null == bigDecimal || bigDecimal.compareTo(BigDecimal.ZERO) == 0) {
+            return null;
+        }else{
+            return bigDecimal.toString();
+        }
+    }
+
+    private String longDateTOStr(Long longDate){
+        if(null == longDate){
+            return null;
+        }else{
+            Date date = new Date(longDate);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            return sdf.format(date);
+        }
+    }
+
+    private String dayToString(BigDecimal bigDecimal) {
+        if(null == bigDecimal || bigDecimal.compareTo(BigDecimal.ZERO) == 0) {
+            return "";
+        }else{
+            return Float.parseFloat(bigDecimal.toString())+"";
+        }
+    }
+
+    private String timestampToStr(Timestamp timestamp){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date(timestamp.getTime());
+        return sdf.format(date);
     }
 }

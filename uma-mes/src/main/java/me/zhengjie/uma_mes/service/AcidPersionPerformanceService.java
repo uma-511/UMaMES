@@ -3,6 +3,7 @@ package me.zhengjie.uma_mes.service;
 import me.zhengjie.uma_mes.domain.AcidPersionPerformance;
 import me.zhengjie.uma_mes.service.dto.AcidPersionPerformanceDTO;
 import me.zhengjie.uma_mes.service.dto.AcidPersionPerformanceQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.TravelPersionPerformanceQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import java.util.Map;
 import java.util.List;
@@ -44,4 +45,6 @@ public interface AcidPersionPerformanceService {
     void delete(Integer id);
 
     void download(List<AcidPersionPerformanceDTO> all, HttpServletResponse response) throws IOException;
+
+    void downloadAcidPersonPerformance(AcidPersionPerformanceQueryCriteria criteria, HttpServletResponse response) throws IOException;
 }

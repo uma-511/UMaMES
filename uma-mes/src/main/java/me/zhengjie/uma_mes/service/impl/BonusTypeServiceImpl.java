@@ -1,5 +1,6 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import me.zhengjie.uma_mes.domain.AttenceType;
 import me.zhengjie.uma_mes.domain.BonusJob;
 import me.zhengjie.uma_mes.domain.BonusType;
 import me.zhengjie.uma_mes.domain.CycleLabel;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
@@ -54,6 +56,12 @@ public class BonusTypeServiceImpl implements BonusTypeService {
     @Override
     public Map<String,Object> queryAll(BonusTypeQueryCriteria criteria, Pageable pageable){
         Page<BonusType> page = bonusTypeRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        BigDecimal zero = new BigDecimal(0.00);
+        for(BonusType b:page){
+            if(null != b.getPrice() && b.getPrice().compareTo(zero) == 0){
+                b.setPrice(null);
+            }
+        }
         return PageUtil.toPage(page.map(bonusTypeMapper::toDto));
     }
 

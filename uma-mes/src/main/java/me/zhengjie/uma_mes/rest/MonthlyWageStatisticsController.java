@@ -2,6 +2,7 @@ package me.zhengjie.uma_mes.rest;
 
 import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
+import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.MonthlyWageStatistics;
 import me.zhengjie.uma_mes.service.MonthlyWageStatisticsService;
 import me.zhengjie.uma_mes.service.dto.MonthlyWageStatisticsQueryCriteria;
@@ -13,6 +14,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -34,7 +39,54 @@ public class MonthlyWageStatisticsController {
     @ApiOperation("导出数据")
     @GetMapping(value = "/download")
     public void download(HttpServletResponse response, MonthlyWageStatisticsQueryCriteria criteria) throws IOException {
-        monthlyWageStatisticsService.download(monthlyWageStatisticsService.queryAll(criteria), response);
+        // monthlyWageStatisticsService.download(monthlyWageStatisticsService.queryAll(criteria), response);
+        if(null != criteria.getMonthTime() && !criteria.getMonthTime().equals("")){
+            Date date = new Date(criteria.getMonthTime());
+            try{
+                criteria.setStartTime(changeToStartTime(date));
+                criteria.setEndTime(changeToEndTime(date));
+            }catch (Exception e){
+                throw new BadRequestException("日期条件转换异常");
+            }
+        }
+        monthlyWageStatisticsService.downloadMonthlyWageStatistics(criteria, response);
+    }
+
+    public Date changeToEndTime(Date date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH,0);
+        date=sdf.parse(sdf.format(calendar.getTime()));
+        return date;
+    }
+
+
+
+    @GetMapping(value = "/oneKeyDelete")
+    @Log("一键删除上月工资")
+    @ApiOperation("一键删除上月工资")
+    public ResponseEntity oneKeyDelete(){
+        monthlyWageStatisticsService.oneKeyDelete();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/oneKeyReset")
+    @Log("一键重置上月工资")
+    @ApiOperation("一键重置上月工资")
+    public ResponseEntity oneKeyReset(){
+        monthlyWageStatisticsService.oneKeyReset();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public Date changeToStartTime(Date date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH,1);
+        date=sdf.parse(sdf.format(calendar.getTime()));
+        return date;
     }
 
     @GetMapping

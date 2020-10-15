@@ -44,4 +44,6 @@ public interface WorkAttendanceService {
     void delete(Integer id);
 
     void download(List<WorkAttendanceDTO> all, HttpServletResponse response) throws IOException;
+
+    void downloadWorkAttendance(WorkAttendanceQueryCriteria criteria, HttpServletResponse response) throws IOException;
 }

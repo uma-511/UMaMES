@@ -56,6 +56,18 @@ public class TravelPersionPerformance implements Serializable {
     private String customerName;
 
     /**
+     * 发货地
+     */
+    @Column(name = "start_place")
+    private String startPlace;
+
+    /**
+     * 目的地
+     */
+    @Column(name = "end_place")
+    private String endPlace;
+
+    /**
      * 里程费
      */
     @Column(name = "mileage_fee")

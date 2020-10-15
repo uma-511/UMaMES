@@ -1,6 +1,7 @@
 package me.zhengjie.uma_mes.rest;
 
 import me.zhengjie.aop.log.Log;
+import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.AcidPersionPerformance;
 import me.zhengjie.uma_mes.service.AcidPersionPerformanceService;
 import me.zhengjie.uma_mes.service.dto.AcidPersionPerformanceQueryCriteria;
@@ -12,6 +13,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -33,14 +38,52 @@ public class AcidPersionPerformanceController {
     @ApiOperation("导出数据")
     @GetMapping(value = "/download")
     public void download(HttpServletResponse response, AcidPersionPerformanceQueryCriteria criteria) throws IOException {
-        acidPersionPerformanceService.download(acidPersionPerformanceService.queryAll(criteria), response);
+        // acidPersionPerformanceService.download(acidPersionPerformanceService.queryAll(criteria), response);
+        if(null != criteria.getMonthTime() && !criteria.getMonthTime().equals("")){
+            Date date = new Date(criteria.getMonthTime());
+            try{
+                criteria.setStartTime(changeToStartTime(date));
+                criteria.setEndTime(changeToEndTime(date));
+            }catch (Exception e){
+                throw new BadRequestException("日期条件转换异常");
+            }
+        }
+        acidPersionPerformanceService.downloadAcidPersonPerformance(criteria, response);
     }
 
     @GetMapping
     @Log("查询AcidPersionPerformance")
     @ApiOperation("查询AcidPersionPerformance")
     public ResponseEntity getAcidPersionPerformances(AcidPersionPerformanceQueryCriteria criteria, Pageable pageable){
+        if(null != criteria.getMonthTime() && !criteria.getMonthTime().equals("")){
+            Date date = new Date(criteria.getMonthTime());
+            try{
+                criteria.setStartTime(changeToStartTime(date));
+                criteria.setEndTime(changeToEndTime(date));
+            }catch (Exception e){
+                throw new BadRequestException("日期条件转换异常");
+            }
+        }
         return new ResponseEntity<>(acidPersionPerformanceService.queryAll(criteria,pageable),HttpStatus.OK);
+    }
+
+    public Date changeToEndTime(Date date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH,0);
+        date=sdf.parse(sdf.format(calendar.getTime()));
+        return date;
+    }
+
+    public Date changeToStartTime(Date date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH,1);
+        date=sdf.parse(sdf.format(calendar.getTime()));
+        return date;
     }
 
     @PostMapping

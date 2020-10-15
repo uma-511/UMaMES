@@ -57,6 +57,18 @@ public class TravelExpensesServiceImpl implements TravelExpensesService {
         }
         criteria.setEnableList(booleanList);
         Page<TravelExpenses> page = travelExpensesRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        BigDecimal zero = new BigDecimal(0.00);
+        for(TravelExpenses t : page){
+            if(null != t.getVanPrice() && t.getVanPrice().compareTo(zero) == 0){
+                t.setVanPrice(null);
+            }
+            if(null != t.getTankPrice() && t.getTankPrice().compareTo(zero) == 0){
+                t.setTankPrice(null);
+            }
+            if(null != t.getTractorPrice() && t.getTractorPrice().compareTo(zero) == 0){
+                t.setTractorPrice(null);
+            }
+        }
         return PageUtil.toPage(page.map(travelExpensesMapper::toDto));
     }
 

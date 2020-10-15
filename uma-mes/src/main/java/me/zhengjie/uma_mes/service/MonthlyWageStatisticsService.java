@@ -45,7 +45,13 @@ public interface MonthlyWageStatisticsService {
 
     void generateWage();
 
+    void oneKeyDelete();
+
+    void oneKeyReset();
+
     void update(MonthlyWageStatistics resources);
 
     void download(List<MonthlyWageStatisticsDTO> all, HttpServletResponse response) throws IOException;
+
+    void downloadMonthlyWageStatistics(MonthlyWageStatisticsQueryCriteria criteria, HttpServletResponse response) throws IOException;
 }

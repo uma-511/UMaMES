@@ -30,6 +30,16 @@ public class TravelPersionPerformanceDTO implements Serializable {
      */
     private String scanNumber;
 
+    /**
+     * 发货地
+     */
+    private String startPlace;
+
+    /**
+     * 目的地
+     */
+    private String endPlace;
+
     // 职位
     private String permission;
 

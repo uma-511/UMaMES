@@ -1,5 +1,8 @@
 package me.zhengjie.uma_mes.service.impl;
 
+import cn.afterturn.easypoi.excel.ExcelExportUtil;
+import cn.afterturn.easypoi.excel.entity.TemplateExportParams;
+import cn.hutool.extra.template.TemplateConfig;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.*;
 import me.zhengjie.uma_mes.repository.WageUserRepository;
@@ -9,6 +12,9 @@ import me.zhengjie.utils.ValidationUtil;
 import me.zhengjie.utils.FileUtil;
 import me.zhengjie.uma_mes.repository.MonthlyWageStatisticsRepository;
 import me.zhengjie.uma_mes.service.mapper.MonthlyWageStatisticsMapper;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,6 +91,35 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         MonthlyWageStatistics monthlyWageStatistics = monthlyWageStatisticsRepository.findById(id).orElseGet(MonthlyWageStatistics::new);
         ValidationUtil.isNull(monthlyWageStatistics.getId(),"MonthlyWageStatistics","id",id);
         return monthlyWageStatisticsMapper.toDto(monthlyWageStatistics);
+    }
+
+    @Override
+    public void oneKeyDelete() {
+        MonthlyWageStatisticsQueryCriteria monthlyWageStatisticsQueryCriteria = new MonthlyWageStatisticsQueryCriteria();
+        monthlyWageStatisticsQueryCriteria.setStatus("0");
+        try{
+            monthlyWageStatisticsQueryCriteria.setStartTime(changeToStartTime(getLastMonthStartTime()));
+            monthlyWageStatisticsQueryCriteria.setEndTime(changeToEndTime(getLastMonthEndTime()));
+        }catch (Exception e){
+            throw new BadRequestException("删除失败");
+        }
+        List<MonthlyWageStatisticsDTO> monthlyWageStatisticsDTOList = this.queryAll(monthlyWageStatisticsQueryCriteria);
+        for(MonthlyWageStatisticsDTO dto : monthlyWageStatisticsDTOList){
+            this.delete(dto.getId());
+        }
+    } @Override
+    public void oneKeyReset() {
+        MonthlyWageStatisticsQueryCriteria monthlyWageStatisticsQueryCriteria = new MonthlyWageStatisticsQueryCriteria();
+        try{
+            monthlyWageStatisticsQueryCriteria.setStartTime(changeToStartTime(getLastMonthStartTime()));
+            monthlyWageStatisticsQueryCriteria.setEndTime(changeToEndTime(getLastMonthEndTime()));
+        }catch (Exception e){
+            throw new BadRequestException("重置失败");
+        }
+        List<MonthlyWageStatisticsDTO> monthlyWageStatisticsDTOList = this.queryAll(monthlyWageStatisticsQueryCriteria);
+        for(MonthlyWageStatisticsDTO dto : monthlyWageStatisticsDTOList){
+            this.delete(dto.getId());
+        }
     }
 
     @Override
@@ -253,8 +288,8 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         // 查询上月已生成记录
         MonthlyWageStatisticsQueryCriteria monthlyWageStatisticsQueryCriteria = new MonthlyWageStatisticsQueryCriteria();
         try {
-            monthlyWageStatisticsQueryCriteria.setStartTime(getLastMonthStartTime());
-            monthlyWageStatisticsQueryCriteria.setEndTime(getLastMonthEndTime());
+            monthlyWageStatisticsQueryCriteria.setStartTime(changeToStartTime(getLastMonthStartTime()));
+            monthlyWageStatisticsQueryCriteria.setEndTime(changeToEndTime(getLastMonthEndTime()));
         }catch (Exception e){
             throw new BadRequestException("生成失败");
         }
@@ -274,8 +309,8 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         AcidPersionPerformanceQueryCriteria acidPersionPerformanceQueryCriteria = new AcidPersionPerformanceQueryCriteria();
         acidPersionPerformanceQueryCriteria.setEnableList(booleanList);
         try {
-            acidPersionPerformanceQueryCriteria.setStartTime(getLastMonthStartTime());
-            acidPersionPerformanceQueryCriteria.setEndTime(getLastMonthEndTime());
+            acidPersionPerformanceQueryCriteria.setStartTime(changeToStartTime(getLastMonthStartTime()));
+            acidPersionPerformanceQueryCriteria.setEndTime(changeToEndTime(getLastMonthEndTime()));
         }catch (Exception e){
             throw new BadRequestException("生成失败");
         }
@@ -285,8 +320,8 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         TravelPersionPerformanceQueryCriteria travelPersionPerformanceQueryCriteria = new TravelPersionPerformanceQueryCriteria();
         travelPersionPerformanceQueryCriteria.setEnableList(booleanList);
         try{
-            travelPersionPerformanceQueryCriteria.setStartTime(getLastMonthStartTime());
-            travelPersionPerformanceQueryCriteria.setEndTime(getLastMonthEndTime());
+            travelPersionPerformanceQueryCriteria.setStartTime(changeToStartTime(getLastMonthStartTime()));
+            travelPersionPerformanceQueryCriteria.setEndTime(changeToEndTime(getLastMonthEndTime()));
         }catch (Exception e){
             throw new BadRequestException("生成失败");
         }
@@ -300,8 +335,8 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         WorkAttendanceQueryCriteria workAttendanceQueryCriteria = new WorkAttendanceQueryCriteria();
         workAttendanceQueryCriteria.setEnableList(booleanList);
         try{
-            workAttendanceQueryCriteria.setStartTime(getLastMonthStartTime());
-            workAttendanceQueryCriteria.setEndTime(getLastMonthEndTime());
+            workAttendanceQueryCriteria.setStartTime(changeToStartTime(getLastMonthStartTime()));
+            workAttendanceQueryCriteria.setEndTime(changeToEndTime(getLastMonthEndTime()));
         }catch (Exception e){
             throw new BadRequestException("生成失败");
         }
@@ -547,8 +582,8 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
         List<Map<String, Object>> list = new ArrayList<>();
         MonthlyWageStatisticsQueryCriteria monthlyWageStatisticsQueryCriteria = new MonthlyWageStatisticsQueryCriteria();
         try {
-            monthlyWageStatisticsQueryCriteria.setStartTime(getLastMonthStartTime());
-            monthlyWageStatisticsQueryCriteria.setEndTime(getLastMonthEndTime());
+            monthlyWageStatisticsQueryCriteria.setStartTime(changeToStartTime(getLastMonthStartTime()));
+            monthlyWageStatisticsQueryCriteria.setEndTime(changeToEndTime(getLastMonthEndTime()));
         }catch (Exception e){
             throw new BadRequestException("获取上月时间失败");
         }
@@ -578,5 +613,140 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
             list.add(map);
         }
         FileUtil.downloadExcel(list, response);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void downloadMonthlyWageStatistics(MonthlyWageStatisticsQueryCriteria criteria, HttpServletResponse response) {
+        criteria.setStatus("1");
+        List<MonthlyWageStatisticsDTO> dtoList = this.queryAll(criteria);
+        String lastName = "";
+        lastName = "/monthlyWageStatistics_temp.xls";
+        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + lastName;
+        // 加载模板
+        TemplateExportParams params = new TemplateExportParams(templatePath);
+        // params.setReadonly(Boolean.TRUE);
+        Workbook workbook = null;
+        // 单条记录
+        Map<String, Object> map = new HashMap<String, Object>();
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+        if(null != criteria.getMonthTime()){
+            map.put("lessDate", longDateTOStr(criteria.getMonthTime()));
+            map.put("longDate", sdf.format(criteria.getStartTime()) + " 至 " + sdf.format(criteria.getEndTime()));
+        }
+        BigDecimal basicSalary = BigDecimal.ZERO;
+        BigDecimal performance = BigDecimal.ZERO;
+        BigDecimal cardPrize = BigDecimal.ZERO;
+        BigDecimal safePrize = BigDecimal.ZERO;
+        BigDecimal fullPrize = BigDecimal.ZERO;
+        BigDecimal highTemperatureSubsidy = BigDecimal.ZERO;
+        BigDecimal overtimePay = BigDecimal.ZERO;
+        BigDecimal otherPrize = BigDecimal.ZERO;
+        BigDecimal wagesPayable = BigDecimal.ZERO;
+        BigDecimal leaveCount = BigDecimal.ZERO;
+        BigDecimal lackCard = BigDecimal.ZERO;
+        BigDecimal violationOfSafety = BigDecimal.ZERO;
+        BigDecimal netSalary = BigDecimal.ZERO;
+        // 组装循环列表
+        List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
+        for(MonthlyWageStatisticsDTO t: dtoList){
+            Map<String, String> lm = new HashMap<String, String>();
+            lm.put("person", t.getPersonName());
+            lm.put("dept", t.getDept());
+            lm.put("job", t.getJob());
+            lm.put("basicSalary", zeroDecimalToNull(t.getBasicSalary()));
+            lm.put("performance", zeroDecimalToNull(t.getPerformance()));
+            lm.put("cardPrize", zeroDecimalToNull(t.getCardPrize()));
+            lm.put("safePrize", zeroDecimalToNull(t.getSafePrize()));
+            lm.put("fullPrize", zeroDecimalToNull(t.getFullPrize()));
+            lm.put("highTemperatureSubsidy", zeroDecimalToNull(t.getHighTemperatureSubsidy()));
+            lm.put("overtimePay", zeroDecimalToNull(t.getOvertimePay()));
+            lm.put("otherPrize", zeroDecimalToNull(t.getOtherPrize()));
+            lm.put("wagesPayable", zeroDecimalToNull(t.getWagesPayable()));
+            lm.put("attendance", dayToString(t.getAttendance()));
+            lm.put("attendanceReal", dayToString(t.getAttendanceReal()));
+            lm.put("leaveCount", zeroDecimalToNull(t.getLeaveCount()));
+            lm.put("lackCard", zeroDecimalToNull(t.getLackCard()));
+            lm.put("violationOfSafety", zeroDecimalToNull(t.getViolationOfSafety()));
+            lm.put("netSalary", zeroDecimalToNull(t.getNetSalary()));
+
+
+
+            listMap.add(lm);
+            // 统计
+            basicSalary = addDecimalWithoutNull(basicSalary,t.getBasicSalary());
+            performance = addDecimalWithoutNull(performance,t.getPerformance());
+            cardPrize = addDecimalWithoutNull(cardPrize,t.getCardPrize());
+            safePrize = addDecimalWithoutNull(safePrize,t.getSafePrize());
+            fullPrize = addDecimalWithoutNull(fullPrize,t.getFullPrize());
+            highTemperatureSubsidy = addDecimalWithoutNull(highTemperatureSubsidy,t.getHighTemperatureSubsidy());
+            overtimePay = addDecimalWithoutNull(overtimePay,t.getOvertimePay());
+            otherPrize = addDecimalWithoutNull(otherPrize,t.getOtherPrize());
+            wagesPayable = addDecimalWithoutNull(wagesPayable,t.getWagesPayable());
+            leaveCount = addDecimalWithoutNull(leaveCount,t.getLeaveCount());
+            lackCard = addDecimalWithoutNull(lackCard,t.getLackCard());
+            violationOfSafety = addDecimalWithoutNull(violationOfSafety,t.getViolationOfSafety());
+            netSalary = addDecimalWithoutNull(netSalary,t.getNetSalary());
+        }
+        map.put("monthlyWageStatisticsList", listMap);
+
+        map.put("totalBasicSalary",zeroDecimalToNull(basicSalary) + "元");
+        map.put("totalPerformance",zeroDecimalToNull(performance) + "元");
+        map.put("totalCardPrize",zeroDecimalToNull(cardPrize) + "元");
+        map.put("totalCardPrize",zeroDecimalToNull(safePrize) + "元");
+        map.put("totalFullPrize",zeroDecimalToNull(fullPrize) + "元");
+        map.put("totalHighTemperatureSubsidy",zeroDecimalToNull(highTemperatureSubsidy) + "元");
+        map.put("totalOvertimePay",zeroDecimalToNull(overtimePay) + "元");
+        map.put("totalOtherPrize",zeroDecimalToNull(otherPrize) + "元");
+        map.put("totalWagesPayable",zeroDecimalToNull(wagesPayable) + "元");
+        map.put("totalLeaveCount",zeroDecimalToNull(leaveCount) + "元");
+        map.put("totalLackCard",zeroDecimalToNull(lackCard) + "元");
+        map.put("totalViolationOfSafety",zeroDecimalToNull(violationOfSafety) + "元");
+        map.put("totalNetSalary",zeroDecimalToNull(netSalary) + "元");
+        workbook = ExcelExportUtil.exportExcel(params, map);
+        // String fileName = longDateTOStr(travelPersionPerformanceQueryCriteria.getMonthTime())+"送货绩效统计.xlsx";
+        FileUtil.downLoadExcel("fileName", response, workbook);
+    }
+
+
+
+    private BigDecimal addDecimalWithoutNull(BigDecimal self,BigDecimal count){
+        if(null == count){
+            return self;
+        }else{
+            return self.add(count);
+        }
+    }
+
+    private String zeroDecimalToNull(BigDecimal bigDecimal) {
+        if(null == bigDecimal || bigDecimal.compareTo(BigDecimal.ZERO) == 0) {
+            return "";
+        }else{
+            return bigDecimal.toString();
+        }
+    }
+
+    private String dayToString(BigDecimal bigDecimal) {
+        if(null == bigDecimal || bigDecimal.compareTo(BigDecimal.ZERO) == 0) {
+            return "";
+        }else{
+            return Float.parseFloat(bigDecimal.toString())+"";
+        }
+    }
+
+    private String longDateTOStr(Long longDate){
+        if(null == longDate){
+            return null;
+        }else{
+            Date date = new Date(longDate);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            return sdf.format(date);
+        }
+    }
+
+    private String timestampToStr(Timestamp timestamp){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new Date(timestamp.getTime());
+        return sdf.format(date);
     }
 }

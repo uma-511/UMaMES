@@ -94,6 +94,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public void changeIsWorker(Long id) {
         User user = userRepository.findById(id).orElseGet(User::new);
+        if (null == user.getIsWorker()){
+            user.setIsWorker(Boolean.FALSE);
+        }
         if (user.getIsWorker()){
             user.setIsWorker(Boolean.FALSE);
         } else {
@@ -133,7 +136,7 @@ public class UserServiceImpl implements UserService {
         if(userRepository.findByEmail(resources.getEmail())!=null){
             throw new EntityExistException(User.class,"email",resources.getEmail());
         }*/
-
+        resources.setIsWorker(Boolean.FALSE);
         // 默认密码 123456，此密码是加密后的字符
         resources.setPassword("202cb962ac59075b964b07152d234b70");
         return userMapper.toDto(userRepository.save(resources));

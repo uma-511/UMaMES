@@ -18,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import me.zhengjie.utils.PageUtil;
 import me.zhengjie.utils.QueryHelp;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
@@ -46,6 +48,12 @@ public class AttenceTypeServiceImpl implements AttenceTypeService {
     @Override
     public Map<String,Object> queryAll(AttenceTypeQueryCriteria criteria, Pageable pageable){
         Page<AttenceType> page = attenceTypeRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        BigDecimal zero = new BigDecimal(0.00);
+        for(AttenceType a:page){
+            if(null != a.getPrice() && a.getPrice().compareTo(zero) == 0){
+                a.setPrice(null);
+            }
+        }
         return PageUtil.toPage(page.map(attenceTypeMapper::toDto));
     }
 

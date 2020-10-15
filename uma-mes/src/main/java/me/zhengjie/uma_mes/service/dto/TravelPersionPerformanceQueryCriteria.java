@@ -38,13 +38,15 @@ public class TravelPersionPerformanceQueryCriteria{
      * 大于等于
       */
     @Query(type = Query.Type.GREATER_THAN, propName = "createTime")
-    private Timestamp startTime;
+    private Date startTime;
+
+    private Long monthTime;
 
     /**
      * 小于等于
      */
     @Query(type = Query.Type.LESS_THAN, propName = "createTime")
-    private Timestamp endTime;
+    private Date endTime;
 
     /**
      * 是否可用

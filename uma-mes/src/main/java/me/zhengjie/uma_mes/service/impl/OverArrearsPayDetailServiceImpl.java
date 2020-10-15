@@ -1,6 +1,7 @@
 package me.zhengjie.uma_mes.service.impl;
 
 import me.zhengjie.exception.BadRequestException;
+import me.zhengjie.uma_mes.domain.AttenceType;
 import me.zhengjie.uma_mes.domain.Customer;
 import me.zhengjie.uma_mes.domain.OverArrearsPayDetail;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
@@ -67,6 +68,15 @@ public class OverArrearsPayDetailServiceImpl implements OverArrearsPayDetailServ
             criteria.setNotEqualNull("");
         }
         Page<Customer> page = customerRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        BigDecimal zero = new BigDecimal(0.00);
+        for(Customer c:page){
+            if(null != c.getAccount() && c.getAccount().compareTo(zero) == 0){
+                c.setAccount(null);
+            }
+            if(null != c.getOverArrears() && c.getOverArrears().compareTo(zero) == 0){
+                c.setOverArrears(null);
+            }
+        }
         return PageUtil.toPage(page.map(customerMapper::toDto));
     }
 

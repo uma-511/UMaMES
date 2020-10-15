@@ -2,6 +2,7 @@ package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import me.zhengjie.annotation.Query;
@@ -27,17 +28,26 @@ public class AcidPersionPerformanceQueryCriteria{
 
     private Boolean showUnEnable;
 
+    private Long monthTime;
+
+
+    /**
+     * 状态
+     */
+    @Query(propName = "enable")
+    private Boolean enable;
+
     /**
      * 大于等于
      */
     @Query(type = Query.Type.GREATER_THAN, propName = "taskDate")
-    private Timestamp startTime;
+    private Date startTime;
 
     /**
      * 小于等于
      */
     @Query(type = Query.Type.LESS_THAN, propName = "taskDate")
-    private Timestamp endTime;
+    private Date endTime;
 
     // 是否可用
     @Query(type = Query.Type.IN,propName = "enable")

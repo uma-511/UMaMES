@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -59,6 +60,12 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     public Map<String,Object> queryAll(ChemicalFiberProductQueryCriteria criteria, Pageable pageable){
         criteria.setDelFlag(0);
         Page<ChemicalFiberProduct> page = chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        BigDecimal zero = new BigDecimal(0.00);
+        for(ChemicalFiberProduct c : page){
+            if(null != c.getMachining() && c.getMachining().compareTo(zero) == 0){
+                c.setMachining(null);
+            }
+        }
         return PageUtil.toPage(page.map(chemicalFiberProductMapper::toDto));
     }
 

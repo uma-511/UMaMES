@@ -1,6 +1,7 @@
 package me.zhengjie.uma_mes.rest;
 
 import me.zhengjie.aop.log.Log;
+import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.WorkAttendance;
 import me.zhengjie.uma_mes.service.WorkAttendanceService;
 import me.zhengjie.uma_mes.service.dto.WorkAttendanceQueryCriteria;
@@ -12,6 +13,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -34,7 +39,17 @@ public class WorkAttendanceController {
     @GetMapping(value = "/download")
     //@PreAuthorize("@el.check('workAttendance:list')")
     public void download(HttpServletResponse response, WorkAttendanceQueryCriteria criteria) throws IOException {
-        workAttendanceService.download(workAttendanceService.queryAll(criteria), response);
+        // workAttendanceService.download(workAttendanceService.queryAll(criteria), response);
+        if(null != criteria.getMonthTime() && !criteria.getMonthTime().equals("")){
+            Date date = new Date(criteria.getMonthTime());
+            try{
+                criteria.setStartTime(changeToStartTime(date));
+                criteria.setEndTime(changeToEndTime(date));
+            }catch (Exception e){
+                throw new BadRequestException("日期条件转换异常");
+            }
+        }
+        workAttendanceService.downloadWorkAttendance(criteria, response);
     }
 
     @GetMapping
@@ -42,7 +57,35 @@ public class WorkAttendanceController {
     @ApiOperation("查询WorkAttendance")
     //@PreAuthorize("@el.check('workAttendance:list')")
     public ResponseEntity getWorkAttendances(WorkAttendanceQueryCriteria criteria, Pageable pageable){
+        if(null != criteria.getMonthTime() && !criteria.getMonthTime().equals("")){
+            Date date = new Date(criteria.getMonthTime());
+            try{
+                criteria.setStartTime(changeToStartTime(date));
+                criteria.setEndTime(changeToEndTime(date));
+            }catch (Exception e){
+                throw new BadRequestException("日期条件转换异常");
+            }
+        }
         return new ResponseEntity<>(workAttendanceService.queryAll(criteria,pageable),HttpStatus.OK);
+    }
+
+    public Date changeToEndTime(Date date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 23:59:59");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH,0);
+        date=sdf.parse(sdf.format(calendar.getTime()));
+        return date;
+    }
+
+    public Date changeToStartTime(Date date) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd 00:00:00");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH,1);
+        date=sdf.parse(sdf.format(calendar.getTime()));
+        return date;
     }
 
     @PostMapping

@@ -50,4 +50,12 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
 
     @Query(value = "SELECT n.customer_name FROM uma_chemical_fiber_delivery_note n where n.scan_number=:scanNumber limit 1",nativeQuery = true)
     String getCusotmerNameByScanNumber(@Param("scanNumber") String scanNumber);
+
+    @Query(value = "SELECT n.start_place FROM uma_chemical_fiber_delivery_note n where n.scan_number=:scanNumber limit 1",nativeQuery = true)
+    String getStartPlaceByScanNumber(@Param("scanNumber") String scanNumber);
+
+    @Query(value = "SELECT n.end_place FROM uma_chemical_fiber_delivery_note n where n.scan_number=:scanNumber limit 1",nativeQuery = true)
+    String getEndPlaceByScanNumber(@Param("scanNumber") String scanNumber);
+
+
 }

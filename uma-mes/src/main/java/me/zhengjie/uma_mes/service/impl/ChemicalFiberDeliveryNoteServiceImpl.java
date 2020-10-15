@@ -145,6 +145,12 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         }
         criteria.setEnableList(booleanList);
         Page<ChemicalFiberDeliveryNote> page = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        BigDecimal zero = new BigDecimal(0.00);
+        for(ChemicalFiberDeliveryNote c:page){
+            if(null != c.getTotalPrice() && c.getTotalPrice().compareTo(zero) == 0){
+                c.setTotalPrice(null);
+            }
+        }
         return PageUtil.toPage(page.map(chemicalFiberDeliveryNoteMapper::toDto));
     }
 
@@ -507,6 +513,8 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         travelPersionPerformance.setPersonName(user);
         travelPersionPerformance.setScanNumber(scanNumber);
         travelPersionPerformance.setCustomerName(chemicalFiberDeliveryNoteRepository.getCusotmerNameByScanNumber(scanNumber));
+        travelPersionPerformance.setStartPlace(chemicalFiberDeliveryNoteRepository.getStartPlaceByScanNumber(scanNumber));
+        travelPersionPerformance.setEndPlace(chemicalFiberDeliveryNoteRepository.getEndPlaceByScanNumber(scanNumber));
         travelPersionPerformanceRepository.save(travelPersionPerformance);
     }
 

@@ -31,19 +31,28 @@ public class WorkAttendanceQueryCriteria{
 
     private Boolean showUnEnable;
 
+    private Long monthTime;
+
+
+    /**
+     * 状态
+     */
+    @Query(propName = "enable")
+    private Boolean enable;
+
 
 
     /**
      * 大于等于
      */
     @Query(type = Query.Type.GREATER_THAN, propName = "attenceDate")
-    private Timestamp startTime;
+    private Date startTime;
 
     /**
      * 小于等于
      */
     @Query(type = Query.Type.LESS_THAN, propName = "attenceDate")
-    private Timestamp endTime; /**
+    private Date endTime; /**
      * 大于等于
      */
     @Query(type = Query.Type.GREATER_THAN, propName = "attenceDate")

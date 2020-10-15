@@ -44,4 +44,6 @@ public interface TravelPersionPerformanceService {
     void delete(Integer id);
 
     void download(List<TravelPersionPerformanceDTO> all, HttpServletResponse response) throws IOException;
+
+    void downloadTravelPersonPerformance(TravelPersionPerformanceQueryCriteria criteria, HttpServletResponse response) throws IOException;
 }
