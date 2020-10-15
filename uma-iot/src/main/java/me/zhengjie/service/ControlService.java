@@ -288,15 +288,15 @@ public class ControlService {
         String labelNumber = cancelInfo.getLabelNumber();
         CancelPage cancelPage = new CancelPage();
         if(StringUtils.isEmpty(labelNumber)){
-            gobalSender.sendImmediate(cancelPage.sendTip("请输入标签号",ip));
+            gobalSender.sendImmediate(cancelPage.sendTip("请输入标签号",ip), ip);
         }else {
             ChemicalFiberLabel label = labelService.getByLabelNumber(labelNumber);
             if(label==null){
-                gobalSender.sendImmediate(cancelPage.sendTip("找不到标签记录",ip));
+                gobalSender.sendImmediate(cancelPage.sendTip("找不到标签记录",ip), ip);
             }else if(label.getStatus()==2){
-                gobalSender.sendImmediate(cancelPage.sendTip("标签已出库,不能作废",ip));
+                gobalSender.sendImmediate(cancelPage.sendTip("标签已出库,不能作废",ip), ip);
             }else if(label.getStatus()==3){
-                gobalSender.sendImmediate(cancelPage.sendTip("标签已作废",ip));
+                gobalSender.sendImmediate(cancelPage.sendTip("标签已作废",ip), ip);
             }else{
                 productionReportService.delectReport(label);
                 ChemicalFiberPalletDetailQueryCeiteria ceieria = new ChemicalFiberPalletDetailQueryCeiteria();
@@ -306,7 +306,7 @@ public class ControlService {
                 label.setStatus(3);
                 label.setPalletId("");
                 labelService.update(label);
-                gobalSender.sendImmediate(cancelPage.sendTip("标签作废成功",ip));
+                gobalSender.sendImmediate(cancelPage.sendTip("标签作废成功",ip), ip);
 
                 gobalSender.addCommand(cancelPage.sendLabelNumber("",ip));
                 gobalSender.addCommand(cancelPage.sendTip("",ip));
