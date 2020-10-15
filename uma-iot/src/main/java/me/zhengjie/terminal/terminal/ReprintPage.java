@@ -55,11 +55,11 @@ public class ReprintPage extends SendCommand {
         ChemicalFiberLabel chemicalFiberLabel = reprintInfo.getChemicalFiberLabel();
         ChemicalFiberProductDTO chemicalFiberProductDTO = reprintInfo.getChemicalFiberProductDTO();
         if(chemicalFiberLabel == null){
-            (gobalSender.sendsendTip("找不到标签记录",ip), ip);
+            gobalSender.send(sendTip("找不到标签记录",ip),ip);
         }else if(chemicalFiberLabel.getStatus()==3){
-            gobalSender.send(sendTip("标签条码号已作废，不能补打",ip), ip);
+            gobalSender.send(sendTip("标签条码号已作废，不能补打",ip),ip);
         }else if(chemicalFiberLabel != null && chemicalFiberProductDTO==null){
-            gobalSender.send(sendTip("标签条码号异常，找不到产品信息",ip), ip);
+            gobalSender.send(sendTip("标签条码号异常，找不到产品信息",ip),ip);
         }else if(chemicalFiberLabel != null && chemicalFiberProductDTO!=null){
             controlService.reprint(ip);
         }
