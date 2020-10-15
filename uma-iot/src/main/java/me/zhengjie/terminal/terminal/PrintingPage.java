@@ -13,7 +13,7 @@ public class PrintingPage {
 
     public void event_back(String buttonId, String ip){
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
-        terminal.goControl();
+        terminal.goControl(ip);
         terminal.isPrint = false;
     }
 }

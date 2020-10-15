@@ -55,7 +55,7 @@ public class ChoiceDevicePage {
 
     public void event_m1(String buttonId, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
-        terminal.goControl();
+        terminal.goControl(ip);
         int id=Integer.parseInt(buttonId.replaceAll("00 ", ""), 16);
         log.info(buttonId + ":" + id);
         controlService.getProdutionByMacchine(Integer.toString(id),ip);
@@ -66,6 +66,6 @@ public class ChoiceDevicePage {
 
     public void event_logout(String buttonId, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
-        terminal.goLogin();
+        terminal.goLogin(ip);
     }
 }

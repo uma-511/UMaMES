@@ -52,7 +52,7 @@ public class CancelPage  extends SendCommand {
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.addCommand(sendLabelNumber("",ip));
         gobalSender.addCommand(sendTip("",ip));
-        gobalSender.send();
+        gobalSender.send(ip);
     }
 
     @Button(id="00 06",handler = "event_back")

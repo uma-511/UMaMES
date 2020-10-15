@@ -140,8 +140,10 @@ public class LoginPage extends SendCommand {
                     ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
                     controlPannelInfo.setBanci(userInfo.getBanci());
 
-                    gobalSender.sendImmediate(switchScreen("00 02"));
+                   // gobalSender.sendImmediate(switchScreen("00 02"));
+                    //Thread.sleep(300);
                     //gobalSender.sendImmediate1(switchScreen("00 02"), chann);
+                    gobalSender.sendDeloy(switchScreen("00 02"), 300, ip);
                     gobalSender.addCommand(controllerPage.sendBanci(userInfo.getBanci(), ip));
                 } else {
                     gobalSender.addCommand(switchScreen("00 03"));
@@ -188,7 +190,7 @@ public class LoginPage extends SendCommand {
         gobalSender.addCommand(getTextValue(screenId,"00 01"));
         gobalSender.addCommand(getTextValue(screenId,"00 02"));
         gobalSender.addCommand(getTextValue(screenId,"00 03"));
-        gobalSender.sendImmediate();
+        gobalSender.sendImmediate(ip);
     }
 
     private void resetLogin(String ip) {
@@ -200,7 +202,7 @@ public class LoginPage extends SendCommand {
         gobalSender.addCommand(setTextValue(screenId, "00 03", ""));
         gobalSender.addCommand(setTextValue(screenId, "00 04", ""));
         gobalSender.addCommand(setTextValue(screenId, "00 05", ""));
-        gobalSender.send();
+        gobalSender.send(ip);
     }
 
     private RestTemplate getRestTemplate() {

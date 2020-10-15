@@ -28,7 +28,7 @@ public class PrintExector {
                 PrintDataHolder.getInstance().removeData(ip);
             } else {
                 GobalSender gobalSender = printData.getGobalSender();
-                gobalSender.send(printData.getFrames().get(curr));
+                gobalSender.send(printData.getFrames().get(curr), ip);
             }
         }
     }

@@ -80,53 +80,53 @@ public class Terminal extends SendCommand {
         gobalSender.init(channel);
     }
 
-    public void goLogin() {
-        gobalSender.send(switchScreen("00 01"));
+    public void goLogin(String ip) {
+        gobalSender.send(switchScreen("00 01"), ip);
     }
 
     public void addGoLoginCommand() {
         gobalSender.addCommand(switchScreen("00 01"));
     }
 
-    public void goControl() {
+    public void goControl(String ip) {
 //        gobalSender.send(2000);
-        gobalSender.send(switchScreen("00 02"));
+        gobalSender.send(switchScreen("00 02"), ip);
     }
 
     public void addGoControlCommand() {
         gobalSender.addCommand(switchScreen("00 02"));
     }
 
-    public void goMachine() {
-        gobalSender.send(switchScreen("00 03"));
+    public void goMachine(String ip) {
+        gobalSender.send(switchScreen("00 03"), ip);
     }
 
-    public void addGoMachineCommand() {
+    public void addGoMachineCommand(String ip) {
         gobalSender.addCommand(switchScreen("00 03"));
     }
 
-    public void goPrinting() {
+    public void goPrinting(String ip) {
 //        gobalSender.sendImmediate(switchScreen("00 04"));
         // 需还原
-        gobalSender.send(switchScreen("00 04"));
+        gobalSender.send(switchScreen("00 04"), ip);
     }
 
     public void addGoPrintingCommand() {
         gobalSender.addCommand(switchScreen("00 04"));
     }
 
-    public void goCancel() {
-        gobalSender.send(switchScreen("00 05"));
+    public void goCancel(String ip) {
+        gobalSender.send(switchScreen("00 05"), ip);
     }
 
     public void addGoCancelCommand() {
         gobalSender.addCommand(switchScreen("00 05"));
     }
 
-    public void goReprint() {
+    public void goReprint(String ip) {
 //         ReprintPage reprintPage = new ReprintPage();
 //         reprintPage.sendLabelNumber()
-        gobalSender.send(switchScreen("00 06"));
+        gobalSender.send(switchScreen("00 06"), ip);
     }
 
     public void addGoReprintCommand() {
@@ -234,14 +234,14 @@ public class Terminal extends SendCommand {
                 "1TEXT 430,240,\"2\",0,3,4,\"27.00\"\r\n" +
                 "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + labelNum + "\"\r\n" +
                 "PRINT 1\r\n";
-        gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand));
+        gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand), ip);
 
-        goPrinting();
+        goPrinting(ip);
     }
 
     public void reprint(ChemicalFiberLabel label, ChemicalFiberProductDTO productDTO) {
         addGoPrintingCommand();
-        gobalSender.send();
+        gobalSender.send(ip);
 
         SimpleDateFormat myFmt = new SimpleDateFormat("yyyy.MM.dd");
         String ym = myFmt.format(label.getPrintTime());
@@ -298,7 +298,7 @@ public class Terminal extends SendCommand {
                 "BARCODE 80,296,\"128\",105,1,0,4,4,\"" + label.getLabelNumber() + "\"\r\n" +
                 "PRINT 1\r\n";
         String command = CoderUtils.stringToHexStr(printCommand);
-        gobalSender.sendDeloy(command,600);
+        gobalSender.sendDeloy(command,600, ip);
 //        checkPrintStatus(command);
         ReprintPage reprintPage = new ReprintPage();
         reprintPage.back(ip);
@@ -311,7 +311,7 @@ public class Terminal extends SendCommand {
         String tip = "登录状态失效，请重新登录";
         if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password) ){
             result = false;
-            gobalSender.sendImmediate(setTextValue(screenId,tipId,tip));
+            gobalSender.sendImmediate(setTextValue(screenId,tipId,tip), ip);
         }
         return result;
     }

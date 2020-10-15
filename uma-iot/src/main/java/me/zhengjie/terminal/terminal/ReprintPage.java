@@ -73,7 +73,7 @@ public class ReprintPage extends SendCommand {
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.addCommand(sendLabelNumber("",ip));
         gobalSender.addCommand(sendTip("",ip));
-        gobalSender.send();
+        gobalSender.send(ip);
     }
 
     @Button(id="00 06",handler = "event_back")
@@ -81,7 +81,7 @@ public class ReprintPage extends SendCommand {
 
     public void event_back(String buttonId,String ip){
         Terminal terminal= NettyTcpServer.terminalMap.get(ip);
-        terminal.goControl();
+        terminal.goControl(ip);
     }
 
     public void back(String ip){
@@ -91,11 +91,11 @@ public class ReprintPage extends SendCommand {
 
         terminal.addGoReprintCommand();
         gobalSender.addCommand(sendTip("补打成功",ip));
-        gobalSender.send(2000);
+        gobalSender.send(2000,ip);
 
         log.info("reprint clean");
         gobalSender.addCommand(sendTip("",ip));
         gobalSender.addCommand(sendLabelNumber("",ip));
-        gobalSender.send(100);
+        gobalSender.send(100, ip);
     }
 }
