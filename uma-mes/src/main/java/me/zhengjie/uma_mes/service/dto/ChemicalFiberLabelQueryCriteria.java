@@ -36,7 +36,7 @@ public class ChemicalFiberLabelQueryCriteria{
     @Query(type = Query.Type.LESS_THAN, propName = "printTime")
     private Timestamp endTime;
 
-    @Query(type = Query.Type.LESS_THAN_NQ, propName = "status")
+    @Query(type = Query.Type.IN, propName = "status")
     private List<Integer> tbStatus;
 
     // 精确

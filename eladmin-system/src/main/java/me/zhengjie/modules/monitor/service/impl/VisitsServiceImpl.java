@@ -5,6 +5,10 @@ import me.zhengjie.modules.monitor.domain.Visits;
 import me.zhengjie.modules.monitor.repository.VisitsRepository;
 import me.zhengjie.modules.monitor.service.VisitsService;
 import me.zhengjie.repository.LogRepository;
+import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
+import me.zhengjie.uma_mes.repository.ChemicalFiberLabelInventoryRepository;
+import me.zhengjie.uma_mes.repository.ChemicalFiberLabelRepository;
+import me.zhengjie.uma_mes.repository.ChemicalFiberStockRepository;
 import me.zhengjie.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +33,15 @@ public class VisitsServiceImpl implements VisitsService {
     private final VisitsRepository visitsRepository;
 
     private final LogRepository logRepository;
+
+    @Autowired
+    private ChemicalFiberStockRepository chemicalFiberStockRepository;
+
+    @Autowired
+    private ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository;
+
+    @Autowired
+    private ChemicalFiberLabelRepository chemicalFiberLabelRepository;
 
     public VisitsServiceImpl(VisitsRepository visitsRepository, LogRepository logRepository) {
         this.visitsRepository = visitsRepository;
@@ -59,7 +72,7 @@ public class VisitsServiceImpl implements VisitsService {
         visitsRepository.save(visits);
     }
 
-    @Override
+    /*@Override
     public Object get() {
         Map<String,Object> map = new HashMap<>();
         LocalDate localDate = LocalDate.now();
@@ -71,6 +84,18 @@ public class VisitsServiceImpl implements VisitsService {
             recentVisits += data.getPvCounts();
             recentIp += data.getIpCounts();
         }
+        map.put("newVisits",visits.getPvCounts());
+        map.put("newIp",visits.getIpCounts());
+        map.put("recentVisits",recentVisits);
+        map.put("recentIp",recentIp);
+        return map;
+    }*/
+    @Override
+    public Object get() {
+        Map<String,Object> map = new HashMap<>();
+
+
+
         map.put("newVisits",visits.getPvCounts());
         map.put("newIp",visits.getIpCounts());
         map.put("recentVisits",recentVisits);

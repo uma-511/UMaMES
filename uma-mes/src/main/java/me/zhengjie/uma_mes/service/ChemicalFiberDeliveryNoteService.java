@@ -54,4 +54,6 @@ public interface ChemicalFiberDeliveryNoteService {
     Map<String,Object> getSalesReport(ChemicalFiberDeliveryNoteQueryCriteria criteria, Pageable pageable);
 
     Result getSalesReportSummaries(ChemicalFiberDeliveryNoteQueryCriteria criteria);
+
+    Result getNoteSumm(ChemicalFiberDeliveryNoteQueryCriteria criteria);
 }

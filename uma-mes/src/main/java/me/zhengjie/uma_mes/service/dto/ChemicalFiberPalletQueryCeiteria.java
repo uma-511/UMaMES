@@ -41,6 +41,10 @@ public class ChemicalFiberPalletQueryCeiteria {
     @Query(type = Query.Type.INNER_LIKE)
     private String packer;
 
+    // 包装员
+    @Query
+    private String prodName;
+
 
 
 }

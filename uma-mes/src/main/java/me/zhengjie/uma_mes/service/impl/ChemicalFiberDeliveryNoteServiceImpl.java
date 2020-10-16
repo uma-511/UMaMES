@@ -84,13 +84,56 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
         }
         Page<ChemicalFiberDeliveryNote> page = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
-        return PageUtil.toPage(page.map(chemicalFiberDeliveryNoteMapper::toDto));
+        List<ChemicalFiberDeliveryNote>  pageList = page.getContent();
+        List<ChemicalFiberDeliveryNoteDTO> pageLists = chemicalFiberDeliveryNoteMapper.toDto(pageList);
+        //ObjectTransfer.transValue(pageList, pageLists);
+        List<Map<String, Object>> sum = chemicalFiberDeliveryNoteRepository.getSum();
+        Map<String, Integer> sumBag = new HashMap<>();
+        Map<String, BigDecimal> sumTotal = new HashMap<>();
+        for (Map<String, Object> sumDto : sum) {
+            BigDecimal b = new BigDecimal(sumDto.get("total_bag").toString());
+            Integer bag = b.intValue();
+            sumBag.put(sumDto.get("note_id").toString(), bag);
+            sumTotal.put(sumDto.get("note_id").toString(), new BigDecimal(sumDto.get("total_weight").toString()));
+        }
+        List<ChemicalFiberDeliveryNoteDTO> pageDtoLists = new ArrayList<>();
+        for (ChemicalFiberDeliveryNoteDTO dto : pageLists) {
+
+            dto.setBag(sumBag.get(dto.getId().toString()));
+            dto.setWeight(sumTotal.get(dto.getId().toString()));
+            pageDtoLists.add(dto);
+        }
+       // return PageUtil.toPage(page.map(chemicalFiberDeliveryNoteMapper::toDto));
+        return PageUtil.toPage(new PageImpl(pageDtoLists,pageable,page.getTotalElements()));
     }
 
     @Override
 //    @Cacheable
     public List<ChemicalFiberDeliveryNoteDTO> queryAll(ChemicalFiberDeliveryNoteQueryCriteria criteria){
-        return chemicalFiberDeliveryNoteMapper.toDto(chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+        if (criteria.getTempStartTime() != null) {
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+        }
+        List<ChemicalFiberDeliveryNote>  pageList = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+        List<ChemicalFiberDeliveryNoteDTO> pageLists = chemicalFiberDeliveryNoteMapper.toDto(pageList);
+        //ObjectTransfer.transValue(pageList, pageLists);
+        List<Map<String, Object>> sum = chemicalFiberDeliveryNoteRepository.getSum();
+        Map<String, Integer> sumBag = new HashMap<>();
+        Map<String, BigDecimal> sumTotal = new HashMap<>();
+        for (Map<String, Object> sumDto : sum) {
+            BigDecimal b = new BigDecimal(sumDto.get("total_bag").toString());
+            Integer bag = b.intValue();
+            sumBag.put(sumDto.get("note_id").toString(), bag);
+            sumTotal.put(sumDto.get("note_id").toString(), new BigDecimal(sumDto.get("total_weight").toString()));
+        }
+        List<ChemicalFiberDeliveryNoteDTO> pageDtoLists = new ArrayList<>();
+        for (ChemicalFiberDeliveryNoteDTO dto : pageLists) {
+
+            dto.setBag(sumBag.get(dto.getId().toString()));
+            dto.setWeight(sumTotal.get(dto.getId().toString()));
+            pageDtoLists.add(dto);
+        }
+        return pageDtoLists;
     }
 
     @Override
@@ -384,6 +427,50 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         list.add(totalCost);
         list.add(totalPrice);
         list.add("");
+        return Result.success(list);
+    }
+
+    @Override
+    public Result getNoteSumm(ChemicalFiberDeliveryNoteQueryCriteria criteria) {
+        if (criteria.getTempStartTime() != null) {
+            criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
+            criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
+        }
+        List<ChemicalFiberDeliveryNote> chemicalFiberDeliveryNotes = chemicalFiberDeliveryNoteRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+
+        // 总成本
+        BigDecimal totalCost = new BigDecimal(0.0);
+
+        // 总金额
+        BigDecimal totalPrice = new BigDecimal(0.0);
+
+        // 总件数
+        Integer totalBag = 0;
+
+        // 总数量
+        Integer totalNumber = 0;
+
+        // 总重量
+        BigDecimal totalWeight = new BigDecimal(0.0);
+
+        for (ChemicalFiberDeliveryNote chemicalFiberDeliveryNote : chemicalFiberDeliveryNotes) {
+            for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryNote.getChemicalFiberDeliveryDetails()) {
+                totalCost = totalCost.add(chemicalFiberDeliveryDetail.getTotalCost());
+                totalPrice = totalPrice.add(chemicalFiberDeliveryDetail.getTotalPrice());
+                totalBag = totalBag + (chemicalFiberDeliveryDetail.getTotalBag() == null ? 0 : chemicalFiberDeliveryDetail.getTotalBag());
+                totalNumber = totalNumber + (chemicalFiberDeliveryDetail.getTotalNumber() == null ? 0 : chemicalFiberDeliveryDetail.getTotalNumber());
+                totalWeight = totalWeight.add(chemicalFiberDeliveryDetail.getTotalWeight() == null ? new BigDecimal(0.0) : chemicalFiberDeliveryDetail.getTotalWeight());
+            }
+        }
+
+        List<Object> list = new ArrayList<>();
+        list.add("总计");
+        list.add("");
+        list.add("");
+        list.add(totalCost);
+        list.add(totalPrice);
+        list.add(totalBag);
+        list.add(totalWeight);
         return Result.success(list);
     }
 }

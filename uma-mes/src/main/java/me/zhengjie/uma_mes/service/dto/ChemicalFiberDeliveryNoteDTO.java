@@ -56,4 +56,10 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
 
     // 制单人
     private String createUser;
+
+    //  总数
+    private Integer bag;
+
+    // 总重量
+    private BigDecimal weight;
 }

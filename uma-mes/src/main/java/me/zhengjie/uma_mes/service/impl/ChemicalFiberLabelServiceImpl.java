@@ -60,10 +60,11 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
         if (criteria.getStatus() != null && criteria.getStatus() == 1) {
             statusList.add(1);
             statusList.add(9);
-        } else {
+            criteria.setTbStatus(statusList);
+        } else if (criteria.getStatus() != null) {
             statusList.add(criteria.getStatus());
+            criteria.setTbStatus(statusList);
         }
-        criteria.setTbStatus(statusList);
         Page<ChemicalFiberLabel> page = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberLabelMapper::toDto));
     }

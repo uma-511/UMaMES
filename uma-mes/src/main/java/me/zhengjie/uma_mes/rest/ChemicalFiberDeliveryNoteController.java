@@ -129,4 +129,12 @@ public class ChemicalFiberDeliveryNoteController {
     public Result getSalesReportSummaries(@RequestBody ChemicalFiberDeliveryNoteQueryCriteria criteria) {
         return chemicalFiberDeliveryNoteService.getSalesReportSummaries(criteria);
     }
+
+    @PostMapping(value = "/getNoteSumm")
+    @Log("获取送货合计")
+    @ApiOperation("获取送货合计")
+    @AnonymousAccess
+    public Result getNoteSumm(@RequestBody ChemicalFiberDeliveryNoteQueryCriteria criteria) {
+        return chemicalFiberDeliveryNoteService.getNoteSumm(criteria);
+    }
 }
