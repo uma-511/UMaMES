@@ -20,5 +20,5 @@ public interface ChemicalFiberWarehousingReortService {
 
     Result getSummaryData(ChemicalFiberWarehousingReortQueryCriteria criteria);
 
-    void download(List<Map<String, Object>> all, HttpServletResponse response) throws IOException;
+    void download(List<Map<String, Object>> all,ChemicalFiberWarehousingReortQueryCriteria criteria, HttpServletResponse response) throws IOException;
 }

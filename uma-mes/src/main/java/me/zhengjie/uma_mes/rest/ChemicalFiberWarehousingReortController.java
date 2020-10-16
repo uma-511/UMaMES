@@ -47,6 +47,6 @@ public class ChemicalFiberWarehousingReortController {
     @GetMapping(value = "/download")
     // @PreAuthorize("@el.check('chemicalFiberProduction:list')")
     public void download(HttpServletResponse response, ChemicalFiberWarehousingReortQueryCriteria criteria) throws IOException {
-        chemicalFiberWarehousingReortService.download(chemicalFiberWarehousingReortService.queryAlls(criteria), response);
+        chemicalFiberWarehousingReortService.download(chemicalFiberWarehousingReortService.queryAlls(criteria),criteria, response);
     }
 }
