@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -94,13 +95,51 @@ public class VisitsServiceImpl implements VisitsService {
         Map<String,Object> map = new HashMap<>();
         String time = DashboardTime(crteria);
 
+        Map<String, Object> sumStock = chemicalFiberStockRepository.getSumStock();
 
+        Map<String, Object> sumLabel = chemicalFiberLabelRepository.getSumLabel(time);
 
+        Map<String, Object> sumNote = chemicalFiberDeliveryNoteRepository.getSum(time);
 
-        /*map.put("newVisits",visits.getPvCounts());
-        map.put("newIp",visits.getIpCounts());
-        map.put("recentVisits",recentVisits);
-        map.put("recentIp",recentIp);*/
+        Map<String, Object> sumNote1 = chemicalFiberDeliveryNoteRepository.getSumDelvery(time);
+
+        BigDecimal a = new BigDecimal(0);
+        BigDecimal b = new BigDecimal(0);
+        BigDecimal c = new BigDecimal(0);
+        BigDecimal d = new BigDecimal(0);
+        BigDecimal e = new BigDecimal(0);
+        BigDecimal g = new BigDecimal(0);
+
+        if (sumStock.get("net_weight") != null) {
+            a = new BigDecimal(sumStock.get("net_weight").toString());
+        }
+        if (sumStock.get("gross_weight") != null) {
+            b = new BigDecimal(sumStock.get("gross_weight").toString());
+        }
+        if (sumLabel.get("net_weight") != null) {
+            c = new BigDecimal(sumLabel.get("net_weight").toString());
+        }
+        if (sumLabel.get("gross_weight") != null) {
+            d = new BigDecimal(sumLabel.get("gross_weight").toString());
+        }
+        if ( sumNote.get("total_price") != null) {
+            e = new BigDecimal(sumNote.get("total_price").toString());
+        }
+        if ( sumNote1.get("total_weight") != null) {
+            g = new BigDecimal(sumNote1.get("total_weight").toString());
+        }
+
+        map.put("stockNumber",sumStock.get("bag"));
+        map.put("stockNetWeight",a);
+        map.put("stockGrossWeight",b);
+        map.put("warehousingNumber",sumLabel.get("total_bag"));
+        map.put("warehousingNetWeight",c);
+        map.put("warehousingGrossWeight",d);
+        map.put("deliveryNumber",sumNote.get("id"));
+        map.put("deliveryTotalNumber",e);
+        map.put("deliveryBagNumber",sumNote1.get("total_bag"));
+        map.put("deliveryNetWeight",g);
+        //map.put("recentIp",5);
         return map;
     }
 

@@ -20,4 +20,11 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
 
     @Query(value = "SELECT delivery_note_id as note_id,sum(total_bag) as total_bag, sum(total_weight) as total_weight FROM `uma_chemical_fiber_delivery_detail` GROUP BY delivery_note_id",nativeQuery = true)
     List<Map<String, Object>> getSum();
+
+    @Query(value = "SELECT count(id) as id , sum(total_price) as total_price  FROM `uma_chemical_fiber_delivery_note` where create_date like %?1%",nativeQuery = true)
+    Map<String, Object> getSum(String time);
+
+    @Query(value = "SELECT sum(total_bag) as total_bag, sum(total_weight) as total_weight FROM `uma_chemical_fiber_delivery_detail` where create_date like %?1%",nativeQuery = true)
+    Map<String, Object> getSumDelvery(String time);
+
 }
