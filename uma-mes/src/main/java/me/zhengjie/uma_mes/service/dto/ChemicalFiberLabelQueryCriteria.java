@@ -20,8 +20,8 @@ public class ChemicalFiberLabelQueryCriteria{
     @Query(type = Query.Type.INNER_LIKE)
     private String labelNumber;
 
-    // 精确
-    @Query
+   /* // 精确
+    @Query*/
     private Integer status;
 
     // 模糊
@@ -35,6 +35,9 @@ public class ChemicalFiberLabelQueryCriteria{
     // 小于等于
     @Query(type = Query.Type.LESS_THAN, propName = "printTime")
     private Timestamp endTime;
+
+    @Query(type = Query.Type.LESS_THAN_NQ, propName = "status")
+    private List<Integer> tbStatus;
 
     // 精确
     @Query

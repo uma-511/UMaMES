@@ -56,6 +56,14 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
             criteria.setStartTime(new Timestamp(criteria.getTempStartTime()));
             criteria.setEndTime(new Timestamp(criteria.getTempEndTime()));
         }
+        List<Integer> statusList = new ArrayList<>();
+        if (criteria.getStatus() != null && criteria.getStatus() == 1) {
+            statusList.add(1);
+            statusList.add(9);
+        } else {
+            statusList.add(criteria.getStatus());
+        }
+        criteria.setTbStatus(statusList);
         Page<ChemicalFiberLabel> page = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
         return PageUtil.toPage(page.map(chemicalFiberLabelMapper::toDto));
     }
