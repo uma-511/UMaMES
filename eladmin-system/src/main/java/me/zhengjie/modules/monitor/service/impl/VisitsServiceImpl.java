@@ -9,6 +9,7 @@ import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberLabelInventoryRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberLabelRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberStockRepository;
+import me.zhengjie.uma_mes.service.dto.VisitsQueryCrteria;
 import me.zhengjie.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -91,15 +90,17 @@ public class VisitsServiceImpl implements VisitsService {
         return map;
     }*/
     @Override
-    public Object get() {
+    public Object get(VisitsQueryCrteria crteria) {
         Map<String,Object> map = new HashMap<>();
+        String time = DashboardTime(crteria);
 
 
 
-        map.put("newVisits",visits.getPvCounts());
+
+        /*map.put("newVisits",visits.getPvCounts());
         map.put("newIp",visits.getIpCounts());
         map.put("recentVisits",recentVisits);
-        map.put("recentIp",recentIp);
+        map.put("recentIp",recentIp);*/
         return map;
     }
 
@@ -112,5 +113,30 @@ public class VisitsServiceImpl implements VisitsService {
         map.put("visitsData",list.stream().map(Visits::getPvCounts).collect(Collectors.toList()));
         map.put("ipData",list.stream().map(Visits::getIpCounts).collect(Collectors.toList()));
         return map;
+    }
+
+    public String DashboardTime(VisitsQueryCrteria criteria) {
+        Long time = criteria.getTime();
+        String radio = criteria.getRadio();
+        Date date = new Date(time);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        Integer year = calendar.get(Calendar.YEAR);
+        Integer month = calendar.get(Calendar.MONTH) + 1;
+        Integer day = calendar.get(Calendar.DAY_OF_MONTH);
+        String dateTime = "";
+        String months = month < 10 ? "0" + month : month + "";
+        String days = day < 10 ? "0" + day : day + "";
+        if (radio.equals("1")) {
+            dateTime = year + "-" + months + "-" + days;
+        }
+        if (radio.equals("2")) {
+            dateTime = year + "-" + months;
+        }
+        if (radio.equals("3")) {
+            dateTime = year + "";
+        }
+
+        return dateTime;
     }
 }

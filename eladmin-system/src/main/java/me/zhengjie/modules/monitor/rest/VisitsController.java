@@ -3,13 +3,12 @@ package me.zhengjie.modules.monitor.rest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import me.zhengjie.modules.monitor.service.VisitsService;
+import me.zhengjie.uma_mes.service.dto.VisitsQueryCrteria;
 import me.zhengjie.utils.RequestHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Zheng Jie
@@ -33,10 +32,10 @@ public class VisitsController {
         return new ResponseEntity(HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @PostMapping(value = "/get")
     @ApiOperation("查询")
-    public ResponseEntity get(){
-        return new ResponseEntity<>(visitsService.get(),HttpStatus.OK);
+    public ResponseEntity get(@Validated @RequestBody VisitsQueryCrteria crteria){
+        return new ResponseEntity<>(visitsService.get(crteria),HttpStatus.OK);
     }
 
     @GetMapping(value = "/chartData")
