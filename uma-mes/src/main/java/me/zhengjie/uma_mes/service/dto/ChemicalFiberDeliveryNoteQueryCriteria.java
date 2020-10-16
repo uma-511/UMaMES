@@ -42,6 +42,8 @@ public class ChemicalFiberDeliveryNoteQueryCriteria{
     @Query(type = Query.Type.INNER_LIKE)
     private String contactPhone;
 
+    private String prodModel;
+
     // 大于等于
     @Query(type = Query.Type.GREATER_THAN, propName = "deliveryDate")
     private Timestamp startTime;

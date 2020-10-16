@@ -39,8 +39,13 @@ public class TravelPersionPerformanceQueryCriteria{
       */
     @Query(type = Query.Type.GREATER_THAN, propName = "createTime")
     private Date startTime;
+    // 模糊
+    @Query(type = Query.Type.INNER_LIKE, propName = "createTime")
+    private String taskStringDate;
 
     private Long monthTime;
+
+    private Long dayTime;
 
     /**
      * 小于等于

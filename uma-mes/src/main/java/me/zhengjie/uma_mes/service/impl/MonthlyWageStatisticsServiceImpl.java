@@ -508,23 +508,31 @@ public class MonthlyWageStatisticsServiceImpl implements MonthlyWageStatisticsSe
 
             // 缺卡/迟到满7次 取消打卡奖
             BigDecimal lackCount = zero;
+            BigDecimal lackCardAndlatePrice = BigDecimal.ZERO;
             for (WorkAttendanceDTO workAttendanceDTO : workAttendanceDTOS) {
                 if (workAttendanceDTO.getPersonName().equals(monthlyWageStatistics.getPersonName())) {
                     if(workAttendanceDTO.getAttenceType().equals("缺卡")) {
                         if(null != workAttendanceDTO.getDay()) {
                             lackCount = lackCount.add(workAttendanceDTO.getDay());
                         }
+                        if(null != workAttendanceDTO.getPrice()){
+                            lackCardAndlatePrice = lackCardAndlatePrice.add(workAttendanceDTO.getPrice());
+                        }
                     }
                     if(workAttendanceDTO.getAttenceType().equals("迟到")) {
                         if(null != workAttendanceDTO.getDay()) {
                             lackCount = lackCount.add(workAttendanceDTO.getDay());
                         }
+                        if(null != workAttendanceDTO.getPrice()){
+                            lackCardAndlatePrice = lackCardAndlatePrice.add(workAttendanceDTO.getPrice());
+                        }
                     }
                 }
             }
             if (lackCount.compareTo(new BigDecimal(7)) >= 0) {
-                monthlyWageStatistics.setLackCard(cardPrize);
+                lackCardAndlatePrice = lackCardAndlatePrice.add(cardPrize);
             }
+            monthlyWageStatistics.setLackCard(lackCardAndlatePrice);
 
             // 实际出勤天数
             monthlyWageStatistics.setAttendanceReal((new BigDecimal(getDaysOfMonth()).subtract(restDay)).subtract(leaveDay));

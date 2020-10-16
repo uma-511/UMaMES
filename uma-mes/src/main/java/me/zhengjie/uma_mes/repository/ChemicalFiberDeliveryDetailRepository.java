@@ -40,7 +40,10 @@ public interface ChemicalFiberDeliveryDetailRepository extends JpaRepository<Che
             nativeQuery = true)
     BigDecimal getTotal(String scanNumber);
 
-
+    @Query(value = "SELECT d.selling_price FROM uma_chemical_fiber_delivery_detail d " +
+            "where d.scan_number in (SELECT n.scan_number from uma_chemical_fiber_delivery_note n where n.customer_id = :customerId) " +
+            "and d.selling_price is not null and d.prod_model=:prodModel ORDER BY id DESC LIMIT 1",nativeQuery = true)
+    String getLastSellingPrice(Integer customerId,String prodModel);
 
 
 

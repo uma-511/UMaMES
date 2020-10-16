@@ -23,6 +23,10 @@ public class AcidPersionPerformanceQueryCriteria{
     private Timestamp taskDate;
 
     // 模糊
+    @Query(type = Query.Type.INNER_LIKE, propName = "taskDate")
+    private String taskStringDate;
+
+    // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String productName;
 
@@ -30,6 +34,7 @@ public class AcidPersionPerformanceQueryCriteria{
 
     private Long monthTime;
 
+    private Long dayTime;
 
     /**
      * 状态

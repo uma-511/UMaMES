@@ -453,7 +453,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 generateDriverPermission(deliveryDate,driverMain,totalWeight,travelExpensesPrice,scanNumber);
                 generateDriverPermission(deliveryDate,driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
             }
-            if ( car.getCarType().equals("槽罐车") ) {
+            if ( "槽罐车".equals(car.getCarType()) ) {
                 if( null != travelExpenses) {
                     travelExpensesPrice = travelExpenses.getTankPrice();
                 }else{
@@ -462,7 +462,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 generateDriverPermission(deliveryDate,driverMain,totalWeight,travelExpensesPrice,scanNumber);
                 generateDriverPermission(deliveryDate,driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
             }
-            if ( car.getCarType().equals("拖头车") ) {
+            if ( "拖头车".equals(car.getCarType()) ) {
                 if( null != travelExpenses) {
                     travelExpensesPrice = travelExpenses.getTractorPrice();
                 }else{
@@ -471,10 +471,40 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 generateDriverPermission(deliveryDate,driverMain,totalWeight,travelExpensesPrice,scanNumber);
                 generateDriverPermission(deliveryDate,driverDeputy,totalWeight,travelExpensesPrice,scanNumber);
             }
-            // 生成放酸人员绩效
-            generateDriverPermission(deliveryDate,loaderOne,BigDecimal.ZERO,BigDecimal.ZERO,scanNumber);
-            generateDriverPermission(deliveryDate,loaderTwo,BigDecimal.ZERO,BigDecimal.ZERO,scanNumber);
+            // 生成装卸人员绩效
+            generateLoaderPermission(deliveryDate,loaderOne,BigDecimal.ZERO,BigDecimal.ZERO,scanNumber);
+            generateLoaderPermission(deliveryDate,loaderTwo,BigDecimal.ZERO,BigDecimal.ZERO,scanNumber);
         }
+    }
+
+    private void generateLoaderPermission(Timestamp deliveryDate,String driverRealName,BigDecimal totalWeight,BigDecimal travelExpensesPrice,String scanNumber){
+        if(null == driverRealName || driverRealName.equals("")) {
+            return;
+        }
+        Integer driverId = null;
+        driverId = chemicalFiberDeliveryNoteRepository.getIdByRealName(driverRealName);
+        if ( null == driverId ) {
+            throw new BadRequestException("签收失败，获取人员id异常");
+        }
+        String driverPermission = null;
+        driverPermission = chemicalFiberDeliveryNoteRepository.getPermissionByUserId(driverId.longValue());
+        if ( null == driverPermission ) {
+            throw new BadRequestException("签收失败，获取人员职位异常");
+        }
+        String ton = chemicalFiberDeliveryNoteRepository.getReferenceQuantityByScanNumberWhithTon(scanNumber);
+        String box = chemicalFiberDeliveryNoteRepository.getReferenceQuantityByScanNumberWhithBox(scanNumber);
+        String bottle = chemicalFiberDeliveryNoteRepository.getReferenceQuantityByScanNumberWhithBottle(scanNumber);
+        StringBuffer referenceQuantity = new StringBuffer();
+        if(null != ton && !ton.equals("")){
+            referenceQuantity.append(ton+"吨 ");
+        }
+        if(null != box && !box.equals("")){
+            referenceQuantity.append(box+"箱 ");
+        }
+        if(null != bottle && !bottle.equals("")){
+            referenceQuantity.append(bottle+"支 ");
+        }
+        createPermission(deliveryDate,driverRealName,driverId,driverPermission,travelExpensesPrice,scanNumber,referenceQuantity.toString());
     }
 
     private void generateDriverPermission(Timestamp deliveryDate,String driverRealName,BigDecimal totalWeight,BigDecimal travelExpensesPrice,String scanNumber){
@@ -491,11 +521,11 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         if ( null == driverPermission ) {
             throw new BadRequestException("签收失败，获取人员职位异常");
         }
-        createPermission(deliveryDate,driverRealName,driverId,driverPermission,travelExpensesPrice,scanNumber);
+        createPermission(deliveryDate,driverRealName,driverId,driverPermission,travelExpensesPrice,scanNumber,"");
     }
 
 
-    private void createPermission(Timestamp deliveryDate,String user,Integer userId,String userPermission,BigDecimal expensesPrice,String scanNumber) {
+    private void createPermission(Timestamp deliveryDate,String user,Integer userId,String userPermission,BigDecimal expensesPrice,String scanNumber,String referenceQuantity) {
         TravelPersionPerformance travelPersionPerformance = new TravelPersionPerformance();
         travelPersionPerformance.setEnable(Boolean.TRUE);
         if(null != deliveryDate){
@@ -503,6 +533,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         }else {
             travelPersionPerformance.setCreateTime(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         }
+        travelPersionPerformance.setReferenceQuantity(referenceQuantity);
         travelPersionPerformance.setMileageFee(expensesPrice);
         travelPersionPerformance.setTotalPerformance(expensesPrice);
         travelPersionPerformance.setPersonId(userId);

@@ -57,5 +57,14 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
     @Query(value = "SELECT n.end_place FROM uma_chemical_fiber_delivery_note n where n.scan_number=:scanNumber limit 1",nativeQuery = true)
     String getEndPlaceByScanNumber(@Param("scanNumber") String scanNumber);
 
+    @Query(value = "SELECT sum(real_quantity) FROM `uma_chemical_fiber_delivery_detail` where scan_number=:scanNumber and unit = '吨'",nativeQuery = true)
+    String getReferenceQuantityByScanNumberWhithTon(@Param("scanNumber") String scanNumber);
+
+    @Query(value = "SELECT sum(real_quantity) FROM `uma_chemical_fiber_delivery_detail` where scan_number=:scanNumber and unit = '箱'",nativeQuery = true)
+    String getReferenceQuantityByScanNumberWhithBox(@Param("scanNumber") String scanNumber);
+
+    @Query(value = "SELECT sum(real_quantity) FROM `uma_chemical_fiber_delivery_detail` where scan_number=:scanNumber and unit = '支'",nativeQuery = true)
+    String getReferenceQuantityByScanNumberWhithBottle(@Param("scanNumber") String scanNumber);
+
 
 }

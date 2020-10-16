@@ -110,6 +110,26 @@ public class TravelPersionPerformance implements Serializable {
     private BigDecimal totalPerformance;
 
     /**
+     * 转换数量
+     */
+    @Column(name = "real_quantity")
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal realQuantity;
+
+    /**
+     * 装卸单价
+     */
+    @Column(name = "unit_price")
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal unitPrice;
+
+    /**
+     * 参考数量
+     */
+    @Column(name = "reference_quantity")
+    private String referenceQuantity;
+
+    /**
      * 日期
      */
     @Column(name = "create_time")

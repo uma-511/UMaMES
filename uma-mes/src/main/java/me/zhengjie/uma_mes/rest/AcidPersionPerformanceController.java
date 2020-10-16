@@ -64,6 +64,11 @@ public class AcidPersionPerformanceController {
                 throw new BadRequestException("日期条件转换异常");
             }
         }
+        if(null != criteria.getDayTime() && !criteria.getDayTime().equals("")){
+            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
+            Date date = new Date(criteria.getDayTime());
+            criteria.setTaskStringDate(sdf.format(date));
+        }
         return new ResponseEntity<>(acidPersionPerformanceService.queryAll(criteria,pageable),HttpStatus.OK);
     }
 

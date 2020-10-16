@@ -128,6 +128,17 @@ public class ChemicalFiberDeliveryNoteController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    @Log("获取产品上次销售单价")
+    @ApiOperation("获取产品上次销售单价")
+    @GetMapping(value = "/getLastSellingPrice")
+    @AnonymousAccess()
+    public ResponseEntity getLastSellingPrice(ChemicalFiberDeliveryNoteQueryCriteria criteria) {
+        String lastSellingPrice = chemicalFiberDeliveryDetailRepository.getLastSellingPrice(criteria.getCustomerId(),criteria.getProdModel());
+        ChemicalFiberDeliveryNoteDTO chemicalFiberDeliveryNoteDto = new ChemicalFiberDeliveryNoteDTO();
+        chemicalFiberDeliveryNoteDto.setLastPrice(lastSellingPrice);
+        return new ResponseEntity(chemicalFiberDeliveryNoteDto,HttpStatus.OK);
+    }
+
     @Log("订单签收")
     @ApiOperation("订单签收")
     @GetMapping(value = "/recived/{id}")

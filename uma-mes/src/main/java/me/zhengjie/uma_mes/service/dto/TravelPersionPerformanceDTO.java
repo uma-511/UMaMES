@@ -43,6 +43,25 @@ public class TravelPersionPerformanceDTO implements Serializable {
     // 职位
     private String permission;
 
+
+
+    /**
+     * 转换数量
+     */
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal realQuantity;
+
+    /**
+     * 装卸单价
+     */
+    @JsonSerialize(using = CustomerBigDecimalSerialize.class)
+    private BigDecimal unitPrice;
+
+    /**
+     * 参考数量
+     */
+    private String referenceQuantity;
+
     // 里程费
     @JsonSerialize(using = CustomerBigDecimalSerialize.class)
     private BigDecimal mileageFee;
