@@ -82,10 +82,16 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         }
         criteria.setProdId(prodctionId);
         Page<ChemicalFiberProductionReport> page = chemicalFiberProductionReportRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
-
+        List<ChemicalFiberProductionReportDTO> pageList1 = chemicalFiberProductionReportMapper.toDto(page.getContent());
+        List<ChemicalFiberProductionReportDTO> pageList2 = new ArrayList<>();
+        for (ChemicalFiberProductionReportDTO dto : pageList1) {
+            dto.setModel(prodNameMap.get(dto.getProductionId().toString()));
+            pageList2.add(dto);
+        }
 
         if (criteria.getIs() == null) {
-            return PageUtil.toPage(page.map(chemicalFiberProductionReportMapper::toDto));
+            //return PageUtil.toPage(page.map(chemicalFiberProductionReportMapper::toDto));
+            return PageUtil.toPage(new PageImpl(pageList2, pageable, page.getTotalElements()));
         } else {
             long startTime = System.currentTimeMillis();    //获取开始时间
 

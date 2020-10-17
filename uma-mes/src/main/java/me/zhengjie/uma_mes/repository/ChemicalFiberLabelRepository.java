@@ -43,9 +43,9 @@ public interface ChemicalFiberLabelRepository extends JpaRepository<ChemicalFibe
     @Query(value = "select * from uma_chemical_fiber_label WHERE print_time BETWEEN ?1 AND ?2 GROUP BY production_id",nativeQuery = true)
     List<ChemicalFiberLabel> getProductionId(String stater, String end);
 
-    @Query(value = "SELECT sum( CASE WHEN `status` != 3 OR status != 0 THEN 1 ELSE 0 END ) AS total_bag, \n" +
-            "sum( CASE WHEN `status` != 3 OR status != 0 THEN net_weight ELSE 0 END ) AS net_weight,\n" +
-            "sum( CASE WHEN `status` != 3 OR status != 0 THEN gross_weight ELSE 0 END ) AS gross_weight FROM `uma_chemical_fiber_label` where print_time like %?1%",nativeQuery = true)
+    @Query(value = "SELECT sum( CASE WHEN `status` != 3 and status != 0 THEN 1 ELSE 0 END ) AS total_bag, \n" +
+            "sum( CASE WHEN `status` != 3 and status != 0 THEN net_weight ELSE 0 END ) AS net_weight,\n" +
+            "sum( CASE WHEN `status` != 3 and status != 0 THEN gross_weight ELSE 0 END ) AS gross_weight FROM `uma_chemical_fiber_label` where print_time like %?1%",nativeQuery = true)
     Map<String, Object> getSumLabel(String time);
 
 
