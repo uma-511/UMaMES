@@ -95,24 +95,7 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
 
             System.out.println("程序运行时间：" + (endTime - startTime) + "ms");
             List<ChemicalFiberProductionReportDTO> pageListSize = new ArrayList<>();
-            int size = pageable.getPageSize();
-            int pageNumber = pageable.getPageNumber();
-            for (int i = 0; i < size; i++) {
-                if (pageNumber == 0) {
-                    if ( pageList.size() > i) {
-                        pageListSize.add(pageList.get(i));
-                    } else {
-                        break;
-                    }
-                } else {
-                    int max = (size * pageNumber) + i;
-                    if (pageList.size() > max) {
-                        pageListSize.add(pageList.get(max));
-                    } else {
-                        break;
-                    }
-                }
-            }
+            pageListSize = PageUtil.toPage(pageable.getPageNumber(),pageable.getPageSize(), pageList);
             return PageUtil.toPage(new PageImpl(pageListSize, pageable, pageList.size()));
         }
     }
