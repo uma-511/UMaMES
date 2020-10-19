@@ -90,17 +90,23 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         List<Map<String, Object>> sum = chemicalFiberDeliveryNoteRepository.getSum();
         Map<String, Integer> sumBag = new HashMap<>();
         Map<String, BigDecimal> sumTotal = new HashMap<>();
+        Map<String, BigDecimal> sumGrossWeight = new HashMap<>();
         for (Map<String, Object> sumDto : sum) {
             BigDecimal b = new BigDecimal(sumDto.get("total_bag").toString());
             Integer bag = b.intValue();
             sumBag.put(sumDto.get("note_id").toString(), bag);
             sumTotal.put(sumDto.get("note_id").toString(), new BigDecimal(sumDto.get("total_weight").toString()));
+            if (sumDto.get("gross_weight") != null ) {
+                sumGrossWeight.put(sumDto.get("note_id").toString(), new BigDecimal(sumDto.get("gross_weight").toString()));
+            } else {
+                sumGrossWeight.put(sumDto.get("note_id").toString(), new BigDecimal(0));
+            }
         }
         List<ChemicalFiberDeliveryNoteDTO> pageDtoLists = new ArrayList<>();
         for (ChemicalFiberDeliveryNoteDTO dto : pageLists) {
-
             dto.setBag(sumBag.get(dto.getId().toString()));
             dto.setWeight(sumTotal.get(dto.getId().toString()));
+            dto.setGrossWeight(sumGrossWeight.get(dto.getId().toString()));
             pageDtoLists.add(dto);
         }
        // return PageUtil.toPage(page.map(chemicalFiberDeliveryNoteMapper::toDto));
@@ -452,6 +458,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
 
         // 总重量
         BigDecimal totalWeight = new BigDecimal(0.0);
+        BigDecimal totalGrossWeight = new BigDecimal(0.0);
 
         for (ChemicalFiberDeliveryNote chemicalFiberDeliveryNote : chemicalFiberDeliveryNotes) {
             for (ChemicalFiberDeliveryDetail chemicalFiberDeliveryDetail : chemicalFiberDeliveryNote.getChemicalFiberDeliveryDetails()) {
@@ -460,6 +467,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
                 totalBag = totalBag + (chemicalFiberDeliveryDetail.getTotalBag() == null ? 0 : chemicalFiberDeliveryDetail.getTotalBag());
                 totalNumber = totalNumber + (chemicalFiberDeliveryDetail.getTotalNumber() == null ? 0 : chemicalFiberDeliveryDetail.getTotalNumber());
                 totalWeight = totalWeight.add(chemicalFiberDeliveryDetail.getTotalWeight() == null ? new BigDecimal(0.0) : chemicalFiberDeliveryDetail.getTotalWeight());
+                totalGrossWeight = totalGrossWeight.add(chemicalFiberDeliveryDetail.getGrossWeight() == null ? new BigDecimal(0.0) : chemicalFiberDeliveryDetail.getGrossWeight());
             }
         }
 
@@ -471,6 +479,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         list.add(totalPrice);
         list.add(totalBag);
         list.add(totalWeight);
+        list.add(totalGrossWeight);
         return Result.success(list);
     }
 }

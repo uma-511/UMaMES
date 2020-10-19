@@ -18,7 +18,7 @@ public interface ChemicalFiberDeliveryNoteRepository extends JpaRepository<Chemi
     @Procedure(procedureName = "proc_generate_delivery_detail")
     void deliveryNoteStoredProcedure(@Param("scanNumber") String scanNumber);
 
-    @Query(value = "SELECT delivery_note_id as note_id,sum(total_bag) as total_bag, sum(total_weight) as total_weight FROM `uma_chemical_fiber_delivery_detail` GROUP BY delivery_note_id",nativeQuery = true)
+    @Query(value = "SELECT delivery_note_id as note_id,sum(total_bag) as total_bag, sum(total_weight) as total_weight, sum(gross_weight) as gross_weight FROM `uma_chemical_fiber_delivery_detail` GROUP BY delivery_note_id",nativeQuery = true)
     List<Map<String, Object>> getSum();
 
     @Query(value = "SELECT count(id) as id , sum(total_price) as total_price  FROM `uma_chemical_fiber_delivery_note` where create_date like %?1%",nativeQuery = true)

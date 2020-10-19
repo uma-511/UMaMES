@@ -67,4 +67,6 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     private Timestamp createDate;
 
     private String customerName;
+
+    private BigDecimal grossWeight;
 }

@@ -61,6 +61,9 @@ public class ChemicalFiberDeliveryDetailVo  {
     // 总重量
     private BigDecimal totalWeight;
 
+    // 总重量
+    private BigDecimal grossWeight;
+
     // 备注
     private String remark;
 }
