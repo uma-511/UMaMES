@@ -1,5 +1,6 @@
 package me.zhengjie.modules.monitor.service;
 
+import me.zhengjie.uma_mes.service.dto.VisitsQueryCrteria;
 import org.springframework.scheduling.annotation.Async;
 import javax.servlet.http.HttpServletRequest;
 
@@ -25,7 +26,7 @@ public interface VisitsService {
      * 获取数据
      * @return /
      */
-    Object get();
+    Object get(VisitsQueryCrteria crteria);
 
     /**
      * getChartData

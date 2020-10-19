@@ -13,6 +13,10 @@ public class ChemicalFiberProductionReportQueryCriteria {
     @Query
     private String shifts;
 
+    // 班次
+    @Query
+    private String machine;
+
     // 纤度
     @Query(type = Query.Type.INNER_LIKE)
     private String fineness;
@@ -35,5 +39,15 @@ public class ChemicalFiberProductionReportQueryCriteria {
 
     // 临时结束时间
     private Long tempEndTime;
+
+    // 临时结束时间
+    private Integer is;
+
+    // 临时结束时间
+    private String name;
+
+    // 临时结束时间
+    @Query
+    private Integer prodId;
 
 }

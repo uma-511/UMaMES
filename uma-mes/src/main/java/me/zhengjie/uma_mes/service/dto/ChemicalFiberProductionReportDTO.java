@@ -29,6 +29,9 @@ public class ChemicalFiberProductionReportDTO implements Serializable {
     // 色号
     private String color;
 
+    // 色号
+    private String model;
+
     // 生产包数
     private BigDecimal productionPacketNumber = new BigDecimal(0);
 

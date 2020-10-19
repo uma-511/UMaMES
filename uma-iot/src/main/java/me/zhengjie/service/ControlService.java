@@ -69,6 +69,9 @@ public class ControlService {
 
     @Autowired
     ChemicalFiberProductionRepository chemicalFiberProductionRepository;
+
+    @Autowired
+    ChemicalFiberProductionReportService productionReportService;
     /**
      * 获取机台生产单数据
      */
@@ -206,7 +209,12 @@ public class ControlService {
 
         ChemicalFiberLabelDTO labelDto = labelService.create(label);
 
-        ChemicalFiberProductionReport report = reportService.getReport(labelDto.getShifts(), labelDto.getMachine());
+        ChemicalFiberProductionReport report = new ChemicalFiberProductionReport();
+
+        /*DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String time = sdf.format(labelDto.getPrintTime());
+*/
+        report = productionReportService.getReport(labelDto.getPrintTime(), labelDto.getShifts(), labelDto.getMachine(), labelDto.getProductionId());
         if (report != null) {
             BigDecimal packetNumber = report.getWarehousingPacketNumber();
             BigDecimal factPerBagNumber = report.getWarehousingFactPerBagNumber();

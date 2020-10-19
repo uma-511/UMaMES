@@ -7,9 +7,9 @@ import java.util.List;
 import me.zhengjie.annotation.Query;
 
 /**
-* @author Tan Jun Ming
-* @date 2019-11-20
-*/
+ * @author Tan Jun Ming
+ * @date 2019-11-20
+ */
 @Data
 public class ChemicalFiberLabelQueryCriteria{
 
@@ -20,8 +20,8 @@ public class ChemicalFiberLabelQueryCriteria{
     @Query(type = Query.Type.INNER_LIKE)
     private String labelNumber;
 
-    // 精确
-    @Query
+    /* // 精确
+     @Query*/
     private Integer status;
 
     // 模糊
@@ -35,6 +35,9 @@ public class ChemicalFiberLabelQueryCriteria{
     // 小于等于
     @Query(type = Query.Type.LESS_THAN, propName = "printTime")
     private Timestamp endTime;
+
+    @Query(type = Query.Type.IN, propName = "status")
+    private List<Integer> tbStatus;
 
     // 精确
     @Query
@@ -64,4 +67,13 @@ public class ChemicalFiberLabelQueryCriteria{
     // 精确
     @Query
     private String color;
+
+
+    // 托板id
+    @Query
+    private String palletId;
+
+    // 托板id
+    @Query
+    private Integer prodId;
 }

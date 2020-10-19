@@ -3,7 +3,10 @@ package me.zhengjie.uma_mes.repository;
 import me.zhengjie.uma_mes.domain.ChemicalFiberStock;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
+
+import java.util.Map;
 
 /**
 * @author Tan Jun Ming
@@ -14,4 +17,7 @@ public interface ChemicalFiberStockRepository extends JpaRepository<ChemicalFibe
     void stockTask();
 
     ChemicalFiberStock findByProdColorAndProdFineness(String color,String fineness);
+
+    @Query(value = "SELECT sum(total_bag) as bag, sum(total_net_weight) as net_weight, sum(total_gross_weight) as gross_weight FROM `uma_chemical_fiber_stock`",nativeQuery = true)
+    Map<String, Object> getSumStock();
 }

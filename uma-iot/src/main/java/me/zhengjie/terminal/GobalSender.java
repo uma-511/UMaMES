@@ -29,7 +29,8 @@ public class GobalSender extends SendCommand {
     }
 
     public void sendImmediate(String command){
-        channel.writeAndFlush(command);
+        sendDeloy(command,300);
+        //channel.writeAndFlush(command);
     }
 
     public void sendImmediate(byte[] command){
@@ -39,7 +40,7 @@ public class GobalSender extends SendCommand {
     public void sendImmediate(Vector<Byte> command){
         channel.writeAndFlush(command);
     }
-    
+
     public void send(String command){
         sendDeloy(command,300);
     }

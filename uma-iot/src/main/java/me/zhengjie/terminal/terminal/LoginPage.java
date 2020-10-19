@@ -137,7 +137,10 @@ public class LoginPage extends SendCommand {
                 if (createByTerminal) {
                     ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
                     controlPannelInfo.setBanci(userInfo.getBanci());
+
+
                     gobalSender.sendImmediate(switchScreen("00 02"));
+
                     gobalSender.addCommand(controllerPage.sendBanci(userInfo.getBanci(), ip));
                 } else {
                     gobalSender.addCommand(switchScreen("00 03"));
