@@ -427,6 +427,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         List<Object> list = new ArrayList<>();
         list.add("总计");
         list.add("");
+        list.add("");
         list.add(totalBag);
         list.add(totalNumber);
         list.add(totalWeight);
