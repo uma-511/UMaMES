@@ -109,6 +109,7 @@ public class VisitsServiceImpl implements VisitsService {
         BigDecimal d = new BigDecimal(0);
         BigDecimal e = new BigDecimal(0);
         BigDecimal g = new BigDecimal(0);
+        BigDecimal h = new BigDecimal(0);
 
         if (sumStock.get("net_weight") != null) {
             a = new BigDecimal(sumStock.get("net_weight").toString());
@@ -128,6 +129,9 @@ public class VisitsServiceImpl implements VisitsService {
         if ( sumNote1.get("total_weight") != null) {
             g = new BigDecimal(sumNote1.get("total_weight").toString());
         }
+        if ( sumNote1.get("total_gross_weight") != null) {
+            h = new BigDecimal(sumNote1.get("total_gross_weight").toString());
+        }
 
         map.put("stockNumber",sumStock.get("bag"));
         map.put("stockNetWeight",a);
@@ -139,6 +143,7 @@ public class VisitsServiceImpl implements VisitsService {
         map.put("deliveryTotalNumber",e);
         map.put("deliveryBagNumber",sumNote1.get("total_bag"));
         map.put("deliveryNetWeight",g);
+        map.put("deliveryGrossWeight",h);
         //map.put("recentIp",5);
         return map;
     }
