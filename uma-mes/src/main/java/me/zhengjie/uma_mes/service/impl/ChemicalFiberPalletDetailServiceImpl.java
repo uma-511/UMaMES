@@ -8,7 +8,6 @@ import me.zhengjie.uma_mes.service.ChemicalFiberPalletDetailService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberPalletDetailDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberPalletDetailQueryCeiteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberPalletDetailMapper;
-import me.zhengjie.uma_mes.service.mapper.ChemicalFiberPalletDetailMapperImpl;
 import me.zhengjie.utils.QueryHelp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;

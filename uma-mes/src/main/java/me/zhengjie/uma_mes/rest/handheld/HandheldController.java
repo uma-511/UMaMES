@@ -5,6 +5,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import me.zhengjie.annotation.AnonymousAccess;
 import me.zhengjie.aop.log.Log;
+import me.zhengjie.uma_mes.domain.ErrorText;
 import me.zhengjie.uma_mes.service.dto.handheld.LabelMsgDto;
 import me.zhengjie.uma_mes.service.dto.handheld.UploadDataDto;
 import me.zhengjie.uma_mes.service.handheld.HandheldService;
@@ -51,5 +52,14 @@ public class HandheldController {
     @AnonymousAccess()
     public Result getConfigs() {
         return handheldService.getConfigs();
+    }
+
+    @Log("保存错误信息")
+    @ApiOperation("保存错误信息")
+    @PostMapping(value = "/errorTextSave")
+    @AnonymousAccess()
+    public Result getErrorTextSave(@RequestBody ErrorText Data) {
+        handheldService.errorTextSave(Data);
+        return Result.success("成功");
     }
 }

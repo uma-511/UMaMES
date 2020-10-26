@@ -1,17 +1,14 @@
 package me.zhengjie.uma_mes.service.handheld;
 
-import cn.hutool.core.thread.ThreadUtil;
 import com.lgmn.common.result.Result;
 import com.lgmn.common.result.ResultEnum;
 import com.lgmn.common.utils.ObjectTransfer;
-import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.*;
 import me.zhengjie.uma_mes.repository.*;
 import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.dto.*;
 import me.zhengjie.uma_mes.service.dto.handheld.LabelMsgDto;
 import me.zhengjie.uma_mes.service.dto.handheld.UploadDataDto;
-import me.zhengjie.uma_mes.vo.handheld.ChemicalFiberHandheld;
 import me.zhengjie.uma_mes.vo.handheld.ChemicalFiberLabelInfoVo;
 import me.zhengjie.uma_mes.vo.handheld.ChemicalFiberProductionInfoVo;
 import me.zhengjie.uma_mes.vo.handheld.LabelMsgVo;
@@ -19,14 +16,10 @@ import me.zhengjie.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class HandheldService {
@@ -73,6 +66,9 @@ public class HandheldService {
 
     @Autowired
     private ViewScanRecordService viewScanRecordService;
+
+    @Autowired
+    private ErrorTextRepository errorTextRepository;
 
     public HandheldService(
             ChemicalFiberLabelService chemicalFiberLabelService,
@@ -938,5 +934,9 @@ public class HandheldService {
         return scanNumber;
     }
 
+    public void errorTextSave(ErrorText Date) {
+        Date.setCreateDate(new Timestamp(System.currentTimeMillis()));
+        errorTextRepository.save(Date);
+    }
 
 }

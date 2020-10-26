@@ -3,6 +3,7 @@ package me.zhengjie.modules.security.rest;
 import cn.hutool.core.util.IdUtil;
 import com.lgmn.common.result.Result;
 import com.wf.captcha.ArithmeticCaptcha;
+import io.netty.channel.Channel;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Zheng Jie
@@ -57,6 +60,8 @@ public class AuthenticationController {
         this.userDetailsService = userDetailsService;
         this.onlineUserService = onlineUserService;
     }
+
+    public static Map<String, String> tokenMap = new HashMap<>();
 
     @Log("用户登录")
     @ApiOperation("登录授权")
@@ -108,7 +113,13 @@ public class AuthenticationController {
 //            throw new BadRequestException("验证码错误");
 //        }
         try {
+
+
             final JwtUser jwtUser = (JwtUser) userDetailsService.loadUserByUsername(authUser.getUsername());
+
+            if (tokenMap.get(authUser.getUsername()) != null) {
+                throw new AccountExpiredException("用户已经登录");
+            }
 
             if(!jwtUser.getPassword().equals(EncryptUtils.encryptPassword(authUser.getPassword()))){
                 throw new AccountExpiredException("密码错误");
@@ -121,11 +132,24 @@ public class AuthenticationController {
             final String token = jwtTokenUtil.generateToken(jwtUser);
             // 保存在线信息
             onlineUserService.save(jwtUser, token, request);
+
+            tokenMap.put(authUser.getUsername(), token);
             // 返回 token
             return Result.success(new AuthInfo(token,jwtUser));
         } catch (Exception e) {
             return Result.serverError(e.getMessage());
         }
+    }
+
+    @Log("手持机用户退出登录")
+    @ApiOperation("退出登录")
+    @AnonymousAccess
+    @PostMapping(value = "/delectlogin")
+    public Result delectlogin(@RequestBody String user){
+        String token = tokenMap.get(user);
+        tokenMap.put(user, null);
+        onlineUserService.logout(token);
+        return Result.success("退出成功");
     }
 
     @ApiOperation("获取用户信息")

@@ -15,6 +15,8 @@ import me.zhengjie.terminal.PrintExector;
 import me.zhengjie.terminal.command.BaseCommand;
 import me.zhengjie.terminal.terminal.ControllerPage;
 import me.zhengjie.terminal.terminal.Terminal;
+import me.zhengjie.uma_mes.domain.Equipment;
+import me.zhengjie.uma_mes.service.EquipmentService;
 import me.zhengjie.uma_mes.service.dto.HeartBeatDTO;
 import me.zhengjie.utils.CoderUtils;
 import me.zhengjie.utils.TerminalUtils;
@@ -42,6 +44,9 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
 
     @Autowired
     HeartBeatConsumer heartBeatConsumer;
+
+    @Autowired
+    EquipmentService equipmentService;
 
     /**
      * 拿到传过来的msg数据，开始处理
@@ -142,6 +147,7 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
             updateChannel = true;
         }
 
+
         NettyTcpServer.map.put(ip, channel);
         NettyTcpServer.ipPortMap.put(ip, port);
         if (updateChannel) {
@@ -149,6 +155,19 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
         } else {
             NettyTcpServer.terminalMap.put(ip, new Terminal(ip));
         }
+
+        // 添加机台在线信息
+        Equipment dto = equipmentService.getByIp(ip);
+        if (dto != null) {
+            dto.setStatus(1);
+            equipmentService.update(dto);
+        } else {
+            Equipment dto1 = new Equipment();
+            dto1.setIp(ip);
+            dto1.setStatus(1);
+            equipmentService.create(dto1);
+        }
+
     }
 
     private boolean checkTerminal(String ip) {
@@ -164,6 +183,10 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
      */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        // 修改机台在线状态
+        Equipment dto = equipmentService.getByIp(getIPString(ctx));
+        dto.setStatus(2);
+        equipmentService.update(dto);
         //删除Channel Map中的失效Client
         NettyTcpServer.map.remove(getIPString(ctx));
         NettyTcpServer.terminalMap.remove(getIPString(ctx));
