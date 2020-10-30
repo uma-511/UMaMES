@@ -137,4 +137,13 @@ public class ChemicalFiberDeliveryNoteController {
     public Result getNoteSumm(@RequestBody ChemicalFiberDeliveryNoteQueryCriteria criteria) {
         return chemicalFiberDeliveryNoteService.getNoteSumm(criteria);
     }
+
+    @PostMapping(value = "/getWasteOutOfWarehouse")
+    @Log("废料出仓")
+    @ApiOperation("废料出仓")
+    @AnonymousAccess
+    public ResponseEntity getWasteOutOfWarehouse() {
+        chemicalFiberDeliveryNoteService.getWasteOutOfWarehouse();
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }

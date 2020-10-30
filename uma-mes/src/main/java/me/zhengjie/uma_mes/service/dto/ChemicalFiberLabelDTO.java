@@ -67,4 +67,13 @@ public class ChemicalFiberLabelDTO implements Serializable {
 
     // 托板id
     private String palletId;
+
+    // 入库时间
+    private Timestamp warehousingTime;
+
+    // 作废时间
+    private Timestamp toVoidTime;
+
+    // 出库时间
+    private Timestamp outOfWarehouseTime;
 }

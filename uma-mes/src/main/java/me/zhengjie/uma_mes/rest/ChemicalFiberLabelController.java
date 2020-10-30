@@ -6,6 +6,7 @@ import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.service.ChemicalFiberLabelService;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.FactoryNameQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +51,13 @@ public class ChemicalFiberLabelController {
     @PreAuthorize("@el.check('chemicalFiberLabel:list')")
     public ResponseEntity getChemicalFiberLabels(ChemicalFiberLabelQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(chemicalFiberLabelService.queryAll(criteria,pageable),HttpStatus.OK);
+    }
+
+    @GetMapping(value ="/factoryName")
+    @Log("查询打印模板")
+    @ApiOperation("查询打印模板")
+    public ResponseEntity getFactoryName(FactoryNameQueryCriteria criteria, Pageable pageable){
+        return new ResponseEntity<>(chemicalFiberLabelService.getFactoryName(criteria, pageable),HttpStatus.OK);
     }
 
     @PostMapping

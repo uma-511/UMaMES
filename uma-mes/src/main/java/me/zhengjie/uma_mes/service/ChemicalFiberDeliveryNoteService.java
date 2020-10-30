@@ -56,4 +56,6 @@ public interface ChemicalFiberDeliveryNoteService {
     Result getSalesReportSummaries(ChemicalFiberDeliveryNoteQueryCriteria criteria);
 
     Result getNoteSumm(ChemicalFiberDeliveryNoteQueryCriteria criteria);
+
+    void getWasteOutOfWarehouse();
 }

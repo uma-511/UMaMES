@@ -3,6 +3,7 @@ package me.zhengjie.uma_mes.service;
 import com.lgmn.common.result.Result;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProductionReport;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionReportDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionReportQueryCriteria;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,8 @@ import java.util.Map;
 public interface ChemicalFiberProductionReportService {
 
     Map<String, Object> queryAll(ChemicalFiberProductionReportQueryCriteria criteria, Pageable pageable);
+
+    Map<String, Object> queryAllDateil(ChemicalFiberLabelQueryCriteria criteria, Pageable pageable);
 
 
     ChemicalFiberProductionReport getReport(Timestamp time, String shifts, String machine, Integer productionId);

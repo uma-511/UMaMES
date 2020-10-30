@@ -15,6 +15,7 @@ public class ControlPannelInfo {
     String coreWeight;
     String machineNumber = "0";
     String factPerBagNumber = "0";
+    String factory;
 
     Integer productionId;
     Integer productId;
@@ -25,6 +26,8 @@ public class ControlPannelInfo {
     String grossWeight;
     String totalNumber;
     String totalWeight;
+    String dayNumber;
+    String dayWeight;
 
     /**
      * 终端机获取

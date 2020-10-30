@@ -99,8 +99,8 @@ public class AuthenticationController {
     @Log("手持机用户登录")
     @ApiOperation("登录授权")
     @AnonymousAccess
-    @PostMapping(value = "/handsetlogin")
-    public Result handSetLogin(@Validated @RequestBody AuthUser authUser, HttpServletRequest request){
+    @PostMapping(value = "/handsetlogins")
+    public Result handSetLogins(@Validated @RequestBody AuthUser authUser, HttpServletRequest request){
 
         // 查询验证码
 //        String code = redisService.getCodeVal(authUser.getUuid());
@@ -134,6 +134,37 @@ public class AuthenticationController {
             onlineUserService.save(jwtUser, token, request);
 
             tokenMap.put(authUser.getUsername(), token);
+            // 返回 token
+            return Result.success(new AuthInfo(token,jwtUser));
+        } catch (Exception e) {
+            return Result.serverError(e.getMessage());
+        }
+    }
+
+    @Log("机台用户登录")
+    @ApiOperation("登录授权")
+    @AnonymousAccess
+    @PostMapping(value = "/handsetlogin")
+    public Result handSetLogin(@Validated @RequestBody AuthUser authUser, HttpServletRequest request){
+        try {
+
+
+            final JwtUser jwtUser = (JwtUser) userDetailsService.loadUserByUsername(authUser.getUsername());
+
+
+            if(!jwtUser.getPassword().equals(EncryptUtils.encryptPassword(authUser.getPassword()))){
+                throw new AccountExpiredException("密码错误");
+            }
+
+            if(!jwtUser.isEnabled()){
+                throw new AccountExpiredException("账号已停用，请联系管理员");
+            }
+            // 生成令牌
+            final String token = jwtTokenUtil.generateToken(jwtUser);
+            // 保存在线信息
+            onlineUserService.save(jwtUser, token, request);
+
+            //tokenMap.put(authUser.getUsername(), token);
             // 返回 token
             return Result.success(new AuthInfo(token,jwtUser));
         } catch (Exception e) {

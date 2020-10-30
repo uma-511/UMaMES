@@ -6,11 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.domain.ControlPannelInfo;
 import me.zhengjie.domain.UserInfo;
 import me.zhengjie.server.NettyTcpServer;
+import me.zhengjie.service.LoginService;
 import me.zhengjie.terminal.GobalSender;
 import me.zhengjie.terminal.annotation.Button;
 import me.zhengjie.terminal.annotation.Screen;
 import me.zhengjie.terminal.annotation.Text;
 import me.zhengjie.terminal.command.SendCommand;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -29,12 +32,16 @@ import java.util.Map;
 @Slf4j
 @Component
 public class LoginPage extends SendCommand {
+    private static final Logger logger = LoggerFactory.getLogger(LoginPage.class);
 
     @Value("${uma.production.createByTerminal}")
     boolean createByTerminal;
 
     @Autowired
     ControllerPage controllerPage;
+
+    @Autowired
+    LoginService loginService;
 
     final String screenId = "00 01";
 
@@ -75,8 +82,10 @@ public class LoginPage extends SendCommand {
         } else {
             bc = banci;
         }
+        String factory = loginService.getFactory(1);
 //        gobalSender.sendImmediate(setTextValue("00 01", "00 03", bc));
         terminal.getUserinfo().setBanci(bc);
+        terminal.getUserinfo().setFactory(factory);
         status = status + 1;
         login(ip);
     }
@@ -143,8 +152,9 @@ public class LoginPage extends SendCommand {
                    // gobalSender.sendImmediate(switchScreen("00 02"));
                     //Thread.sleep(300);
                     //gobalSender.sendImmediate1(switchScreen("00 02"), chann);
-                    gobalSender.sendDeloy(switchScreen("00 02"), 300, ip);
+                    gobalSender.sendDeloy(switchScreen("00 02"), 400, ip);
                     gobalSender.addCommand(controllerPage.sendBanci(userInfo.getBanci(), ip));
+                    gobalSender.addCommand(controllerPage.sendFactory(userInfo.getFactory(), ip));
                 } else {
                     gobalSender.addCommand(switchScreen("00 03"));
                 }

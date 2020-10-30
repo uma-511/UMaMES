@@ -9,5 +9,7 @@ public class UserInfo {
     String userName;
     String password;
     String banci;
+    String factory;
+    String print;
     String jitai;
 }

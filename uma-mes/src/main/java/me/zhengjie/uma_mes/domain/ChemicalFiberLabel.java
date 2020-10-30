@@ -90,6 +90,18 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name = "pallet_id")
     private String palletId;
 
+    // 入库时间
+    @Column(name = "warehousing_time")
+    private Timestamp warehousingTime;
+
+    // 作废时间
+    @Column(name = "to_void_time")
+    private Timestamp toVoidTime;
+
+    // 出库时间
+    @Column(name = "out_of_warehouse_time")
+    private Timestamp outOfWarehouseTime;
+
     public void copy(ChemicalFiberLabel source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
     }

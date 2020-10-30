@@ -5,6 +5,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import me.zhengjie.aop.log.Log;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductionReportService;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionReportQueryCriteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,14 @@ public class ChemicalFiberProductionReportController {
     //@PreAuthorize("@el.check('chemicalFiberProductionReport:list')")
     public ResponseEntity getChemicalFiberProductionReport(ChemicalFiberProductionReportQueryCriteria criteria, Pageable pageable){
         return new ResponseEntity<>(chemicalFiberProductionReportService.queryAll(criteria,pageable), HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/getDateil")
+    @Log("查询生产报表详情")
+    @ApiOperation("查询生产报表详情")
+    //@PreAuthorize("@el.check('chemicalFiberProductionReport:list')")
+    public ResponseEntity getChemicalFiberProductionReportDateil(ChemicalFiberLabelQueryCriteria criteria, Pageable pageable){
+        return new ResponseEntity<>(chemicalFiberProductionReportService.queryAllDateil(criteria,pageable), HttpStatus.OK);
     }
 
     @PostMapping(value = "/getProductionReportSummaries")

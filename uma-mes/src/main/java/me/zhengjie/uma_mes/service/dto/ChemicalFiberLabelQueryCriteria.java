@@ -39,6 +39,9 @@ public class ChemicalFiberLabelQueryCriteria{
     @Query(type = Query.Type.IN, propName = "status")
     private List<Integer> tbStatus;
 
+    @Query(type = Query.Type.NOT_EQUAL, propName = "status")
+    private Integer notStatus;
+
     // 精确
     @Query
     private String shifts;
@@ -74,6 +77,8 @@ public class ChemicalFiberLabelQueryCriteria{
     private String palletId;
 
     // 托板id
-    @Query
+    @Query(type = Query.Type.EQUAL, propName = "productId")
     private Integer prodId;
+
+    private Integer model;
 }

@@ -2,7 +2,11 @@ package me.zhengjie.uma_mes.service.impl;
 
 import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
+import me.zhengjie.uma_mes.domain.FactoryName;
+import me.zhengjie.uma_mes.repository.FactoryNameRepository;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelTotalDTO;
+import me.zhengjie.uma_mes.service.dto.FactoryNameQueryCriteria;
+import me.zhengjie.uma_mes.service.mapper.FactoryNameMapper;
 import me.zhengjie.utils.ValidationUtil;
 import me.zhengjie.utils.FileUtil;
 import me.zhengjie.uma_mes.repository.ChemicalFiberLabelRepository;
@@ -11,6 +15,7 @@ import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberLabelMapper;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +29,9 @@ import me.zhengjie.utils.QueryHelp;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 /**
 * @author Tan Jun Ming
@@ -43,6 +45,11 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
     private final ChemicalFiberLabelRepository chemicalFiberLabelRepository;
 
     private final ChemicalFiberLabelMapper chemicalFiberLabelMapper;
+
+    @Autowired
+    private FactoryNameRepository factoryNameRepository;
+    @Autowired
+    private FactoryNameMapper factoryNameMapper;
 
     public ChemicalFiberLabelServiceImpl(ChemicalFiberLabelRepository chemicalFiberLabelRepository, ChemicalFiberLabelMapper chemicalFiberLabelMapper) {
         this.chemicalFiberLabelRepository = chemicalFiberLabelRepository;
@@ -73,6 +80,14 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
 //    @Cacheable
     public List<ChemicalFiberLabelDTO> queryAll(ChemicalFiberLabelQueryCriteria criteria){
         return chemicalFiberLabelMapper.toDto(chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
+    }
+
+    @Override
+//    @Cacheable
+    public Map<String,Object> getFactoryName(FactoryNameQueryCriteria criteria, Pageable pageable){
+
+        Page<FactoryName> page = factoryNameRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder),pageable);
+        return PageUtil.toPage(page.map(factoryNameMapper::toDto));
     }
 
     @Override
@@ -138,6 +153,7 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
             ObjectTransfer.transValue(dto, label);
             if (dto.getStatus() == 2) {
                 label.setPalletId(null);
+                label.setOutOfWarehouseTime(new Timestamp(System.currentTimeMillis()));
             }
             if (dto.getStatus() == 10) {
                 label.setPalletId(null);
@@ -155,8 +171,14 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
     public ChemicalFiberLabelTotalDTO getTotalByProductionId(Integer productionId) {
         Map map = chemicalFiberLabelRepository.getTotalByProductionId(productionId);
 
+        Map<String, Object> timeMap = monthTimeInMillis();
+
+        Map map1 = chemicalFiberLabelRepository.getTotalByProductionIdTime(productionId, timeMap.get("year").toString() + "-" + timeMap.get("month").toString() + "-" + timeMap.get("day").toString());
         int factPerBagNumber=0;
         BigDecimal netWeight = new BigDecimal(0);
+
+        int dayNumber=0;
+        BigDecimal dayWeight = new BigDecimal(0);
 
         if(map.containsKey("fact_per_bag_number")){
             factPerBagNumber = Integer.parseInt(map.get("fact_per_bag_number").toString());
@@ -166,9 +188,20 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
             netWeight = new BigDecimal(map.get("net_weight").toString());
         }
 
+        if(map1.containsKey("fact_per_bag_number")){
+            dayNumber = Integer.parseInt(map1.get("fact_per_bag_number").toString());
+        }
+
+        if(map1.containsKey("net_weight")){
+            dayWeight = new BigDecimal(map1.get("net_weight").toString());
+        }
+
+
         ChemicalFiberLabelTotalDTO totalDTO = new ChemicalFiberLabelTotalDTO();
         totalDTO.setTotalNumber(factPerBagNumber);
         totalDTO.setTotalWeight(netWeight);
+        totalDTO.setDayNumber(dayNumber);
+        totalDTO.setDayWeight(dayWeight);
         return totalDTO;
     }
 
@@ -184,5 +217,26 @@ public class ChemicalFiberLabelServiceImpl implements ChemicalFiberLabelService 
 
     public List<ChemicalFiberLabelDTO> getShifts() {
         return chemicalFiberLabelMapper.toDto(chemicalFiberLabelRepository.getShifts()) ;
+    }
+
+    public Map monthTimeInMillis() {
+        Calendar calendar = Calendar.getInstance();// 获取当前日期
+        calendar.add(Calendar.YEAR, 0);
+        calendar.add(Calendar.MONTH, 0);
+        //calendar.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Long time = calendar.getTimeInMillis();
+        int month = calendar.get(Calendar.MONTH) + 1;
+        int year = calendar.get(Calendar.YEAR);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("time", time);
+        map.put("month", month < 10 ? "0" + month : month);
+        map.put("year", year);
+        map.put("day", day < 10 ? "0" + day : day);
+        return map;
     }
 }

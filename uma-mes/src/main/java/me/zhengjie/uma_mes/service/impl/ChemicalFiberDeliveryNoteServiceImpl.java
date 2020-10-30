@@ -12,13 +12,17 @@ import com.lgmn.common.utils.ObjectTransfer;
 import me.zhengjie.exception.BadRequestException;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryDetail;
 import me.zhengjie.uma_mes.domain.ChemicalFiberDeliveryNote;
+import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
+import me.zhengjie.uma_mes.repository.ChemicalFiberLabelRepository;
 import me.zhengjie.uma_mes.service.*;
 import me.zhengjie.uma_mes.service.dto.*;
+import me.zhengjie.uma_mes.service.mapper.ChemicalFiberLabelMapper;
 import me.zhengjie.uma_mes.utils.NumberToCN;
 import me.zhengjie.utils.*;
 import me.zhengjie.uma_mes.repository.ChemicalFiberDeliveryNoteRepository;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberDeliveryNoteMapper;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -59,6 +63,9 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
     private final ScanRecordLabelService scanRecordLabelService;
 
     private final ChemicalFiberLabelService chemicalFiberLabelService;
+
+    @Autowired
+    private ChemicalFiberLabelRepository chemicalFiberLabelRepository;
 
     public ChemicalFiberDeliveryNoteServiceImpl(ChemicalFiberDeliveryNoteRepository chemicalFiberDeliveryNoteRepository,
                                                 ChemicalFiberDeliveryNoteMapper chemicalFiberDeliveryNoteMapper,
@@ -482,5 +489,17 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         list.add(totalWeight);
         list.add(totalGrossWeight);
         return Result.success(list);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void getWasteOutOfWarehouse() {
+        ChemicalFiberLabelQueryCriteria criteria = new ChemicalFiberLabelQueryCriteria();
+        criteria.setFineness("X");
+        criteria.setColor("废料");
+        List<ChemicalFiberLabel> list = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+        for (int i = 0; i < list.size(); i ++ ) {
+            list.get(i).setStatus(2);
+        }
+        chemicalFiberLabelService.update(list);
     }
 }

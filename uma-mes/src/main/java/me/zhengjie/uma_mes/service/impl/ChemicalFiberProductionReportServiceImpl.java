@@ -12,9 +12,8 @@ import me.zhengjie.uma_mes.repository.ChemicalFiberLabelRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductionReportRepository;
 import me.zhengjie.uma_mes.repository.ChemicalFiberProductionRepository;
 import me.zhengjie.uma_mes.service.ChemicalFiberProductionReportService;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionReportDTO;
-import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionReportQueryCriteria;
+import me.zhengjie.uma_mes.service.dto.*;
+import me.zhengjie.uma_mes.service.mapper.ChemicalFiberLabelMapper;
 import me.zhengjie.uma_mes.service.mapper.ChemicalFiberProductionReportMapper;
 import me.zhengjie.utils.FileUtil;
 import me.zhengjie.utils.PageUtil;
@@ -54,6 +53,9 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
 
     @Autowired
     private ChemicalFiberLabelRepository chemicalFiberLabelRepository;
+
+    @Autowired
+    private ChemicalFiberLabelMapper chemicalFiberLabelMapper;
 
 
     public Map<String, Object> queryAll(ChemicalFiberProductionReportQueryCriteria criteria, Pageable pageable) {
@@ -180,9 +182,10 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
                 for (ChemicalFiberLabel dtoList : list) {
                     if (dtoMap.get("machine").toString().equals(dtoList.getMachine())) {
                         if (dtoMap.get("shifts").toString().equals(dtoList.getShifts())) {
-                            if (dtoMap.get("prodctionNumber").toString().equals(dtoList.getProductionId().toString())) {
+                            if (dtoMap.get("prodctionNumber").toString().equals(dtoList.getProductId().toString())) {
                                 //if (tamp1.getTime() < dtoList.getPrintTime().getTime() && dtoList.getPrintTime().getTime() < tamp2.getTime()) {
                                 production.setProductionId(dtoList.getProductionId());
+                                production.setProdId(dtoList.getProductId());
                                 production.setMachine(dtoList.getMachine());
                                 production.setShifts(dtoList.getShifts());
                                 production.setFineness(dtoList.getFineness());
@@ -217,6 +220,126 @@ public class ChemicalFiberProductionReportServiceImpl implements ChemicalFiberPr
         }
         return productionList;
     }
+
+    public Map<String, Object> queryAllDateil(ChemicalFiberLabelQueryCriteria criteria, Pageable pageable) {
+        if (criteria.getTempStartTime() != null) {
+            String StartTime = new SimpleDateFormat("yyyy-MM-dd").format(criteria.getTempStartTime());
+            StartTime = StartTime + " 07:30:00";
+            Timestamp time1 = Timestamp.valueOf(StartTime);
+            Date star = new Timestamp(time1.getTime());
+            Timestamp tamp1 = new Timestamp(star.getTime());
+            Timestamp tamp2 = new Timestamp(star.getTime() + (long)86399998);
+            criteria.setStartTime(tamp1);
+            criteria.setEndTime(tamp2);
+        }
+        criteria.setNotStatus(3);
+
+        //Page<ChemicalFiberLabel> page = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+
+        List<ChemicalFiberLabel> pageList = chemicalFiberLabelRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder));
+
+        List<ListDateil> dateil = new ArrayList<>();
+        int li = pageList.size() / 10;
+        for (int i = 0; i <= pageList.size() / 10; i ++ ) {
+
+            Map<String, String> map = new HashMap<>();
+            BigDecimal sum = new BigDecimal(0);
+            ListDateil dto = new ListDateil();
+            for (int j = 1; j <= 10; j++) {
+
+                if (pageList.size() > ((i * 10) + j) - 1) {
+
+                    ChemicalFiberLabel label = new ChemicalFiberLabel();
+                    label = pageList.get(((i * 10) + j) - 1);
+
+                    sum =  sum.add(label.getNetWeight());
+                    //map.put("" + j, label.getLabelNumber());
+                    if (criteria.getModel() == 1) {
+                        switch (j) {
+                            case 1 :
+                                dto.setList1(label.getLabelNumber());
+                                break;
+                            case 2 :
+                                dto.setList2(label.getLabelNumber());
+                                break;
+                            case 3 :
+                                dto.setList3(label.getLabelNumber());
+                                break;
+                            case 4 :
+                                dto.setList4(label.getLabelNumber());
+                                break;
+                            case 5 :
+                                dto.setList5(label.getLabelNumber());
+                                break;
+                            case 6 :
+                                dto.setList6(label.getLabelNumber());
+                                break;
+                            case 7 :
+                                dto.setList7(label.getLabelNumber());
+                                break;
+                            case 8 :
+                                dto.setList8(label.getLabelNumber());
+                                break;
+                            case 9 :
+                                dto.setList9(label.getLabelNumber());
+                                break;
+                            case 10 :
+                                dto.setList10(label.getLabelNumber());
+                                break;
+                        }
+                    } else {
+                        switch (j) {
+                            case 1 :
+                                dto.setList1(label.getNetWeight().toString());
+                                break;
+                            case 2 :
+                                dto.setList2(label.getNetWeight().toString());
+                                break;
+                            case 3 :
+                                dto.setList3(label.getNetWeight().toString());
+                                break;
+                            case 4 :
+                                dto.setList4(label.getNetWeight().toString());
+                                break;
+                            case 5 :
+                                dto.setList5(label.getNetWeight().toString());
+                                break;
+                            case 6 :
+                                dto.setList6(label.getNetWeight().toString());
+                                break;
+                            case 7 :
+                                dto.setList7(label.getNetWeight().toString());
+                                break;
+                            case 8 :
+                                dto.setList8(label.getNetWeight().toString());
+                                break;
+                            case 9 :
+                                dto.setList9(label.getNetWeight().toString());
+                                break;
+                            case 10 :
+                                dto.setList10(label.getNetWeight().toString());
+                                break;
+                        }
+                    }
+
+                }
+            }
+
+            dto.setSum(sum);
+            if (dto.getList1() != null ) {
+                dateil.add(dto);
+            }
+        }
+
+
+        List<ListDateil> pageListSize = PageUtil.toPage(pageable.getPageNumber(),pageable.getPageSize(), dateil);
+        return PageUtil.toPage(new PageImpl(pageListSize, pageable, dateil.size()));
+
+        //return PageUtil.toPage(page.map(chemicalFiberProductionReportMapper::toDto));
+        //return PageUtil.toPage(page.map(chemicalFiberLabelMapper::toDto));
+    }
+
+
 
     public Result getProductionReportSummaries(ChemicalFiberProductionReportQueryCriteria criteria) {
         if (criteria.getTempStartTime() != null) {

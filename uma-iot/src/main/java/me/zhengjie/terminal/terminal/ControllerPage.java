@@ -121,9 +121,12 @@ public class ControllerPage extends SendCommand {
         if (createByTerminal) {
             GobalSender gobalSender = terminal.getGobalSender();
 
+            UserInfo userInfo = terminal.getUserinfo();
             String banci = controlPannelInfo.getBanci();
             gobalSender.addCommand(sendBanci(banci + " - " + machineNumber, ip));
             gobalSender.addCommand(sendJitai2(machineNumber, ip));
+            String loginInfo = userInfo.getUserName() + " " + userInfo.getBanci();
+            gobalSender.addCommand(sendLoginInfo("操作员：" + loginInfo, ip));
             // 修改机台号时，查询最后一个标签信息并更新屏幕
             ChemicalFiberLabel label = controlService.getLastLabelByMachine(machineNumber);
             if(label!=null){
@@ -134,6 +137,8 @@ public class ControllerPage extends SendCommand {
                 gobalSender.addCommand(sendTare(label.getTare().toString(),ip));
                 gobalSender.addCommand(sendTotalWeight("",ip));
                 gobalSender.addCommand(sendTotalNumber("",ip));
+                gobalSender.addCommand(sendDayWeight("",ip));
+                gobalSender.addCommand(sendDayNumber("",ip));
                 controlPannelInfo.setColor(label.getColor());
                 controlPannelInfo.setFineness(label.getFineness());
                 controlPannelInfo.setFactPerBagNumber(label.getFactPerBagNumber().toString());
@@ -141,6 +146,9 @@ public class ControllerPage extends SendCommand {
                 controlPannelInfo.setTare(label.getTare().toString());
                 controlPannelInfo.setTotalWeight("");
                 controlPannelInfo.setTotalNumber("");
+                controlPannelInfo.setDayWeight("");
+                controlPannelInfo.setDayNumber("");
+                gobalSender.send(ip);
                 updateProductionId(ip);
             }else{
                 gobalSender.addCommand(sendProductionNumber("",ip));
@@ -221,8 +229,19 @@ public class ControllerPage extends SendCommand {
         NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setTotalWeight(totalWeight);
     }
 
+    public void setDayWeight(String dayWeight, String ip) {
+        NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setDayWeight(dayWeight);
+    }
+
+    public void setDayNumber(String dayNumber, String ip) {
+        NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setDayNumber(dayNumber);
+    }
+
     public void setNetWeight(String netWeight, String ip) {
         NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setNetWeight(netWeight);
+    }
+    public void setFactory(String factory, String ip) {
+        NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setFactory(factory);
     }
 
     public void setJitai2(String jitai2,String ip){
@@ -323,6 +342,18 @@ public class ControllerPage extends SendCommand {
         return setTextValue("00 02", "00 0c", totalWeight);
     }
 
+    public String sendDayNumber(String dayNumber, String ip) {
+        return setTextValue("00 02", "00 23", dayNumber);
+    }
+
+    public String sendDayWeight(String dayWeight, String ip) {
+        return setTextValue("00 02", "00 24", dayWeight);
+    }
+
+    public String sendFactory(String factory, String ip) {
+        return setTextValue("00 02", "00 1f", factory);
+    }
+
     public String sendNetWeight(String netWeight, String ip) {
         return setTextValue("00 02", "00 0d", netWeight);
     }
@@ -374,6 +405,12 @@ public class ControllerPage extends SendCommand {
     String totalWeight;
     @Text(id = "00 0d", handler = "setNetWeight")
     String netWeight;
+    @Text(id = "23", handler = "setDayNumber")
+    String dayNumber;
+    @Text(id = "24", handler = "setDayWeight")
+    String dayWeight;
+    @Text(id = "1f", handler = "setFactory")
+    String factory;
 
     @Text(id = "00 0e", handler = "setJitai2")
     String jitai2;
@@ -405,6 +442,9 @@ public class ControllerPage extends SendCommand {
     @Button(id = "00 2d", handler = "event_back")
     String btn_back;
 
+    @Button(id = "00 22", handler = "event_factory")
+    String event_factory;
+
     public void event_manual(String buttonId, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
@@ -421,6 +461,16 @@ public class ControllerPage extends SendCommand {
         controlPannelInfo.setTare(tareStr);
         controlPannelInfo.setManualModeEventTimes(0);
         gobalSender.send(sendTare(tareStr, ip), ip);
+    }
+
+    public void event_factory(String button, String ip) {
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
+        gobalSender.addCommand(switchScreen("00 03"));
+        //cleanControllerPage(ip);
+        //cleanControllerPageInfo(ip);
+        gobalSender.send(ip);
+
     }
 
     public void event_auto(String button, String ip) {
@@ -601,9 +651,11 @@ public class ControllerPage extends SendCommand {
 
     public void load(String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
         UserInfo userInfo = terminal.getUserinfo();
         String loginInfo = userInfo.getUserName() + " " + userInfo.getBanci();
         sendLoginInfo(loginInfo, ip);
+        gobalSender.send(ip);
     }
 
     public void cleanControllerPage(String ip) {
@@ -620,6 +672,8 @@ public class ControllerPage extends SendCommand {
         gobalSender.addCommand(sendTare("", ip));
         gobalSender.addCommand(sendTotalNumber("", ip));
         gobalSender.addCommand(sendTotalWeight("", ip));
+        gobalSender.addCommand(sendDayNumber("", ip));
+        gobalSender.addCommand(sendDayWeight("", ip));
         gobalSender.addCommand(sendProductionNumber("",ip));
         gobalSender.addCommand(sendJitai2("",ip));
         gobalSender.send(ip);
@@ -638,6 +692,8 @@ public class ControllerPage extends SendCommand {
         controlPannelInfo.setTare("");
         controlPannelInfo.setTotalWeight("");
         controlPannelInfo.setTotalWeight("");
+        controlPannelInfo.setDayWeight("");
+        controlPannelInfo.setDayWeight("");
         controlPannelInfo.setProductionNumber("");
     }
 
@@ -662,7 +718,7 @@ public class ControllerPage extends SendCommand {
             terminalUploadDataDto.setColor(color);
             terminalUploadDataDto.setFineness(fineness);
             terminalUploadDataDto.setMachineNumber(controlPannelInfo.getMachineNumber());
-            ChemicalFiberProduction chemicalFiberProduction = controlService.terminalUploadData(terminalUploadDataDto);
+            ChemicalFiberProduction chemicalFiberProduction = controlService.terminalUploadData(terminalUploadDataDto, terminal.isPrint());
 
             controlPannelInfo.setProductionId(chemicalFiberProduction.getId());
             controlPannelInfo.setProductId(chemicalFiberProduction.getProdId());

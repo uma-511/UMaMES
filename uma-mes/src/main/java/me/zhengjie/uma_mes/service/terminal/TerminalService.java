@@ -50,7 +50,7 @@ public class TerminalService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ChemicalFiberProduction terminalUploadData(TerminalUploadDataDto terminalUploadDataDto) {
+    public ChemicalFiberProduction terminalUploadData(TerminalUploadDataDto terminalUploadDataDto, Boolean print) {
 
         ChemicalFiberProduct chemicalFiberProduct = new ChemicalFiberProduct();
         String modelAndName = terminalUploadDataDto.getColor() + "-" + terminalUploadDataDto.getFineness();
@@ -71,19 +71,19 @@ public class TerminalService {
 
 
             // 添加库存
-            //saveChemicalFiberStock(chemicalFiberProduct);
+            saveChemicalFiberStock(chemicalFiberProduct);
         } else {
             ChemicalFiberProductDTO chemicalFiberProductDTO = chemicalFiberProductDTOS.get(0);
             ObjectTransfer.transValue(chemicalFiberProductDTO, chemicalFiberProduct);
         }
-        ChemicalFiberProduction chemicalFiberProduction = getChemicalFiberProduction(chemicalFiberProduct, terminalUploadDataDto);
+        ChemicalFiberProduction chemicalFiberProduction = getChemicalFiberProduction(chemicalFiberProduct, terminalUploadDataDto, print);
         return chemicalFiberProduction;
     }
 
-    private ChemicalFiberProduction getChemicalFiberProduction(ChemicalFiberProduct chemicalFiberProduct, TerminalUploadDataDto terminalUploadDataDto) {
+    private ChemicalFiberProduction getChemicalFiberProduction(ChemicalFiberProduct chemicalFiberProduct, TerminalUploadDataDto terminalUploadDataDto, Boolean print) {
         ChemicalFiberProduction production = null;
         List<ChemicalFiberProduction> productions = chemicalFiberProductionRepository.findByProdIdAndMachineNumber(chemicalFiberProduct.getId(),terminalUploadDataDto.getMachineNumber());
-        if(productions==null || productions.size()==0) {
+        if(productions==null || productions.size()==0 || print) {
             // 添加生产单
             ChemicalFiberProduction chemicalFiberProduction = new ChemicalFiberProduction();
             chemicalFiberProduction.setNumber(getChemicalFiberProductionNumber());

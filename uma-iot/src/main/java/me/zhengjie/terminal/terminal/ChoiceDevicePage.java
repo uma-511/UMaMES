@@ -8,7 +8,7 @@ import me.zhengjie.terminal.annotation.Screen;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Screen(id = "00 03")
+@Screen(id = "00 09")
 @Slf4j
 @Component
 public class ChoiceDevicePage {

@@ -27,7 +27,8 @@ public class TerminalController {
     @PostMapping(value = "/terminalUploadData")
     @AnonymousAccess()
     public ChemicalFiberProduction terminalUploadData(@RequestBody TerminalUploadDataDto terminalUploadDataDto) {
-        return terminalService.terminalUploadData(terminalUploadDataDto);
+        Boolean a = true;
+        return terminalService.terminalUploadData(terminalUploadDataDto, a);
     }
 
 }

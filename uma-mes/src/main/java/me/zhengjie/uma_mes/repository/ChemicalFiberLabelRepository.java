@@ -20,6 +20,9 @@ public interface ChemicalFiberLabelRepository extends JpaRepository<ChemicalFibe
     @Query(value = "select max(id) as id,sum(net_weight) as net_weight,sum(fact_per_bag_number) as fact_per_bag_number from uma_chemical_fiber_label where `status`<> 3 and production_id=:productionId GROUP BY production_id",nativeQuery = true)
     Map getTotalByProductionId(@Param("productionId") Integer productionId);
 
+    @Query(value = "select max(id) as id,sum(net_weight) as net_weight,sum(fact_per_bag_number) as fact_per_bag_number from uma_chemical_fiber_label where `status`<> 3 and production_id=:productionId and print_time like %:time% GROUP BY production_id",nativeQuery = true)
+    Map getTotalByProductionIdTime(@Param("productionId") Integer productionId,@Param("time") String time );
+
     ChemicalFiberLabel getByLabelNumber(String labelNumber);
 
     @Query(value = "select * from uma_chemical_fiber_label where machine=:machine order by id desc limit 1",nativeQuery = true)
@@ -34,7 +37,7 @@ public interface ChemicalFiberLabelRepository extends JpaRepository<ChemicalFibe
     @Query(value = "select * from uma_chemical_fiber_label WHERE print_time BETWEEN ?1 AND ?2 GROUP BY machine",nativeQuery = true)
     List<ChemicalFiberLabel> getMachine(String stater, String end);
 
-    @Query(value = "select shifts, machine, production_id as prodctionNumber from uma_chemical_fiber_label WHERE print_time BETWEEN ?1 AND ?2 GROUP BY shifts, machine, production_id",nativeQuery = true)
+    @Query(value = "select shifts, machine, product_id as prodctionNumber from uma_chemical_fiber_label WHERE print_time BETWEEN ?1 AND ?2 GROUP BY shifts, machine, product_id",nativeQuery = true)
     List<Map<String, Object>> gets(String stater, String end);
 
     @Query(value = "select max(print_time) as prodctionNumber from uma_chemical_fiber_label",nativeQuery = true)

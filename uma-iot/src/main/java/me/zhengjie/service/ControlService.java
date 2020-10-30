@@ -137,9 +137,13 @@ public class ControlService {
 
         controlPanelInfo.setTotalNumber(labelTotalDTO.getTotalNumber().toString());
         controlPanelInfo.setTotalWeight(labelTotalDTO.getTotalWeight().toString());
+        controlPanelInfo.setDayNumber(labelTotalDTO.getDayNumber().toString());
+        controlPanelInfo.setDayWeight(labelTotalDTO.getDayWeight().toString());
 
         gobalSender.addCommand(controllerPage.sendTotalNumber(controlPanelInfo.getTotalNumber(), ip));
         gobalSender.addCommand(controllerPage.sendTotalWeight(controlPanelInfo.getTotalWeight(), ip));
+        gobalSender.addCommand(controllerPage.sendDayNumber(controlPanelInfo.getDayNumber(), ip));
+        gobalSender.addCommand(controllerPage.sendDayWeight(controlPanelInfo.getDayWeight(), ip));
         gobalSender.addCommand(controllerPage.sendTip("",ip));
         gobalSender.send(1000, ip);
     }
@@ -187,9 +191,9 @@ public class ControlService {
 
         int status=0;
 
-        /*if(printIsIn){
+        if(printIsIn){
             status=1;
-        }*/
+        }
 
         ChemicalFiberLabel label = new ChemicalFiberLabel();
         label.setGrossWeight(new BigDecimal(controlPanelInfo.getGrossWeight()));
@@ -207,6 +211,7 @@ public class ControlService {
         label.setFineness(controlPanelInfo.getFineness());
         label.setColor(controlPanelInfo.getColor());
         label.setCoreWeight(new BigDecimal(controlPanelInfo.getCoreWeight()));
+        label.setWarehousingTime(new Timestamp(System.currentTimeMillis()));
 
         ChemicalFiberLabelDTO labelDto = labelService.create(label);
 
@@ -305,6 +310,7 @@ public class ControlService {
                 chemicalFiberPalletDetailRepository.deleteAll(palletDetail);
                 label.setStatus(3);
                 label.setPalletId("");
+                label.setToVoidTime(new Timestamp(System.currentTimeMillis()));
                 labelService.update(label);
                 gobalSender.sendImmediate(cancelPage.sendTip("标签作废成功",ip), ip);
 
@@ -376,8 +382,8 @@ public class ControlService {
         return str.toString();
     }
 
-    public ChemicalFiberProduction terminalUploadData(TerminalUploadDataDto terminalUploadDataDto){
-        ChemicalFiberProduction result = terminalService.terminalUploadData(terminalUploadDataDto);
+    public ChemicalFiberProduction terminalUploadData(TerminalUploadDataDto terminalUploadDataDto, Boolean print){
+        ChemicalFiberProduction result = terminalService.terminalUploadData(terminalUploadDataDto, print);
         return  result;
     }
 

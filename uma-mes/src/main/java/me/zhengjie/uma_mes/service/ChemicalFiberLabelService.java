@@ -4,6 +4,7 @@ import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelDTO;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelQueryCriteria;
 import me.zhengjie.uma_mes.service.dto.ChemicalFiberLabelTotalDTO;
+import me.zhengjie.uma_mes.service.dto.FactoryNameQueryCriteria;
 import org.springframework.data.domain.Pageable;
 import java.util.Map;
 import java.util.List;
@@ -23,7 +24,6 @@ public interface ChemicalFiberLabelService {
     * @return Map<String,Object>
     */
     Map<String,Object> queryAll(ChemicalFiberLabelQueryCriteria criteria, Pageable pageable);
-
     /**
     * 查询所有数据不分页
     * @param criteria 条件参数
@@ -55,4 +55,7 @@ public interface ChemicalFiberLabelService {
     ChemicalFiberLabel getLastLabelByMachine(String machine);
 
     List<ChemicalFiberLabelDTO> getShifts();
+
+    Map<String,Object> getFactoryName(FactoryNameQueryCriteria criteria, Pageable pageable);
+
 }

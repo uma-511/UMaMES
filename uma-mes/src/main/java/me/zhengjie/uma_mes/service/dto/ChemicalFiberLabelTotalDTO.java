@@ -9,4 +9,6 @@ import java.math.BigDecimal;
 public class ChemicalFiberLabelTotalDTO implements Serializable {
     Integer totalNumber;
     BigDecimal totalWeight;
+    Integer dayNumber;
+    BigDecimal dayWeight;
 }
