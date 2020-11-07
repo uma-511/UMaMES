@@ -7,4 +7,6 @@ public class TerminalUploadDataDto {
     private String color;
     private String fineness;
     private String machineNumber;
+    private String factPerBagNumber;
+    private String productionNumber;
 }

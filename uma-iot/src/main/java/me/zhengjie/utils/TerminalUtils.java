@@ -29,4 +29,16 @@ public class TerminalUtils {
         log.info("input value:"+value);
         return value;
     }
+
+    public static String getTextValue1(String msg,String before,String after){
+        msg = msg.replaceAll(before,"").replaceAll(after,"").trim();
+        if(msg.length()<16){
+            return "";
+        }
+        log.info(Integer.toString(msg.length()));
+        //String screnCommand=msg.substring(0);
+        String value= CoderUtils.decoder(msg.replaceAll(" ",""));
+        log.info("input value:"+value);
+        return value;
+    }
 }

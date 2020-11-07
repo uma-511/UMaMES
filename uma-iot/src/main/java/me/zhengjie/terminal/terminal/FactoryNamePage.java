@@ -36,7 +36,7 @@ public class FactoryNamePage extends SendCommand {
     public void event_login(String button, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
-        gobalSender.addCommand(switchScreen("00 02"));
+        gobalSender.addCommand(switchScreen("00 02",ip));
         //cleanControllerPage(ip);
         //cleanControllerPageInfo(ip);
         gobalSender.send(ip);
@@ -48,7 +48,7 @@ public class FactoryNamePage extends SendCommand {
         terminal.getUserinfo().setFactory(factory);
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.addCommand(controllerPage.sendFactory(factory, ip));
-        gobalSender.addCommand(switchScreen("00 02"));
+        gobalSender.addCommand(switchScreen("00 02",ip));
         gobalSender.send(ip);
     }
 

@@ -22,10 +22,17 @@ public class ChemicalFiberProductQueryCriteria{
     @Query(type = Query.Type.INNER_LIKE)
     private String name;
 
+    // 精确
+    @Query(propName = "color")
+    private String colorAccurate;
+
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String color;
 
+    // 精确
+    @Query(propName = "fineness")
+    private String finenessAccurate;
     // 模糊
     @Query(type = Query.Type.INNER_LIKE)
     private String fineness;

@@ -8,10 +8,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.config.HeartbeatConfig;
 import me.zhengjie.service.HeartBeatConsumer;
-import me.zhengjie.terminal.GobalListener;
-import me.zhengjie.terminal.PrintData;
-import me.zhengjie.terminal.PrintDataHolder;
-import me.zhengjie.terminal.PrintExector;
+import me.zhengjie.terminal.*;
 import me.zhengjie.terminal.command.BaseCommand;
 import me.zhengjie.terminal.terminal.ControllerPage;
 import me.zhengjie.terminal.terminal.Terminal;
@@ -89,7 +86,26 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler<Object> {
             }
         } else if (text.startsWith(sc)) {
             log.info("scan event");
-//            scanHandle();
+            String screenId = NettyTcpServer.screenMap.get(ip);
+            String value;
+            switch (screenId) {
+                case"00 02":
+                    value = TerminalUtils.getTextValue1(text, sc, "0D");
+                    gobalListener.gateWay("00 02", "00 03", value, "text", ip);
+                    break;
+                case "00 05":
+                    value = TerminalUtils.getTextValue1(text, sc, "0D");
+                    gobalListener.gateWay("00 05", "00 02", value, "text", ip);
+                    break;
+                case"00 06":
+                    value = TerminalUtils.getTextValue1(text, sc, "0D");
+                    gobalListener.gateWay("00 06", "00 02", value, "text", ip);
+                    break;
+                default:
+                   break;
+            }
+
+            //scanHandle();
         } else if (text.startsWith(baseCommand.getGetWeights())) {
             String message = CoderUtils.decoder(text.replaceAll(" ", ""));
             log.info("getWeights event:" + message);

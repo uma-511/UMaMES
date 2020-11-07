@@ -30,6 +30,10 @@ public interface ChemicalFiberProductService {
     */
     List<ChemicalFiberProductDTO> queryAll(ChemicalFiberProductQueryCriteria criteria);
 
+    List<ChemicalFiberProductDTO> getListColor(ChemicalFiberProductQueryCriteria criteria);
+
+    List<ChemicalFiberProductDTO> getListFineness(ChemicalFiberProductQueryCriteria criteria);
+
     /**
      * 根据ID查询
      * @param id ID
@@ -38,6 +42,8 @@ public interface ChemicalFiberProductService {
     ChemicalFiberProductDTO findById(Integer id);
 
     ChemicalFiberProductDTO create(ChemicalFiberProduct resources);
+
+    ChemicalFiberProductDTO createSave(ChemicalFiberProduct resources);
 
     ChemicalFiberProductDTO createForTerminal(ChemicalFiberProduct resources);
 

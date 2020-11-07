@@ -87,7 +87,6 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
     }
 
     @Override
-    @Cacheable
     public List<ChemicalFiberProductionDTO> queryAll(ChemicalFiberProductionQueryCriteria criteria){
         criteria.setDelFlag(0);
         return chemicalFiberProductionMapper.toDto(chemicalFiberProductionRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
@@ -116,7 +115,7 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
             resources.setCustomerContactPhone(customerDTO.getContactPhone());
         }
 
-        resources.setNumber(getChemicalFiberProductionNumber());
+        resources.setNumber(getChemicalFiberProductionNumber(resources.getCustomerOrderNumber()));
         resources.setProdId(chemicalFiberProductDTO.getId());
         resources.setProdModel(chemicalFiberProductDTO.getModel());
         resources.setProdName(chemicalFiberProductDTO.getName());
@@ -126,6 +125,7 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         resources.setCreateTime(new Timestamp(System.currentTimeMillis()));
         resources.setCreateUser(SecurityUtils.getUsername());
         resources.setDelFlag(0);
+        resources.setFlowingWater(0);
         return chemicalFiberProductionMapper.toDto(chemicalFiberProductionRepository.save(resources));
     }
 
@@ -365,22 +365,25 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         return Result.success(list);
     }
 
-    private String getChemicalFiberProductionNumber() {
+    private String getChemicalFiberProductionNumber(String st) {
         String productionNumber;
         ChemicalFiberProductionQueryCriteria criteria = new ChemicalFiberProductionQueryCriteria();
         Map<String, Object> timeMap = handheldService.monthTimeInMillis();
-        String year = timeMap.get("year").toString();
+        String yea = timeMap.get("year").toString();
+        String year = yea.substring(2 );
         String month = timeMap.get("month").toString();
-        criteria.setStartTime(new Timestamp(Long.parseLong(timeMap.get("time").toString())));
-        criteria.setEndTime(new Timestamp(System.currentTimeMillis()));
+        String day = timeMap.get("day").toString();
+        //criteria.setStartTime(new Timestamp(Long.parseLong(timeMap.get("time").toString())));
+        //criteria.setEndTime(new Timestamp(System.currentTimeMillis()));
+        criteria.setCustomerOrderNumber(st);
         List<ChemicalFiberProductionDTO> chemicalFiberProductionDTOS = chemicalFiberProductionMapper.toDto(chemicalFiberProductionRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
 
         if (chemicalFiberProductionDTOS.size() == 0) {
-            productionNumber = year + month + "0001";
+            productionNumber = st + "01";
         } else {
             Integer chemicalFiberProductionDTOSSize =  chemicalFiberProductionDTOS.size();
-            String tempNumberStr = String.format("%4d", (chemicalFiberProductionDTOSSize + 1)).replace(" ", "0");
-            productionNumber = year + month + tempNumberStr;
+            String tempNumberStr = String.format("%2d", (chemicalFiberProductionDTOSSize + 1)).replace(" ", "0");
+            productionNumber = st + tempNumberStr;
         }
         return productionNumber;
     }
@@ -458,6 +461,15 @@ public class ChemicalFiberProductionServiceImpl implements ChemicalFiberProducti
         TemplateExportParams params = new TemplateExportParams(templatePath);
         workbook = ExcelExportUtil.exportExcel(params, map);
         FileUtil.downLoadExcel("生产报表导出.xls", response, workbook);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateList(List<ChemicalFiberProduction> resources) {
+        /*ChemicalFiberProduction ChemicalFiberProduction = chemicalFiberProductionRepository.findById(resources.getId()).orElseGet(ChemicalFiberCustomerOrder::new);
+        ValidationUtil.isNull( chemicalFiberCustomerOrder.getId(),"ChemicalFiberCustomerOrder","id",resources.getId());
+        chemicalFiberCustomerOrder.copy(resources);*/
+        chemicalFiberProductionRepository.saveAll(resources);
     }
 
 

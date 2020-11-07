@@ -80,10 +80,22 @@ public class TerminalService {
         return chemicalFiberProduction;
     }
 
+    public ChemicalFiberProduction saveProdction(TerminalUploadDataDto terminalUploadDataDto) {
+        List<ChemicalFiberProduction> productions = chemicalFiberProductionRepository.findByNumberAndDelFlag(terminalUploadDataDto.getProductionNumber(), 0);
+        ChemicalFiberProduction production = null;
+        production = productions.get(0);
+        production.setMachineNumber(terminalUploadDataDto.getMachineNumber());
+        production.setPerBagNumber(Integer.valueOf(terminalUploadDataDto.getFactPerBagNumber()));
+        production.setFlowingWater(production.getFlowingWater() + 1);
+        chemicalFiberProductionRepository.save(production);
+        return production;
+    }
+
     private ChemicalFiberProduction getChemicalFiberProduction(ChemicalFiberProduct chemicalFiberProduct, TerminalUploadDataDto terminalUploadDataDto, Boolean print) {
         ChemicalFiberProduction production = null;
-        List<ChemicalFiberProduction> productions = chemicalFiberProductionRepository.findByProdIdAndMachineNumber(chemicalFiberProduct.getId(),terminalUploadDataDto.getMachineNumber());
-        if(productions==null || productions.size()==0 || print) {
+        Integer a = 0;
+        List<ChemicalFiberProduction> productions = chemicalFiberProductionRepository.findByNumberAndDelFlag(terminalUploadDataDto.getProductionNumber(), a);
+        if(productions==null || productions.size()==0) {
             // 添加生产单
             ChemicalFiberProduction chemicalFiberProduction = new ChemicalFiberProduction();
             chemicalFiberProduction.setNumber(getChemicalFiberProductionNumber());
@@ -102,8 +114,11 @@ public class TerminalService {
             chemicalFiberProduction.setCreateUser("admin");
             chemicalFiberProduction.setDelFlag(0);
             production = chemicalFiberProductionRepository.save(chemicalFiberProduction);
-        }else {
+        } else {
             production = productions.get(0);
+            /*production.setMachineNumber(terminalUploadDataDto.getMachineNumber());
+            production.setPerBagNumber(Integer.valueOf(terminalUploadDataDto.getFactPerBagNumber()));
+            chemicalFiberProductionRepository.save(production);*/
         }
         return production;
     }

@@ -4,6 +4,7 @@ import lombok.Data;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.io.Serializable;
 
@@ -36,6 +37,10 @@ public class ChemicalFiberProduct implements Serializable {
     // 纤度
     @Column(name = "fineness")
     private String fineness;
+
+    // 纤度
+    @Column(name = "core_weight")
+    private BigDecimal core_weight;
 
     // 创建日期
     @Column(name = "create_date")

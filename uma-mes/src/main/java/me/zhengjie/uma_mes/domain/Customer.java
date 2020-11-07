@@ -57,6 +57,10 @@ public class Customer implements Serializable {
     @Column(name = "del_flag")
     private Integer delFlag;
 
+    // 传真
+    @Column(name = "fax")
+    private String fax;
+
     public void copy(Customer source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
     }

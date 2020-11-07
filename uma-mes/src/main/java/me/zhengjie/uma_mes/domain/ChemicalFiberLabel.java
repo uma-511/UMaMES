@@ -102,6 +102,10 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name = "out_of_warehouse_time")
     private Timestamp outOfWarehouseTime;
 
+    // 出库时间
+    @Column(name = "flowing_water")
+    private Integer flowingWater;
+
     public void copy(ChemicalFiberLabel source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
     }

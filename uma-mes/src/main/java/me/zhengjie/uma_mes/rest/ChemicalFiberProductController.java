@@ -55,6 +55,14 @@ public class ChemicalFiberProductController {
         return new ResponseEntity<>(chemicalFiberProductService.create(resources),HttpStatus.CREATED);
     }
 
+    @PostMapping(value="/save")
+    @Log("新增ChemicalFiberProduct")
+    @ApiOperation("新增ChemicalFiberProduct")
+    @PreAuthorize("@el.check('chemicalFiberProduct:add')")
+    public ResponseEntity createSave(@Validated @RequestBody ChemicalFiberProduct resources){
+        return new ResponseEntity<>(chemicalFiberProductService.createSave(resources),HttpStatus.CREATED);
+    }
+
     @PutMapping
     @Log("修改ChemicalFiberProduct")
     @ApiOperation("修改ChemicalFiberProduct")
@@ -80,5 +88,23 @@ public class ChemicalFiberProductController {
     @AnonymousAccess()
     public ResponseEntity getList(@RequestBody ChemicalFiberProductQueryCriteria criteria) {
         return new ResponseEntity<>(chemicalFiberProductService.queryAll(criteria),HttpStatus.OK);
+    }
+
+    @Log("获取产品色号列表")
+    @ApiOperation("获取产品色号列表")
+    @PostMapping(value = "/getProdListColor")
+//    @PreAuthorize("@el.check('chemicalFiberProduct:getList')")
+    @AnonymousAccess()
+    public ResponseEntity getListColor(@RequestBody ChemicalFiberProductQueryCriteria criteria) {
+        return new ResponseEntity<>(chemicalFiberProductService.getListColor(criteria),HttpStatus.OK);
+    }
+
+    @Log("获取产品规格列表")
+    @ApiOperation("获取产品规格列表")
+    @PostMapping(value = "/getProdListFineness")
+//    @PreAuthorize("@el.check('chemicalFiberProduct:getList')")
+    @AnonymousAccess()
+    public ResponseEntity getListFineness(@RequestBody ChemicalFiberProductQueryCriteria criteria) {
+        return new ResponseEntity<>(chemicalFiberProductService.getListFineness(criteria),HttpStatus.OK);
     }
 }

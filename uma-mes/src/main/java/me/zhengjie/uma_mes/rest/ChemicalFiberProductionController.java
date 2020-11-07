@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.*;
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -113,6 +114,14 @@ public class ChemicalFiberProductionController {
     // @PreAuthorize("@el.check('chemicalFiberProduction:list')")
     public void downloadProduct(HttpServletResponse response, ChemicalFiberProductionQueryCriteria criteria,  Pageable pageable) throws IOException {
         chemicalFiberProductionService.downloadProduct(criteria, pageable, response);
+    }
+
+    @PutMapping(value = "/PrductionList")
+    @Log("批量修改生产单")
+    @ApiOperation("批量修改生产单")
+    public ResponseEntity updateList(@Validated @RequestBody List<ChemicalFiberProduction> resources){
+        chemicalFiberProductionService.updateList(resources);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
 

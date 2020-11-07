@@ -117,7 +117,7 @@ public class ControlService {
             updateControllerPage(Integer.parseInt(machineId), ip);
         } else {
             GobalSender gobalSender = terminal.getGobalSender();
-            terminal.addGoControlCommand();
+            terminal.addGoControlCommand(ip);
             gobalSender.addCommand(controllerPage.sendTip("当前机号没有生产单", ip));
             controllerPage.cleanControllerPage(ip);
         }
@@ -211,7 +211,7 @@ public class ControlService {
         label.setFineness(controlPanelInfo.getFineness());
         label.setColor(controlPanelInfo.getColor());
         label.setCoreWeight(new BigDecimal(controlPanelInfo.getCoreWeight()));
-        label.setWarehousingTime(new Timestamp(System.currentTimeMillis()));
+        label.setFlowingWater(Integer.valueOf(controlPanelInfo.getFlowingWater()) );
 
         ChemicalFiberLabelDTO labelDto = labelService.create(label);
 
@@ -275,7 +275,25 @@ public class ControlService {
          * todo 打印操作
          */
         log.info("before print");
-        terminal.print(labelDto.getLabelNumber());
+        //terminal.print(labelDto.getLabelNumber());
+        switch (controlPanelInfo.getFactory()) {
+            case "1":
+                terminal.print1(labelDto.getLabelNumber());
+                break;
+            case "2":
+                terminal.print2(labelDto.getLabelNumber());
+                break;
+            case "3":
+                terminal.print3(labelDto.getLabelNumber());
+                break;
+            case "4":
+                terminal.print4(labelDto.getLabelNumber());
+                break;
+            case "5":
+                break;
+            default:
+                break;
+        }
         terminal.getReprintInfo().setLabelNumber(labelDto.getLabelNumber());
         terminal.getCancelInfo().setLabelNumber(labelDto.getLabelNumber());
         log.info("after print");
@@ -387,8 +405,20 @@ public class ControlService {
         return  result;
     }
 
+    public ChemicalFiberProduction saveProdction(TerminalUploadDataDto terminalUploadDataDto){
+        ChemicalFiberProduction result = terminalService.saveProdction(terminalUploadDataDto);
+        return  result;
+    }
+
     public ChemicalFiberLabel getLastLabelByMachine(String machine){
         ChemicalFiberLabel chemicalFiberLabel = labelService.getLastLabelByMachine(machine);
         return chemicalFiberLabel;
     }
+
+    /*public ChemicalFiberProductionDTO getProduction(String productionNumber) {
+        ChemicalFiberProductionQueryCriteria ctireria = new ChemicalFiberProductionQueryCriteria();
+        ctireria.setNumber(productionNumber);
+        List<ChemicalFiberProductionDTO> production = productionService.queryAll(ctireria);
+        return production.get(0);
+    }*/
 }

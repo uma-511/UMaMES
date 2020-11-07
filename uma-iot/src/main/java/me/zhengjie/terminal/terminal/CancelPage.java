@@ -21,6 +21,10 @@ public class CancelPage  extends SendCommand {
 
     public void setLabelNumber(String labelNumber,String ip){
         NettyTcpServer.terminalMap.get(ip).getCancelInfo().setLabelNumber(labelNumber);
+        NettyTcpServer.terminalMap.get(ip).getReprintInfo().setLabelNumber(labelNumber);
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
+        gobalSender.send(sendLabelNumber(labelNumber,ip),ip);
     }
 
     public String sendLabelNumber(String labelNumber,String ip) {

@@ -81,56 +81,56 @@ public class Terminal extends SendCommand {
     }
 
     public void goLogin(String ip) {
-        gobalSender.send(switchScreen("00 01"), ip);
+        gobalSender.send(switchScreen("00 01",ip), ip);
     }
 
-    public void addGoLoginCommand() {
-        gobalSender.addCommand(switchScreen("00 01"));
-    }
+    /*public void addGoLoginCommand() {
+        gobalSender.addCommand(switchScreen("00 01",ip));
+    }*/
 
     public void goControl(String ip) {
 //        gobalSender.send(2000);
-        gobalSender.send(switchScreen("00 02"), ip);
+        gobalSender.send(switchScreen("00 02", ip), ip);
     }
 
-    public void addGoControlCommand() {
-        gobalSender.addCommand(switchScreen("00 02"));
+    public void addGoControlCommand(String ip) {
+        gobalSender.addCommand(switchScreen("00 02", ip));
     }
 
     public void goMachine(String ip) {
-        gobalSender.send(switchScreen("00 03"), ip);
+        gobalSender.send(switchScreen("00 03", ip), ip);
     }
 
     public void addGoMachineCommand(String ip) {
-        gobalSender.addCommand(switchScreen("00 03"));
+        gobalSender.addCommand(switchScreen("00 03", ip));
     }
 
     public void goPrinting(String ip) {
 //        gobalSender.sendImmediate(switchScreen("00 04"));
         // 需还原
-        gobalSender.send(switchScreen("00 04"), ip);
+        gobalSender.send(switchScreen("00 04", ip), ip);
     }
 
-    public void addGoPrintingCommand() {
-        gobalSender.addCommand(switchScreen("00 04"));
+    public void addGoPrintingCommand(String ip) {
+        gobalSender.addCommand(switchScreen("00 04", ip));
     }
 
     public void goCancel(String ip) {
-        gobalSender.send(switchScreen("00 05"), ip);
+        gobalSender.send(switchScreen("00 05",ip), ip);
     }
 
-    public void addGoCancelCommand() {
-        gobalSender.addCommand(switchScreen("00 05"));
+    public void addGoCancelCommand(String ip) {
+        gobalSender.addCommand(switchScreen("00 05", ip));
     }
 
     public void goReprint(String ip) {
 //         ReprintPage reprintPage = new ReprintPage();
 //         reprintPage.sendLabelNumber()
-        gobalSender.send(switchScreen("00 06"), ip);
+        gobalSender.send(switchScreen("00 06", ip), ip);
     }
 
-    public void addGoReprintCommand() {
-        gobalSender.addCommand(switchScreen("00 06"));
+    public void addGoReprintCommand(String ip) {
+        gobalSender.addCommand(switchScreen("00 06",ip));
     }
 
     public void print(String labelNum) throws UnsupportedEncodingException {
@@ -239,8 +239,179 @@ public class Terminal extends SendCommand {
         goPrinting(ip);
     }
 
+    public void print1(String labelNum) throws UnsupportedEncodingException {
+        SimpleDateFormat myFmt = new SimpleDateFormat("yyyy.MM.dd");
+        String ym = myFmt.format(System.currentTimeMillis());
+        String printCommand = "PT:\r\n"+
+        "SIZE 60 mm,40 mm \r\n"+
+        "GAP 2 mm,4 mm\r\n"+
+        "CLS\r\n"+
+        "DENSITY 10\r\n"+
+        "REFERENCE 0,0\r\n"+
+        "TEXT 35,35,\"TSS24.BF2\",0,2,2,\"规格：\"\r\n" +
+        "TEXT 165,35,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFineness() + "\"\r\n"+
+        "TEXT 380,35,\"TSS24.BF2\",0,2,2,\"色号：\"\r\n "+
+        "TEXT 510,35,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n"+
+        "TEXT 35,105,\"TSS24.BF2\",0,2,2,\"班组：\""+
+        "TEXT 165,105,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + "\" - \"" + controlPannelInfo.getMachineNumber() + "\"\r\n"+
+        "TEXT 380,105,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n"+
+        "TEXT 510,105,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFactPerBagNumber() + "\"\r\n" +
+        "TEXT 380,175,\"TSS24.BF2\",0,2,2,\"日期：\"\r\n" +
+        "TEXT 520,175,\"TSS24.BF2\",0,1,2,\"" + ym + "\"\r\n "+
+        "TEXT 380,245,\"TSS24.BF2\",0,2,2,\"毛重：\"\r\n"+
+        "TEXT 520,245,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getGrossWeight() + "\"\r\n"+
+        "TEXT 35,175,\"TSS24.BF2\",0,2,2,\"净\"\r\n"+
+        "TEXT 35,245,\"TSS24.BF2\",0,2,2,\"重\"\r\n"+
+        "TEXT 107,193,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n" +
+        "TEXT 103,193,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n" +
+        "TEXT 560,330,\"TSS24.BF2\",0,3,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
+        "BARCODE 35,297,\"128\",105,1,0,4,4,\""+labelNum+"\"\r\n"+
+        "PRINT 1\r\n";
+
+
+        gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand), ip);
+
+        goPrinting(ip);
+    }
+
+    public void print2(String labelNum) throws UnsupportedEncodingException {
+        SimpleDateFormat myFmt = new SimpleDateFormat("yyyy.MM.dd");
+        String ym = myFmt.format(System.currentTimeMillis());
+        String printCommand = "PT:\r\n"+
+        "SIZE 60 mm,40 mm\r\n"+
+        "GAP 2 mm,4 mm\r\n"+
+                "CLS\r\n"+
+        "DENSITY 10\r\n"+
+        "REFERENCE 0,0\r\n"+
+        "TEXT 19,7,\"TSS24.BF2\",0,2,2,\"东莞市新保利纤维制品有限公司\"\r\n"+
+        "TEXT 21,7,\"TSS24.BF2\",0,2,2,\"东莞市新保利纤维制品有限公司\"\r\n"+
+        "TEXT 35,67,\"TSS24.BF2\",0,2,2,\"规格：\"\r\n"+
+        "TEXT 165,67,\"TSS24.BF2\",0,2,2,\""+ controlPannelInfo.getFineness() +"\"\r\n"+
+        "TEXT 380,67,\"TSS24.BF2\",0,2,2,\"色号：\"\r\n"+
+        "TEXT 510,67,\"TSS24.BF2\",0,2,2,\""+controlPannelInfo.getColor()+"\"\r\n"+
+        "TEXT 35,124,\"TSS24.BF2\",0,2,2,\"班组：\"\r\n"+
+        "TEXT 165,124,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + "\" - \"" + controlPannelInfo.getMachineNumber() + "\"\r\n"+
+        "TEXT 380,124,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n"+
+        "TEXT 510,124,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFactPerBagNumber() + "\"\r\n" +
+        "TEXT 380,182,\"TSS24.BF2\",0,2,2,\"日期：\"\r\n" +
+        "TEXT 520,182,\"TSS24.BF2\",0,1,2,\"" + ym + "\"\r\n "+
+        "TEXT 380,240,\"TSS24.BF2\",0,2,2,\"毛重：\"\r\n"+
+        "TEXT 520,240,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getGrossWeight() + "\"\r\n"+
+        "TEXT 35,182,\"TSS24.BF2\",0,2,2,\"净\"\r\n"+
+        "TEXT 35,240,\"TSS24.BF2\",0,2,2,\"重\"\r\n"+
+        "TEXT 107,197,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n" +
+        "TEXT 103,197,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n" +
+        "TEXT 560,330,\"TSS24.BF2\",0,3,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
+        "BARCODE 35,296,\"128\",105,1,0,4,4,\""+labelNum+"\"\r\n"+
+        "PRINT 1\r\n";
+
+        gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand), ip);
+
+        goPrinting(ip);
+    }
+
+    public void print3(String labelNum) throws UnsupportedEncodingException {
+        SimpleDateFormat myFmt = new SimpleDateFormat("yyyy.MM.dd");
+        String ym = myFmt.format(System.currentTimeMillis());
+        String printCommand = "PT:\r\n"+
+        "SIZE 100 mm,100 mm\r\n"+
+        "GAP 2 mm,4 mn\r\n"+
+        "CLS\r\n"+
+        "DENSITY 10\r\n"+
+        "REFERENCE 0,0\r\n"+
+        "TEXT 301,60,\"TSS24.BF2\",0,3,3,\"Y  N\"\r\n"+
+        "TEXT 299,60,\"TSS24.BF2\",0,3,3,\"Y  N\"\r\n"+
+        "TEXT 201,180,\"TSS24.BF2\",0,3,3,\"Product Name:  PP Yarn\"\r\n"+
+        "TEXT 199,180,\"TSS24.BF2\",0,3,3,\"Product Name:  PP Yarn\"\r\n"+
+        "TEXT 201,280,\"TSS24.BF2\",0,3,3,\"Standard：      PP\"\r\n"+
+        "TEXT 199,280,\"TSS24.BF2\",0,3,3,\"Standard：      PP\"\r\n"+
+        "TEXT 561,280,\"TSS24.BF2\",0,3,3,\""+ controlPannelInfo.getFineness() +"\"\r\n"+
+        "TEXT 559,280,\"TSS24.BF2\",0,3,3,\""+ controlPannelInfo.getFineness() +"\"\r\n"+
+        "TEXT 201,380,\"TSS24.BF2\",0,3,3,\"Color：\"\r\n"+
+        "TEXT 199,380,\"TSS24.BF2\",0,3,3,\"Color：\"\r\n"+
+        "TEXT 451,380,\"TSS24.BF2\",0,3,3,\""+controlPannelInfo.getColor()+"\"\r\n"+
+        "TEXT 449,380,\"TSS24.BF2\",0,3,3,\""+controlPannelInfo.getColor()+"\"\r\n"+
+        "TEXT 201,480,\"TSS24.BF2\",0,3,3,\"Qrigin：\"\r\n"+
+        "TEXT 199,480,\"TSS24.BF2\",0,3,3,\"Qrigin：\"\r\n"+
+        "TEXT 491,480,\"TSS24.BF2\",0,3,3,\"Made in China\"\r\n"+
+        "TEXT 489,480,\"TSS24.BF2\",0,3,3,\"Made in China\"\r\n"+
+        "TEXT 201,580,\"TSS24.BF2\",0,3,3,\"Manufactory：\"\r\n"+
+        "TEXT 199,580,\"TSS24.BF2\",0,3,3,\"Manufactory：\"\r\n"+
+        "TEXT 681,580,\"TSS24.BF2\",0,3,3,\"Xinbaoli\"\r\n"+
+        "TEXT 679,580,\"TSS24.BF2\",0,3,3,\"Xinbaoli\"\r\n"+
+        "TEXT 201,680,\"TSS24.BF2\",0,3,3,\"G.W：       KG\"\r\n"+
+        "TEXT 199,680,\"TSS24.BF2\",0,3,3,\"G.W：       KG\"\r\n"+
+        "TEXT 401,680,\"TSS24.BF2\",0,3,3,\""+ controlPannelInfo.getGrossWeight() +"\"\r\n"+
+        "TEXT 399,680,\"TSS24.BF2\",0,3,3,\""+ controlPannelInfo.getGrossWeight() +"\"\r\n"+
+        "TEXT 201,780,\"TSS24.BF2\",0,3,4,\"N.W：       KG\"\r\n"+
+        "TEXT 199,780,\"TSS24.BF2\",0,3,4,\"N.W：       KG\"\r\n"+
+        "TEXT 401,780,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n"+
+        "TEXT 399,780,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n"+
+        "TEXT 750,960,\"TSS24.BF2\",0,2,2,\"订单号： \"\r\n"+
+        "TEXT 940,960,\"TSS24.BF2\",0,2,2,\""+controlPannelInfo.getProductionNumber() +"\"\r\n"+
+        "TEXT 750,1020,\"TSS24.BF2\",0,2,2,\"班组： \"\r\n"+
+        "TEXT 880,1020,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + "\" - \"" + controlPannelInfo.getMachineNumber() + "\"\r\n"+
+        "TEXT 750,1080,\"TSS24.BF2\",0,2,2,\"流水号 \"\r\n"+
+        "TEXT 940,1080,\"TSS24.BF2\",0,2,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
+        "BARCODE 50,960,\"128\",150,1,0,6,4,\""+ labelNum +"\"\r\n"+
+        "PRINT 1\r\n";
+
+        gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand), ip);
+
+        goPrinting(ip);
+    }
+
+    public void print4(String labelNum) throws UnsupportedEncodingException {
+        SimpleDateFormat myFmt = new SimpleDateFormat("yyyy.MM.dd");
+        String ym = myFmt.format(System.currentTimeMillis());
+        String printCommand = "PT:\r\n"+
+        "SIZE 100 mm,100 mm\r\n"+
+        "GAP 2 mm,4 mn\r\n"+
+        "CLS\r\n"+
+        "DENSITY 10\r\n"+
+        "REFERENCE 0,0\r\n"+
+        "TEXT 301,60,\"TSS24.BF2\",0,3,3,\"Y  N\"\r\n"+
+        "TEXT 299,60,\"TSS24.BF2\",0,3,3,\"Y  N\"\r\n"+
+        "TEXT 201,180,\"TSS24.BF2\",0,3,3,\"Product Name:  PP Yarn\"\r\n"+
+        "TEXT 199,180,\"TSS24.BF2\",0,3,3,\"Product Name:  PP Yarn\"\r\n"+
+        "TEXT 201,280,\"TSS24.BF2\",0,3,3,\"Standard：      PP\"\r\n"+
+        "TEXT 199,280,\"TSS24.BF2\",0,3,3,\"Standard：      PP\"\r\n"+
+        "TEXT 561,280,\"TSS24.BF2\",0,3,3,\""+ controlPannelInfo.getFineness() +"\"\r\n"+
+        "TEXT 559,280,\"TSS24.BF2\",0,3,3,\""+ controlPannelInfo.getFineness() +"\"\r\n"+
+        "TEXT 201,380,\"TSS24.BF2\",0,3,3,\"Color：\"\r\n"+
+        "TEXT 199,380,\"TSS24.BF2\",0,3,3,\"Color：\"\r\n"+
+        "TEXT 451,380,\"TSS24.BF2\",0,3,3,\""+controlPannelInfo.getColor()+"\"\r\n"+
+        "TEXT 449,380,\"TSS24.BF2\",0,3,3,\""+controlPannelInfo.getColor()+"\"\r\n"+
+        "TEXT 201,480,\"TSS24.BF2\",0,3,3,\"Qrigin：\"\r\n"+
+        "TEXT 199,480,\"TSS24.BF2\",0,3,3,\"Qrigin：\"\r\n"+
+        "TEXT 491,480,\"TSS24.BF2\",0,3,3,\"Made in China\"\r\n"+
+        "TEXT 489,480,\"TSS24.BF2\",0,3,3,\"Made in China\"\r\n"+
+        "TEXT 201,580,\"TSS24.BF2\",0,3,3,\"Manufactory：\"\r\n"+
+        "TEXT 199,580,\"TSS24.BF2\",0,3,3,\"Manufactory：\"\r\n"+
+        "TEXT 201,680,\"TSS24.BF2\",0,3,3,\"G.W：       KG\"\r\n"+
+        "TEXT 199,680,\"TSS24.BF2\",0,3,3,\"G.W：       KG\"\r\n"+
+        "TEXT 401,680,\"TSS24.BF2\",0,3,3,\""+ controlPannelInfo.getGrossWeight() +"\"\r\n"+
+        "TEXT 399,680,\"TSS24.BF2\",0,3,3,\""+ controlPannelInfo.getGrossWeight() +"\"\r\n"+
+        "TEXT 201,780,\"TSS24.BF2\",0,3,4,\"N.W：       KG\"\r\n"+
+        "TEXT 199,780,\"TSS24.BF2\",0,3,4,\"N.W：       KG\"\r\n"+
+        "TEXT 401,780,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n"+
+        "TEXT 399,780,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n"+
+        "TEXT 750,960,\"TSS24.BF2\",0,2,2,\"订单号： \"\r\n"+
+        "TEXT 940,960,\"TSS24.BF2\",0,2,2,\""+controlPannelInfo.getProductionNumber() +"\"\r\n"+
+        "TEXT 750,1020,\"TSS24.BF2\",0,2,2,\"班组： \"\r\n"+
+        "TEXT 880,1020,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + "\" - \"" + controlPannelInfo.getMachineNumber() + "\"\r\n"+
+        "TEXT 750,1080,\"TSS24.BF2\",0,2,2,\"流水号 \"\r\n"+
+        "TEXT 940,1080,\"TSS24.BF2\",0,2,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
+        "BARCODE 50,960,\"128\",150,1,0,6,4,\""+ labelNum +"\"\r\n"+
+        "PRINT 1\r\n";
+
+        gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand), ip);
+
+        goPrinting(ip);
+    }
+
     public void reprint(ChemicalFiberLabel label, ChemicalFiberProductDTO productDTO) {
-        addGoPrintingCommand();
+        addGoPrintingCommand(ip);
         gobalSender.send(ip);
 
         SimpleDateFormat myFmt = new SimpleDateFormat("yyyy.MM.dd");

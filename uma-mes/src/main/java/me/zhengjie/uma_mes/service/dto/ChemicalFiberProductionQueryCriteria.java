@@ -73,4 +73,7 @@ public class ChemicalFiberProductionQueryCriteria{
     private String machineNumber;
 
     private String shifts;
+
+    @Query
+    private String customerOrderNumber;
 }

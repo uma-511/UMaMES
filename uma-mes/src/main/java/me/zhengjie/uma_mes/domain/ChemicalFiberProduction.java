@@ -119,6 +119,18 @@ public class ChemicalFiberProduction implements Serializable {
     @Column(name = "del_flag")
     private Integer delFlag;
 
+    // 客户订单编号
+    @Column(name = "customer_order_number")
+    private String customerOrderNumber;
+
+    // 打印模板
+    @Column(name = "factory_number")
+    private String factoryNumber;
+
+    // 流水
+    @Column(name = "flowing_water")
+    private Integer flowingWater;
+
     @OneToMany(mappedBy = "productionId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberLabel> chemicalFiberLabels;
 

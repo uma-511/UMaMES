@@ -16,6 +16,7 @@ public class ControlPannelInfo {
     String machineNumber = "0";
     String factPerBagNumber = "0";
     String factory;
+    String flowingWater;
 
     Integer productionId;
     Integer productId;

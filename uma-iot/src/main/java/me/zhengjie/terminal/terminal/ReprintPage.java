@@ -26,6 +26,10 @@ public class ReprintPage extends SendCommand {
 
     public void setLabelNumber(String labelNumber,String ip){
         NettyTcpServer.terminalMap.get(ip).getReprintInfo().setLabelNumber(labelNumber);
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        GobalSender gobalSender = terminal.getGobalSender();
+        gobalSender.send(sendLabelNumber(labelNumber,ip),ip);
+
     }
 
     public String sendLabelNumber(String labelNumber,String ip) {
@@ -89,7 +93,7 @@ public class ReprintPage extends SendCommand {
         Terminal terminal= NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
 
-        terminal.addGoReprintCommand();
+        terminal.addGoReprintCommand(ip);
         gobalSender.addCommand(sendTip("补打成功",ip));
         gobalSender.send(2000,ip);
 

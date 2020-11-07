@@ -17,7 +17,8 @@ import java.util.Map;
 * @date 2019-11-20
 */
 public interface ChemicalFiberProductionRepository extends JpaRepository<ChemicalFiberProduction, Integer>, JpaSpecificationExecutor<ChemicalFiberProduction> {
-    List<ChemicalFiberProduction> findByProdIdAndMachineNumber(Integer prodId, String machineNumber);
+
+    List<ChemicalFiberProduction> findByNumberAndDelFlag(String number, Integer delFlag);
 
    /* @Query(value = "select *, " +
             "case when temp.in_stock_number / (temp.in_stock_number +temp.out_stock_number) is null then 0 else convert(temp.in_stock_number / (temp.in_stock_number +temp.out_stock_number),decimal(10,2)) end as in_stock_prop, " +
@@ -98,4 +99,7 @@ public interface ChemicalFiberProductionRepository extends JpaRepository<Chemica
 
     @Query(value = "SELECT prod_id FROM `uma_chemical_fiber_production` where prod_model = ?1 GROUP BY prod_id",nativeQuery = true)
     Integer getProductionId(String name);
+
+    @Query(value = "SELECT * FROM `uma_chemical_fiber_production` where number = ?1 and del_flag = 0 ",nativeQuery = true)
+    ChemicalFiberProduction getProductionNumber(String name);
 }

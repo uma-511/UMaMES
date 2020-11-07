@@ -1,10 +1,12 @@
 package me.zhengjie.terminal.command;
 
+import me.zhengjie.server.NettyTcpServer;
 import me.zhengjie.utils.CoderUtils;
 
 public class SendCommand extends BaseCommand {
 
-    public String switchScreen(String screenId){
+    public String switchScreen(String screenId, String ip){
+        NettyTcpServer.screenMap.put(ip,screenId);
         return getSwitchScreen() + " " + screenId + " " + getFunctionEndingFrame();
     }
 

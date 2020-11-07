@@ -90,5 +90,11 @@ public class ChemicalFiberProductionDTO implements Serializable {
     // 删除标识
     private Integer delFlag;
 
+    private String customerOrderNumber;
+
+    private String factoryNumber;;
+
+    private Integer flowingWater;
+
     private List<ChemicalFiberLabel> chemicalFiberLabels;
 }

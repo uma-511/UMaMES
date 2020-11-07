@@ -1,6 +1,8 @@
 package me.zhengjie.uma_mes.service.dto;
 
 import lombok.Data;
+
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.io.Serializable;
 
@@ -25,6 +27,9 @@ public class ChemicalFiberProductDTO implements Serializable {
 
     // 纤度
     private String fineness;
+
+    // 纤度
+    private BigDecimal coreWeight;
 
     // 创建日期
     private Timestamp createDate;

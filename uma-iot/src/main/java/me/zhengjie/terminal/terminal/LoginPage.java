@@ -152,11 +152,11 @@ public class LoginPage extends SendCommand {
                    // gobalSender.sendImmediate(switchScreen("00 02"));
                     //Thread.sleep(300);
                     //gobalSender.sendImmediate1(switchScreen("00 02"), chann);
-                    gobalSender.sendDeloy(switchScreen("00 02"), 400, ip);
+                    gobalSender.sendDeloy(switchScreen("00 02", ip), 400, ip);
                     gobalSender.addCommand(controllerPage.sendBanci(userInfo.getBanci(), ip));
                     gobalSender.addCommand(controllerPage.sendFactory(userInfo.getFactory(), ip));
                 } else {
-                    gobalSender.addCommand(switchScreen("00 03"));
+                    gobalSender.addCommand(switchScreen("00 03",ip));
                 }
 
                 resetLogin(ip);

@@ -7,6 +7,7 @@ import me.zhengjie.domain.ReprintInfo;
 import me.zhengjie.domain.UserInfo;
 import me.zhengjie.server.NettyTcpServer;
 import me.zhengjie.service.ControlService;
+import me.zhengjie.service.LoginService;
 import me.zhengjie.terminal.GobalSender;
 import me.zhengjie.terminal.annotation.Button;
 import me.zhengjie.terminal.annotation.Screen;
@@ -14,6 +15,9 @@ import me.zhengjie.terminal.annotation.Text;
 import me.zhengjie.terminal.command.SendCommand;
 import me.zhengjie.uma_mes.domain.ChemicalFiberLabel;
 import me.zhengjie.uma_mes.domain.ChemicalFiberProduction;
+import me.zhengjie.uma_mes.domain.ChemicalFiberProductionReport;
+import me.zhengjie.uma_mes.repository.ChemicalFiberProductionRepository;
+import me.zhengjie.uma_mes.service.dto.ChemicalFiberProductionDTO;
 import me.zhengjie.uma_mes.service.dto.termina.TerminalUploadDataDto;
 import me.zhengjie.utils.CoderUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +36,11 @@ public class ControllerPage extends SendCommand {
     private static final Logger logger = LoggerFactory.getLogger(ControllerPage.class);
     @Autowired
     ControlService controlService;
+    @Autowired
+    LoginService loginService;
+
+    @Autowired
+    ChemicalFiberProductionRepository productionService;
 
     @Value("${uma.production.createByTerminal}")
     boolean createByTerminal;
@@ -50,6 +59,90 @@ public class ControllerPage extends SendCommand {
     public void setProductionNumber(String productionNumber, String ip) {
         NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setProductionNumber(productionNumber);
 
+
+        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        boolean hadlogin = terminal.checkLoginStatus(screenId, tipId);
+        if (!hadlogin) {
+            return;
+        }
+        ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
+
+        if (createByTerminal) {
+            GobalSender gobalSender = terminal.getGobalSender();
+
+            UserInfo userInfo = terminal.getUserinfo();
+            String banci = controlPannelInfo.getBanci();
+            //gobalSender.addCommand(sendJitai2(machineNumber, ip));
+            String loginInfo = userInfo.getUserName() + " " + userInfo.getBanci();
+            gobalSender.addCommand(sendLoginInfo("操作员：" + loginInfo, ip));
+            // 修改机台号时，查询最后一个标签信息并更新屏幕
+            ChemicalFiberProduction prodction = productionService.getProductionNumber(productionNumber);
+            //ChemicalFiberLabel label = controlService.getLastLabelByMachine(machineNumber);
+            if (prodction != null) {
+                String factoryName = loginService.getFactory(Integer.valueOf(prodction.getFactoryNumber()));
+                gobalSender.addCommand(sendBanci(banci + " - " + prodction.getMachineNumber(), ip));
+                gobalSender.addCommand(sendCustomerCode(prodction.getProdColor(), ip));
+                gobalSender.addCommand(sendFineness(prodction.getProdFineness(), ip));
+                gobalSender.addCommand(sendFactPerBagNumber(prodction.getPerBagNumber().toString(), ip));
+                gobalSender.addCommand(sendCoreWeight(prodction.getCoreWeight().toString(), ip));
+               // gobalSender.addCommand(sendMachineNumber(prodction.getMachineNumber(), ip));
+                gobalSender.addCommand(sendMachineNumber(StringUtils.isEmpty(prodction.getMachineNumber()) ? "" : prodction.getMachineNumber(), ip));
+                gobalSender.addCommand(sendTare(new BigDecimal(prodction.getPerBagNumber()).multiply(prodction.getCoreWeight()).toString(),ip));
+                gobalSender.send(ip);
+                gobalSender.addCommand(sendFlowingWater(prodction.getFlowingWater().toString(), ip));
+                gobalSender.addCommand(sendFactory(factoryName, ip));
+                gobalSender.addCommand(sendTotalWeight("", ip));
+                gobalSender.addCommand(sendTotalNumber("", ip));
+                gobalSender.addCommand(sendDayWeight("", ip));
+                gobalSender.addCommand(sendDayNumber("", ip));
+                controlPannelInfo.setColor(prodction.getProdColor());
+                controlPannelInfo.setFineness(prodction.getProdFineness());
+                controlPannelInfo.setFactPerBagNumber(prodction.getPerBagNumber().toString());
+                controlPannelInfo.setCoreWeight(prodction.getCoreWeight().toString());
+                controlPannelInfo.setMachineNumber(prodction.getMachineNumber());
+                controlPannelInfo.setTare(new BigDecimal(prodction.getPerBagNumber()).multiply(prodction.getCoreWeight()).toString().toString());
+                controlPannelInfo.setFlowingWater(prodction.getFlowingWater().toString());
+                controlPannelInfo.setTotalWeight("");
+                controlPannelInfo.setTotalNumber("");
+                controlPannelInfo.setDayWeight("");
+                controlPannelInfo.setDayNumber("");
+                gobalSender.send(ip);
+                updateProductionId(ip);
+            } else {
+                gobalSender.send(sendTip("没有此单号", ip), ip);
+                gobalSender.addCommand(sendProductionNumber("", ip));
+                gobalSender.addCommand(sendCustomerCode("", ip));
+                gobalSender.addCommand(sendFineness("", ip));
+                gobalSender.addCommand(sendFactPerBagNumber("", ip));
+                gobalSender.addCommand(sendCoreWeight("", ip));
+                gobalSender.addCommand(sendTare("", ip));
+                gobalSender.addCommand(sendDayWeight("", ip));
+                gobalSender.addCommand(sendDayNumber("", ip));
+                gobalSender.send(ip);
+                gobalSender.addCommand(sendTotalWeight("", ip));
+                gobalSender.addCommand(sendTotalNumber("", ip));
+                gobalSender.addCommand(sendFlowingWater("", ip));
+                gobalSender.addCommand(sendFactory("", ip));
+                controlPannelInfo.setProductionNumber("");
+                controlPannelInfo.setFlowingWater("");
+                controlPannelInfo.setColor("");
+                controlPannelInfo.setFineness("");
+                controlPannelInfo.setFactPerBagNumber("");
+                controlPannelInfo.setFlowingWater("");
+                controlPannelInfo.setCoreWeight("");
+                controlPannelInfo.setTare("");
+                controlPannelInfo.setTotalWeight("");
+                controlPannelInfo.setTotalNumber("");
+                controlPannelInfo.setFlowingWater("");
+                controlPannelInfo.setFactory("");
+                controlPannelInfo.setDayWeight("");
+                controlPannelInfo.setDayNumber("");
+            }
+//            gobalSender.addCommand(enablePrint());
+            //gobalSender.send();
+            gobalSender.send(ip);
+
+        }
     }
 
     public void setCustomerCode(String customerCode, String ip) {
@@ -110,7 +203,8 @@ public class ControllerPage extends SendCommand {
     }
 
     public void setMachineNumber(String machineNumber, String ip) {
-        Terminal terminal = NettyTcpServer.terminalMap.get(ip);
+        NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setMachineNumber(machineNumber);
+        /*Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         boolean hadlogin=terminal.checkLoginStatus(screenId,tipId);
         if(!hadlogin){
             return;
@@ -170,8 +264,7 @@ public class ControllerPage extends SendCommand {
             }
 //            gobalSender.addCommand(enablePrint());
             //gobalSender.send();
-            gobalSender.send(ip);
-        }
+            gobalSender.send(ip);*/
     }
 
     public void setFactPerBagNumber(String factPerBagNumber, String ip) {
@@ -243,6 +336,9 @@ public class ControllerPage extends SendCommand {
     public void setFactory(String factory, String ip) {
         NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setFactory(factory);
     }
+    public void setFlowingWater(String flowingWater, String ip) {
+        NettyTcpServer.terminalMap.get(ip).getControlPannelInfo().setFlowingWater(flowingWater);
+    }
 
     public void setJitai2(String jitai2,String ip){
         log.info("setJitai2 do nothing");
@@ -282,7 +378,7 @@ public class ControllerPage extends SendCommand {
             }
         } catch (Exception exception) {
             exception.printStackTrace();
-            terminal.addGoControlCommand();
+            terminal.addGoControlCommand(ip);
             if (terminal.getUserinfo().getUserName() == null) {
                 gobalSender.addCommand(sendTip("与服务器断开连接，请重新登录", ip));
             } else {
@@ -346,6 +442,10 @@ public class ControllerPage extends SendCommand {
         return setTextValue("00 02", "00 23", dayNumber);
     }
 
+    public String sendFlowingWater(String flowingWater, String ip) {
+        return setTextValue("00 02", "00 2c", flowingWater);
+    }
+
     public String sendDayWeight(String dayWeight, String ip) {
         return setTextValue("00 02", "00 24", dayWeight);
     }
@@ -405,15 +505,16 @@ public class ControllerPage extends SendCommand {
     String totalWeight;
     @Text(id = "00 0d", handler = "setNetWeight")
     String netWeight;
-    @Text(id = "23", handler = "setDayNumber")
+    @Text(id = "00 23", handler = "setDayNumber")
     String dayNumber;
-    @Text(id = "24", handler = "setDayWeight")
+    @Text(id = "00 24", handler = "setDayWeight")
     String dayWeight;
-    @Text(id = "1f", handler = "setFactory")
+    @Text(id = "00 1f", handler = "setFactory")
     String factory;
-
     @Text(id = "00 0e", handler = "setJitai2")
     String jitai2;
+    @Text(id = "00 2c", handler = "setFlowingWater")
+    String flowingWater;
 
     @Button(id = "00 11", handler = "event_print")
     String btn_print;
@@ -466,7 +567,7 @@ public class ControllerPage extends SendCommand {
     public void event_factory(String button, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
-        gobalSender.addCommand(switchScreen("00 03"));
+        gobalSender.addCommand(switchScreen("00 03", ip));
         //cleanControllerPage(ip);
         //cleanControllerPageInfo(ip);
         gobalSender.send(ip);
@@ -504,7 +605,17 @@ public class ControllerPage extends SendCommand {
         GobalSender gobalSender = terminal.getGobalSender();
         ControlPannelInfo controlPannelInfo = terminal.getControlPannelInfo();
         boolean isXishaji = terminal.isXishaji;
+        TerminalUploadDataDto terminalUploadDataDto = new TerminalUploadDataDto();
+        terminalUploadDataDto.setColor(controlPannelInfo.getColor());
+        terminalUploadDataDto.setFineness(controlPannelInfo.getFineness());
+        terminalUploadDataDto.setMachineNumber(controlPannelInfo.getMachineNumber());
+        terminalUploadDataDto.setFactPerBagNumber(controlPannelInfo.getFactPerBagNumber());
+        terminalUploadDataDto.setProductionNumber(controlPannelInfo.getProductionNumber());
+        ChemicalFiberProduction chemicalFiberProduction = controlService.saveProdction(terminalUploadDataDto);
 
+        gobalSender.addCommand(sendFlowingWater(chemicalFiberProduction.getFlowingWater().toString(), ip));
+        controlPannelInfo.setFlowingWater(chemicalFiberProduction.getFlowingWater().toString());
+        gobalSender.send(ip);
         String productionNumber = controlPannelInfo.getProductionNumber();
         if(createByTerminal && StringUtils.isEmpty(productionNumber)) {
             canPrint = false;
@@ -569,12 +680,12 @@ public class ControllerPage extends SendCommand {
 
             if (netWeight.compareTo(new BigDecimal("0")) < 0) {
                 canPrint = false;
-                terminal.addGoControlCommand();
+                terminal.addGoControlCommand(ip);
                 gobalSender.addCommand(sendTip("重量值不能为负数", ip));
                 gobalSender.send(ip);
             } else if (netWeight.compareTo(new BigDecimal("0")) == 0) {
                 canPrint = false;
-                terminal.addGoControlCommand();
+                terminal.addGoControlCommand(ip);
                 gobalSender.addCommand(sendTip("重量值不能等于0", ip));
                 gobalSender.send(ip);
             }
@@ -598,7 +709,7 @@ public class ControllerPage extends SendCommand {
 
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.addCommand(cancelPage.sendLabelNumber(cancelInfo.getLabelNumber(), ip));
-        terminal.addGoCancelCommand();
+        terminal.addGoCancelCommand(ip);
         gobalSender.send(ip);
     }
 
@@ -616,14 +727,14 @@ public class ControllerPage extends SendCommand {
 
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.addCommand(reprintPage.sendLabelNumber(reprintInfo.getLabelNumber(), ip));
-        terminal.addGoReprintCommand();
+        terminal.addGoReprintCommand(ip);
         gobalSender.send(ip);
     }
 
     public void event_logout(String buttonId, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
-        gobalSender.addCommand(switchScreen("00 01"));
+        gobalSender.addCommand(switchScreen("00 01",ip));
         cleanControllerPage(ip);
         cleanControllerPageInfo(ip);
     }
@@ -644,7 +755,7 @@ public class ControllerPage extends SendCommand {
     public void event_back(String buttonId, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
-        gobalSender.addCommand(switchScreen("00 03"));
+        gobalSender.addCommand(switchScreen("00 03",ip));
         cleanControllerPage(ip);
         cleanControllerPageInfo(ip);
     }
@@ -676,6 +787,8 @@ public class ControllerPage extends SendCommand {
         gobalSender.addCommand(sendDayWeight("", ip));
         gobalSender.addCommand(sendProductionNumber("",ip));
         gobalSender.addCommand(sendJitai2("",ip));
+        gobalSender.addCommand(sendFlowingWater("", ip));
+        gobalSender.addCommand(sendFactory("", ip));
         gobalSender.send(ip);
     }
 
@@ -695,6 +808,8 @@ public class ControllerPage extends SendCommand {
         controlPannelInfo.setDayWeight("");
         controlPannelInfo.setDayWeight("");
         controlPannelInfo.setProductionNumber("");
+        controlPannelInfo.setFlowingWater("");
+        controlPannelInfo.setFactory("");
     }
 
     public void updateProductionId(String ip) {
@@ -704,20 +819,27 @@ public class ControllerPage extends SendCommand {
 
         // 设置打印按钮不可用
         gobalSender.addCommand(disablePrint());
-        if(terminal.isPrint()) {
+        if (terminal.isPrint()) {
             gobalSender.addCommand(sendTip("正在创建订单，请稍候！", ip));
-        }else{
+        } else {
             gobalSender.addCommand(sendTip("正在查询订单，请稍候！", ip));
         }
         //gobalSender.sendImmediate();
         gobalSender.sendImmediate(ip);
         String color = controlPannelInfo.getColor();
         String fineness = controlPannelInfo.getFineness();
-        if(StringUtils.isNotEmpty(color) && StringUtils.isNotEmpty(fineness)) {
+        String machineNumber = controlPannelInfo.getMachineNumber();
+        String factPerBagNumber = controlPannelInfo.getFactPerBagNumber();
+        String productionNumber = controlPannelInfo.getProductionNumber();
+
+        if(StringUtils.isNotEmpty(color) && StringUtils.isNotEmpty(fineness) && StringUtils.isNotEmpty(productionNumber)) {
+
             TerminalUploadDataDto terminalUploadDataDto = new TerminalUploadDataDto();
             terminalUploadDataDto.setColor(color);
             terminalUploadDataDto.setFineness(fineness);
             terminalUploadDataDto.setMachineNumber(controlPannelInfo.getMachineNumber());
+            terminalUploadDataDto.setFactPerBagNumber(factPerBagNumber);
+            terminalUploadDataDto.setProductionNumber(productionNumber);
             ChemicalFiberProduction chemicalFiberProduction = controlService.terminalUploadData(terminalUploadDataDto, terminal.isPrint());
 
             controlPannelInfo.setProductionId(chemicalFiberProduction.getId());

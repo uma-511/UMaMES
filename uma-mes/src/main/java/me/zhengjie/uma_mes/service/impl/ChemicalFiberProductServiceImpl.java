@@ -70,6 +70,20 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     }
 
     @Override
+//    @Cacheable
+    public List<ChemicalFiberProductDTO> getListColor(ChemicalFiberProductQueryCriteria criteria){
+        criteria.setDelFlag(0);
+        return chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.getColor(criteria.getColor()));
+    }
+
+    @Override
+//    @Cacheable
+    public List<ChemicalFiberProductDTO> getListFineness(ChemicalFiberProductQueryCriteria criteria){
+        criteria.setDelFlag(0);
+        return chemicalFiberProductMapper.toDto( chemicalFiberProductRepository.getFineness(criteria.getFineness()));
+    }
+
+    @Override
     @Cacheable(key = "#p0")
     public ChemicalFiberProductDTO findById(Integer id) {
         ChemicalFiberProduct chemicalFiberProduct = chemicalFiberProductRepository.findById(id).orElseGet(ChemicalFiberProduct::new);
@@ -82,13 +96,53 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
     @Transactional(rollbackFor = Exception.class)
     public ChemicalFiberProductDTO create(ChemicalFiberProduct resources) {
         ChemicalFiberProductQueryCriteria chemicalFiberProductQueryCriteria = new ChemicalFiberProductQueryCriteria();
-        chemicalFiberProductQueryCriteria.setModelAccurate(resources.getModel());
+        chemicalFiberProductQueryCriteria.setColorAccurate(resources.getColor());
+        chemicalFiberProductQueryCriteria.setFinenessAccurate(resources.getFineness());
         chemicalFiberProductQueryCriteria.setDelFlag(0);
         List<ChemicalFiberProductDTO> chemicalFiberProductDTOS = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, chemicalFiberProductQueryCriteria, criteriaBuilder)));
         if (chemicalFiberProductDTOS.size() > 0) {
-            throw new BadRequestException("请确保产品型号唯一");
+            return chemicalFiberProductDTOS.get(0);
         } else {
 
+            if (resources.getModel() == null) {
+                Integer max = chemicalFiberProductRepository.getMax();
+                resources.setModel("CP" + max);
+            }
+            resources.setCreateUser(SecurityUtils.getUsername());
+            resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
+            resources.setDelFlag(0);
+            ChemicalFiberProductDTO chemicalFiberProductDTO = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.save(resources));
+
+            // 添加库存
+            ChemicalFiberStock chemicalFiberStock = new ChemicalFiberStock();
+            chemicalFiberStock.setProdId(chemicalFiberProductDTO.getId());
+            chemicalFiberStock.setProdModel(chemicalFiberProductDTO.getModel());
+            chemicalFiberStock.setProdName(chemicalFiberProductDTO.getName());
+            chemicalFiberStock.setProdColor(chemicalFiberProductDTO.getColor());
+            chemicalFiberStock.setProdFineness(chemicalFiberProductDTO.getFineness());
+            chemicalFiberStockService.create(chemicalFiberStock);
+            chemicalFiberStockService.stockTask();
+            return chemicalFiberProductDTO;
+        }
+    }
+
+    @Override
+    @CacheEvict(allEntries = true)
+    @Transactional(rollbackFor = Exception.class)
+    public ChemicalFiberProductDTO createSave(ChemicalFiberProduct resources) {
+        ChemicalFiberProductQueryCriteria chemicalFiberProductQueryCriteria = new ChemicalFiberProductQueryCriteria();
+        chemicalFiberProductQueryCriteria.setColorAccurate(resources.getColor());
+        chemicalFiberProductQueryCriteria.setFinenessAccurate(resources.getFineness());
+        chemicalFiberProductQueryCriteria.setDelFlag(0);
+        List<ChemicalFiberProductDTO> chemicalFiberProductDTOS = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, chemicalFiberProductQueryCriteria, criteriaBuilder)));
+        if (chemicalFiberProductDTOS.size() > 0) {
+            return chemicalFiberProductDTOS.get(0);
+        } else {
+
+            if (resources.getModel() == null) {
+                Integer max = chemicalFiberProductRepository.getMax();
+                resources.setModel("CP" + max);
+            }
             resources.setCreateUser(SecurityUtils.getUsername());
             resources.setCreateDate(new Timestamp(System.currentTimeMillis()));
             resources.setDelFlag(0);
