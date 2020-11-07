@@ -253,7 +253,7 @@ public class Terminal extends SendCommand {
         "TEXT 380,35,\"TSS24.BF2\",0,2,2,\"色号：\"\r\n "+
         "TEXT 510,35,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getColor() + "\"\r\n"+
         "TEXT 35,105,\"TSS24.BF2\",0,2,2,\"班组：\""+
-        "TEXT 165,105,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + "\" - \"" + controlPannelInfo.getMachineNumber() + "\"\r\n"+
+        "TEXT 165,105,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() +  " - "   + controlPannelInfo.getMachineNumber() + "\"\r\n"+
         "TEXT 380,105,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n"+
         "TEXT 510,105,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFactPerBagNumber() + "\"\r\n" +
         "TEXT 380,175,\"TSS24.BF2\",0,2,2,\"日期：\"\r\n" +
@@ -264,7 +264,7 @@ public class Terminal extends SendCommand {
         "TEXT 35,245,\"TSS24.BF2\",0,2,2,\"重\"\r\n"+
         "TEXT 107,193,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n" +
         "TEXT 103,193,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n" +
-        "TEXT 560,330,\"TSS24.BF2\",0,3,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
+        "TEXT 590,330,\"TSS24.BF2\",0,3,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
         "BARCODE 35,297,\"128\",105,1,0,4,4,\""+labelNum+"\"\r\n"+
         "PRINT 1\r\n";
 
@@ -290,7 +290,7 @@ public class Terminal extends SendCommand {
         "TEXT 380,67,\"TSS24.BF2\",0,2,2,\"色号：\"\r\n"+
         "TEXT 510,67,\"TSS24.BF2\",0,2,2,\""+controlPannelInfo.getColor()+"\"\r\n"+
         "TEXT 35,124,\"TSS24.BF2\",0,2,2,\"班组：\"\r\n"+
-        "TEXT 165,124,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + "\" - \"" + controlPannelInfo.getMachineNumber() + "\"\r\n"+
+        "TEXT 165,124,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + " - " +  controlPannelInfo.getMachineNumber() + "\"\r\n"+
         "TEXT 380,124,\"TSS24.BF2\",0,2,2,\"数量：\"\r\n"+
         "TEXT 510,124,\"TSS24.BF2\",0,2,2,\"" + controlPannelInfo.getFactPerBagNumber() + "\"\r\n" +
         "TEXT 380,182,\"TSS24.BF2\",0,2,2,\"日期：\"\r\n" +
@@ -301,7 +301,7 @@ public class Terminal extends SendCommand {
         "TEXT 35,240,\"TSS24.BF2\",0,2,2,\"重\"\r\n"+
         "TEXT 107,197,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n" +
         "TEXT 103,197,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n" +
-        "TEXT 560,330,\"TSS24.BF2\",0,3,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
+        "TEXT 590,330,\"TSS24.BF2\",0,3,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
         "BARCODE 35,296,\"128\",105,1,0,4,4,\""+labelNum+"\"\r\n"+
         "PRINT 1\r\n";
 
@@ -347,13 +347,13 @@ public class Terminal extends SendCommand {
         "TEXT 199,780,\"TSS24.BF2\",0,3,4,\"N.W：       KG\"\r\n"+
         "TEXT 401,780,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n"+
         "TEXT 399,780,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n"+
-        "TEXT 750,960,\"TSS24.BF2\",0,2,2,\"订单号： \"\r\n"+
-        "TEXT 940,960,\"TSS24.BF2\",0,2,2,\""+controlPannelInfo.getProductionNumber() +"\"\r\n"+
-        "TEXT 750,1020,\"TSS24.BF2\",0,2,2,\"班组： \"\r\n"+
-        "TEXT 880,1020,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + "\" - \"" + controlPannelInfo.getMachineNumber() + "\"\r\n"+
-        "TEXT 750,1080,\"TSS24.BF2\",0,2,2,\"流水号 \"\r\n"+
-        "TEXT 940,1080,\"TSS24.BF2\",0,2,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
-        "BARCODE 50,960,\"128\",150,1,0,6,4,\""+ labelNum +"\"\r\n"+
+        "TEXT 740,960,\"TSS24.BF2\",0,2,2,\"订单号： \"\r\n"+
+        "TEXT 920,960,\"TSS24.BF2\",0,2,2,\""+controlPannelInfo.getProductionNumber() +"\"\r\n"+
+        "TEXT 740,1020,\"TSS24.BF2\",0,2,2,\"班组： \"\r\n"+
+        "TEXT 870,1020,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + " - " +  controlPannelInfo.getMachineNumber() + "\"\r\n"+
+        "TEXT 740,1080,\"TSS24.BF2\",0,2,2,\"流水号 \"\r\n"+
+        "TEXT 930,1080,\"TSS24.BF2\",0,2,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
+        "BARCODE 50,960,\"128\",150,1,0,5,4,\""+ labelNum +"\"\r\n"+
         "PRINT 1\r\n";
 
         gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand), ip);
@@ -396,13 +396,13 @@ public class Terminal extends SendCommand {
         "TEXT 199,780,\"TSS24.BF2\",0,3,4,\"N.W：       KG\"\r\n"+
         "TEXT 401,780,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n"+
         "TEXT 399,780,\"TSS24.BF2\",0,3,4,\""+ controlPannelInfo.getNetWeight() +"\"\r\n"+
-        "TEXT 750,960,\"TSS24.BF2\",0,2,2,\"订单号： \"\r\n"+
-        "TEXT 940,960,\"TSS24.BF2\",0,2,2,\""+controlPannelInfo.getProductionNumber() +"\"\r\n"+
-        "TEXT 750,1020,\"TSS24.BF2\",0,2,2,\"班组： \"\r\n"+
-        "TEXT 880,1020,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + "\" - \"" + controlPannelInfo.getMachineNumber() + "\"\r\n"+
-        "TEXT 750,1080,\"TSS24.BF2\",0,2,2,\"流水号 \"\r\n"+
-        "TEXT 940,1080,\"TSS24.BF2\",0,2,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
-        "BARCODE 50,960,\"128\",150,1,0,6,4,\""+ labelNum +"\"\r\n"+
+        "TEXT 740,960,\"TSS24.BF2\",0,2,2,\"订单号： \"\r\n"+
+        "TEXT 920,960,\"TSS24.BF2\",0,2,2,\""+controlPannelInfo.getProductionNumber() +"\"\r\n"+
+        "TEXT 740,1020,\"TSS24.BF2\",0,2,2,\"班组： \"\r\n"+
+        "TEXT 870,1020,\"TSS24.BF2\",0,2,2,\"" + userinfo.getBanci() + " - " +  controlPannelInfo.getMachineNumber() + "\"\r\n"+
+        "TEXT 740,1080,\"TSS24.BF2\",0,2,2,\"流水号 \"\r\n"+
+        "TEXT 930,1080,\"TSS24.BF2\",0,2,2,\""+ controlPannelInfo.getFlowingWater() +"\"\r\n"+
+        "BARCODE 50,960,\"128\",150,1,0,5,4,\""+ labelNum +"\"\r\n"+
         "PRINT 1\r\n";
 
         gobalSender.sendImmediate(CoderUtils.stringToHexStr(printCommand), ip);

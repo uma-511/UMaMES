@@ -102,6 +102,7 @@ public class ControllerPage extends SendCommand {
                 controlPannelInfo.setMachineNumber(prodction.getMachineNumber());
                 controlPannelInfo.setTare(new BigDecimal(prodction.getPerBagNumber()).multiply(prodction.getCoreWeight()).toString().toString());
                 controlPannelInfo.setFlowingWater(prodction.getFlowingWater().toString());
+                controlPannelInfo.setFactory(prodction.getFactoryNumber().toString());
                 controlPannelInfo.setTotalWeight("");
                 controlPannelInfo.setTotalNumber("");
                 controlPannelInfo.setDayWeight("");

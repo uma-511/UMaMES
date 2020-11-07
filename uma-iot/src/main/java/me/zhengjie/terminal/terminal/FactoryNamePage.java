@@ -1,6 +1,7 @@
 package me.zhengjie.terminal.terminal;
 
 import me.zhengjie.server.NettyTcpServer;
+import me.zhengjie.service.ControlService;
 import me.zhengjie.service.LoginService;
 import me.zhengjie.terminal.GobalSender;
 import me.zhengjie.terminal.annotation.Button;
@@ -19,6 +20,9 @@ public class FactoryNamePage extends SendCommand {
     @Autowired
     ControllerPage controllerPage;
 
+    @Autowired
+    ControlService controlService;
+
     @Button(id = "00 01" ,handler = "event_one")
     String btn_one;
     @Button(id = "00 02" ,handler = "event_one")
@@ -36,20 +40,20 @@ public class FactoryNamePage extends SendCommand {
     public void event_login(String button, String ip) {
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         GobalSender gobalSender = terminal.getGobalSender();
-        gobalSender.addCommand(switchScreen("00 02",ip));
+        controlService.updateControllerPageTotalFieldsAndGoControl(ip);
         //cleanControllerPage(ip);
         //cleanControllerPageInfo(ip);
-        gobalSender.send(ip);
     }
     public void event_one(String button, String ip) {
         Integer id = Integer.valueOf(button.substring(4, 5));
         Terminal terminal = NettyTcpServer.terminalMap.get(ip);
         String factory = loginService.getFactory(id);
         terminal.getUserinfo().setFactory(factory);
+        terminal.getControlPannelInfo().setFactory(factory);
         GobalSender gobalSender = terminal.getGobalSender();
         gobalSender.addCommand(controllerPage.sendFactory(factory, ip));
-        gobalSender.addCommand(switchScreen("00 02",ip));
-        gobalSender.send(ip);
+        //gobalSender.addCommand(switchScreen("00 02",ip));
+        controlService.updateControllerPageTotalFieldsAndGoControl(ip);
     }
 
 }

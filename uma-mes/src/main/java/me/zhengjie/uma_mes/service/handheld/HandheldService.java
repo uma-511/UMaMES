@@ -339,9 +339,9 @@ public class HandheldService {
             chemicalFiberPalletDetail.setId(null);
             chemicalFiberPalletDetails.add(chemicalFiberPalletDetail);
 
-            ObjectTransfer.transValue(newChemicalFiberLabelDTO, viewScanRecord);
             ChemicalFiberProduction production = chemicalFiberProductionRepository.findById(newChemicalFiberLabelDTO.getProductionId()).orElseGet(ChemicalFiberProduction::new);
             ObjectTransfer.transValue(production, viewScanRecord);
+            ObjectTransfer.transValue(newChemicalFiberLabelDTO, viewScanRecord);
             viewScanRecord.setId(null);
             if (uploadDataDto.getStatus() == 10) {
 
