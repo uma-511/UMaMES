@@ -59,4 +59,7 @@ public class ViewScanRecordDTO implements Serializable {
 
     // 产品纤度
     private String prodFineness;
+
+    // 产品纤度
+    private Integer flowingWater;
 }

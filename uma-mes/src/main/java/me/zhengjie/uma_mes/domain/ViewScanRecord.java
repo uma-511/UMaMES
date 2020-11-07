@@ -86,7 +86,7 @@ public class ViewScanRecord implements Serializable {
 
     // 产品纤度
     @Column(name = "flowing_water")
-    private String flowingWater;
+    private Integer flowingWater;
 
     public void copy(ViewScanRecord source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));
