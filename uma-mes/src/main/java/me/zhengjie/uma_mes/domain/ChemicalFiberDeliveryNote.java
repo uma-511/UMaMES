@@ -80,6 +80,10 @@ public class ChemicalFiberDeliveryNote implements Serializable {
     @Column(name = "create_user")
     private String createUser;
 
+    // 制单人
+    @Column(name = "fax")
+    private String fax;
+
     @OneToMany(mappedBy = "deliveryNoteId",cascade={CascadeType.PERSIST,CascadeType.REMOVE})
     private List<ChemicalFiberDeliveryDetail> chemicalFiberDeliveryDetails;
 

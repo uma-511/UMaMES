@@ -91,6 +91,13 @@ public class TerminalService {
         return production;
     }
 
+    public ChemicalFiberProduction saveProdction2(TerminalUploadDataDto terminalUploadDataDto) {
+        List<ChemicalFiberProduction> productions = chemicalFiberProductionRepository.findByNumberAndDelFlag(terminalUploadDataDto.getProductionNumber(), 0);
+        ChemicalFiberProduction production = null;
+        production = productions.get(0);
+        return production;
+    }
+
     private ChemicalFiberProduction getChemicalFiberProduction(ChemicalFiberProduct chemicalFiberProduct, TerminalUploadDataDto terminalUploadDataDto, Boolean print) {
         ChemicalFiberProduction production = null;
         Integer a = 0;

@@ -40,7 +40,11 @@ public class ChemicalFiberProduct implements Serializable {
 
     // 纤度
     @Column(name = "core_weight")
-    private BigDecimal core_weight;
+    private BigDecimal coreWeight;
+
+    // 纤度
+    @Column(name = "remark")
+    private String remark;
 
     // 创建日期
     @Column(name = "create_date")

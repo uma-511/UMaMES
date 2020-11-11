@@ -104,7 +104,7 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
             return chemicalFiberProductDTOS.get(0);
         } else {
 
-            if (resources.getModel() == null) {
+            if (resources.getModel() == null || resources.getModel() == "") {
                 Integer max = chemicalFiberProductRepository.getMax();
                 resources.setModel("CP" + max);
             }
@@ -139,7 +139,7 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
             return chemicalFiberProductDTOS.get(0);
         } else {
 
-            if (resources.getModel() == null) {
+            if (resources.getModel() == null || resources.getModel() == "") {
                 Integer max = chemicalFiberProductRepository.getMax();
                 resources.setModel("CP" + max);
             }

@@ -190,17 +190,18 @@ public class ChemicalFiberCustomerOrderServiceImpl implements ChemicalFiberCusto
     public String getNumber() {
         String productionNumber;
         Map<String, Object> timeMap = handheldService.monthTimeInMillis();
-        String year = timeMap.get("year").toString();
+        String yea = timeMap.get("year").toString();
+        String year = yea.substring(2);
         String month = timeMap.get("month").toString();
         String day = timeMap.get("day").toString();
         //List<ChemicalFiberProductionDTO> chemicalFiberProductionDTOS = chemicalFiberProductionMapper.toDto(chemicalFiberProductionRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));
-        List<ChemicalFiberCustomerOrder> chemicalFiberProductionDTOS = chemicalFiberCustomerOrderRepository.get(year + "-" + month);
+        List<ChemicalFiberCustomerOrder> chemicalFiberProductionDTOS = chemicalFiberCustomerOrderRepository.get(yea + "-" + month);
 
         if (chemicalFiberProductionDTOS.size() == 0) {
-            productionNumber = year + month + "01";
+            productionNumber = year + month + "0001";
         } else {
             Integer chemicalFiberProductionDTOSSize =  chemicalFiberProductionDTOS.size();
-            String tempNumberStr = String.format("%2d", (chemicalFiberProductionDTOSSize + 1)).replace(" ", "0");
+            String tempNumberStr = String.format("%4d", (chemicalFiberProductionDTOSSize + 1)).replace(" ", "0");
             productionNumber = year + month + tempNumberStr;
         }
         return productionNumber;

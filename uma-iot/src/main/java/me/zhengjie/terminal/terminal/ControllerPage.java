@@ -80,7 +80,7 @@ public class ControllerPage extends SendCommand {
             //ChemicalFiberLabel label = controlService.getLastLabelByMachine(machineNumber);
             if (prodction != null) {
                 String factoryName = loginService.getFactory(Integer.valueOf(prodction.getFactoryNumber()));
-                gobalSender.addCommand(sendBanci(banci + " - " + prodction.getMachineNumber(), ip));
+                gobalSender.addCommand(sendBanci(banci, ip));
                 gobalSender.addCommand(sendCustomerCode(prodction.getProdColor(), ip));
                 gobalSender.addCommand(sendFineness(prodction.getProdFineness(), ip));
                 gobalSender.addCommand(sendFactPerBagNumber(prodction.getPerBagNumber().toString(), ip));
@@ -612,7 +612,7 @@ public class ControllerPage extends SendCommand {
         terminalUploadDataDto.setMachineNumber(controlPannelInfo.getMachineNumber());
         terminalUploadDataDto.setFactPerBagNumber(controlPannelInfo.getFactPerBagNumber());
         terminalUploadDataDto.setProductionNumber(controlPannelInfo.getProductionNumber());
-        ChemicalFiberProduction chemicalFiberProduction = controlService.saveProdction(terminalUploadDataDto);
+        ChemicalFiberProduction chemicalFiberProduction = controlService.saveProdction2(terminalUploadDataDto);
 
         gobalSender.addCommand(sendFlowingWater(chemicalFiberProduction.getFlowingWater().toString(), ip));
         controlPannelInfo.setFlowingWater(chemicalFiberProduction.getFlowingWater().toString());

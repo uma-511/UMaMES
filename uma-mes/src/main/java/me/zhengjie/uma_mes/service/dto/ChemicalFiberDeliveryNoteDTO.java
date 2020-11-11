@@ -65,4 +65,7 @@ public class ChemicalFiberDeliveryNoteDTO implements Serializable {
 
     // 总重量
     private BigDecimal grossWeight;
+
+    // 总重量
+    private String fax;
 }

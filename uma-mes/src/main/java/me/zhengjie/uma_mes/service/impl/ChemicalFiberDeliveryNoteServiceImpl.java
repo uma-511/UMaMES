@@ -180,6 +180,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         chemicalFiberDeliveryNote.setCustomerAddress(customerDTO.getAddress());
         chemicalFiberDeliveryNote.setContactPhone(customerDTO.getContactPhone());
         chemicalFiberDeliveryNote.setContacts(customerDTO.getContacts());
+        chemicalFiberDeliveryNote.setFax(customerDTO.getFax());
         chemicalFiberDeliveryNoteRepository.save(chemicalFiberDeliveryNote);
     }
 

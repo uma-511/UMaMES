@@ -271,6 +271,13 @@ public class ControlService {
             }
             productionReportService.create(reportDTO);
         }
+
+        TerminalUploadDataDto terminalUploadDataDto = new TerminalUploadDataDto();
+        terminalUploadDataDto.setColor(controlPanelInfo.getColor());
+        terminalUploadDataDto.setFineness(controlPanelInfo.getFineness());
+        terminalUploadDataDto.setMachineNumber(controlPanelInfo.getMachineNumber());
+        terminalUploadDataDto.setFactPerBagNumber(controlPanelInfo.getFactPerBagNumber());
+        terminalUploadDataDto.setProductionNumber(controlPanelInfo.getProductionNumber());
         /**
          * todo 打印操作
          */
@@ -279,15 +286,19 @@ public class ControlService {
         switch (controlPanelInfo.getFactory()) {
             case "1":
                 terminal.print1(labelDto.getLabelNumber());
+                save(terminalUploadDataDto, terminal, ip);
                 break;
             case "2":
                 terminal.print2(labelDto.getLabelNumber());
+                save(terminalUploadDataDto, terminal, ip);
                 break;
             case "3":
                 terminal.print3(labelDto.getLabelNumber());
+                save(terminalUploadDataDto, terminal, ip);
                 break;
             case "4":
                 terminal.print4(labelDto.getLabelNumber());
+                save(terminalUploadDataDto, terminal, ip);
                 break;
             case "5":
                 break;
@@ -299,6 +310,13 @@ public class ControlService {
         log.info("after print");
 
         updateControllerPageTotalFieldsAndGoControl(ip);
+    }
+
+    public void save(TerminalUploadDataDto terminalUploadDataDto, Terminal terminal, String ip) {
+        ChemicalFiberProduction chemicalFiberProduction = saveProdction(terminalUploadDataDto);
+        GobalSender gobalSender = terminal.getGobalSender();
+        gobalSender.addCommand(controllerPage.sendFlowingWater(chemicalFiberProduction.getFlowingWater().toString(), ip));
+        gobalSender.send(ip);
     }
 
     /**
@@ -407,6 +425,11 @@ public class ControlService {
 
     public ChemicalFiberProduction saveProdction(TerminalUploadDataDto terminalUploadDataDto){
         ChemicalFiberProduction result = terminalService.saveProdction(terminalUploadDataDto);
+        return  result;
+    }
+
+    public ChemicalFiberProduction saveProdction2(TerminalUploadDataDto terminalUploadDataDto){
+        ChemicalFiberProduction result = terminalService.saveProdction2(terminalUploadDataDto);
         return  result;
     }
 

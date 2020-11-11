@@ -29,6 +29,9 @@ public class ChemicalFiberProductDTO implements Serializable {
     private String fineness;
 
     // 纤度
+    private String remark;
+
+    // 纤度
     private BigDecimal coreWeight;
 
     // 创建日期
