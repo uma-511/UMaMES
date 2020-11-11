@@ -49,6 +49,8 @@ public interface ChemicalFiberDeliveryNoteService {
 
     void downloadDeliveryNote(Integer id, HttpServletResponse response);
 
+    void downloadDeliveryNote1(Integer id, HttpServletResponse response);
+
     void exportPoundExcel(ChemicalFiberDeliveryNoteExportPoundExcelDto chemicalFiberDeliveryNoteExportPoundExcelDto, HttpServletResponse response);
 
     Map<String,Object> getSalesReport(ChemicalFiberDeliveryNoteQueryCriteria criteria, Pageable pageable);

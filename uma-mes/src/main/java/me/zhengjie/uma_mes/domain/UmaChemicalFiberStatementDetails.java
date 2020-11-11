@@ -58,6 +58,21 @@ public class UmaChemicalFiberStatementDetails implements Serializable {
     @Column(name = "remark")
     private String remark;
 
+    // 备注
+    @Column(name = "color")
+    private String color;
+
+    // 备注
+    @Column(name = "fineness")
+    private String fineness;
+    // 备注
+    @Column(name = "model")
+    private String model;
+
+    @Column(name = "edition_fee")
+    private BigDecimal editionFee;
+
+
     // 预付款
     @Column(name = "advance_charge")
     private BigDecimal advanceCharge;

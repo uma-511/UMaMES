@@ -227,7 +227,7 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
         chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
         List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
-        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/delivery_temp.xls";
+        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/buHanShui.xls";
         // 加载模板
         TemplateExportParams params = new TemplateExportParams(templatePath);
         // 生成workbook 并导出
@@ -245,6 +245,10 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
         for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
             Map<String, String> lm = new HashMap<String, String>();
             lm.put("prodName", chemicalFiberDeliveryDetailDTO.getProdName());
+            lm.put("prodColor", chemicalFiberDeliveryDetailDTO.getProdColor());
+            lm.put("prodFineness", chemicalFiberDeliveryDetailDTO.getProdFineness());
+            lm.put("editionFee", chemicalFiberDeliveryDetailDTO.getEditionFee() + "");
+            lm.put("number", chemicalFiberDeliveryNote.getScanNumber());
             lm.put("totalBag", chemicalFiberDeliveryDetailDTO.getTotalBag() + "");
             lm.put("totalNumber", "个".equals(chemicalFiberDeliveryDetailDTO.getUnit()) ? chemicalFiberDeliveryDetailDTO.getTotalNumber() + "" : chemicalFiberDeliveryDetailDTO.getTotalWeight() + "");
             lm.put("unit", chemicalFiberDeliveryDetailDTO.getUnit());
@@ -253,6 +257,49 @@ public class ChemicalFiberDeliveryNoteServiceImpl implements ChemicalFiberDelive
             lm.put("remark", chemicalFiberDeliveryDetailDTO.getRemark());
             listMap.add(lm);
         }
+        map.put("deliveryList", listMap);
+        workbook = ExcelExportUtil.exportExcel(params, map);
+        FileUtil.downLoadExcel("生产单导出.xlsx", response, workbook);
+    }
+
+    @Override
+    public void downloadDeliveryNote1(Integer id, HttpServletResponse response) {
+        ChemicalFiberDeliveryNote chemicalFiberDeliveryNote = chemicalFiberDeliveryNoteRepository.findById(id).orElseGet(ChemicalFiberDeliveryNote::new);
+        ChemicalFiberDeliveryDetailQueryCriteria chemicalFiberDeliveryDetailQueryCriteria = new ChemicalFiberDeliveryDetailQueryCriteria();
+        chemicalFiberDeliveryDetailQueryCriteria.setScanNumber(chemicalFiberDeliveryNote.getScanNumber());
+        List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailService.queryAll(chemicalFiberDeliveryDetailQueryCriteria);
+        String templatePath = new TemplateConfig("template/excel", TemplateConfig.ResourceMode.CLASSPATH).getPath() + "/hanShui.xls";
+        // 加载模板
+        TemplateExportParams params = new TemplateExportParams(templatePath);
+        // 生成workbook 并导出
+        Workbook workbook = null;
+        Map<String, Object> map = new HashMap<String, Object>();
+        BigDecimal a = new BigDecimal(0.00);
+        map.put("customerName", chemicalFiberDeliveryNote.getCustomerName());
+        map.put("customerAddress", chemicalFiberDeliveryNote.getCustomerAddress());
+        map.put("contacts", chemicalFiberDeliveryNote.getContacts());
+        map.put("contactPhone", chemicalFiberDeliveryNote.getContactPhone());
+        map.put("scanNumber", chemicalFiberDeliveryNote.getScanNumber());
+        map.put("createDate", chemicalFiberDeliveryNote.getCreateDate());
+        List<Map<String, String>> listMap = new ArrayList<Map<String, String>>();
+        for (ChemicalFiberDeliveryDetailDTO chemicalFiberDeliveryDetailDTO : chemicalFiberDeliveryDetailDTOS) {
+            Map<String, String> lm = new HashMap<String, String>();
+            lm.put("prodName", chemicalFiberDeliveryDetailDTO.getProdName());
+            lm.put("prodColor", chemicalFiberDeliveryDetailDTO.getProdColor());
+            lm.put("prodFineness", chemicalFiberDeliveryDetailDTO.getProdFineness());
+            lm.put("editionFee", chemicalFiberDeliveryDetailDTO.getEditionFee() + "");
+            lm.put("number", chemicalFiberDeliveryNote.getScanNumber());
+            lm.put("totalBag", chemicalFiberDeliveryDetailDTO.getTotalBag() + "");
+            lm.put("totalNumber", "个".equals(chemicalFiberDeliveryDetailDTO.getUnit()) ? chemicalFiberDeliveryDetailDTO.getTotalNumber() + "" : chemicalFiberDeliveryDetailDTO.getTotalWeight() + "");
+            lm.put("unit", chemicalFiberDeliveryDetailDTO.getUnit());
+            lm.put("sellingPrice", chemicalFiberDeliveryDetailDTO.getSellingPrice() + "");
+            lm.put("totalPrice", chemicalFiberDeliveryDetailDTO.getTotalPriceShuiDian() + "");
+            lm.put("remark", chemicalFiberDeliveryDetailDTO.getRemark());
+            a = a.add(chemicalFiberDeliveryDetailDTO.getTotalPriceShuiDian());
+            listMap.add(lm);
+        }
+        map.put("total", a.toString());
+        map.put("capitalizationTotal", NumberToCN.number2CNMontrayUnit(a));
         map.put("deliveryList", listMap);
         workbook = ExcelExportUtil.exportExcel(params, map);
         FileUtil.downLoadExcel("生产单导出.xlsx", response, workbook);

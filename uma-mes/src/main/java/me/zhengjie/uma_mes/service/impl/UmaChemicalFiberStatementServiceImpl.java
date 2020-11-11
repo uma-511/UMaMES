@@ -127,7 +127,10 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             umaChemicalFiberStatementDetails.setTotalPrice(chemicalFiberDeliveryDetailDTO.getTotalPrice());
             umaChemicalFiberStatementDetails.setRemark(chemicalFiberDeliveryDetailDTO.getRemark());
             umaChemicalFiberStatementDetails.setAdvanceCharge(new BigDecimal(0));
-            umaChemicalFiberStatementDetails.setAmountDeducted(new BigDecimal(0));
+            umaChemicalFiberStatementDetails.setColor(chemicalFiberDeliveryDetailDTO.getProdColor());
+            umaChemicalFiberStatementDetails.setFineness(chemicalFiberDeliveryDetailDTO.getProdFineness());
+            umaChemicalFiberStatementDetails.setModel(chemicalFiberDeliveryDetailDTO.getProdModel());
+            umaChemicalFiberStatementDetails.setEditionFee(chemicalFiberDeliveryDetailDTO.getEditionFee());
             umaChemicalFiberStatementDetailsService.create(umaChemicalFiberStatementDetails);
         }
         return chemicalFiberStatementDTO;
@@ -284,6 +287,9 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
             lm.put("scanDate", (umaChemicalFiberStatementDetailsDTOS.get(i).getScanDate() + "").substring(0, 10));
             lm.put("scanNumber", umaChemicalFiberStatementDetailsDTOS.get(i).getScanNumber());
             lm.put("prodName", umaChemicalFiberStatementDetailsDTOS.get(i).getProdName());
+            lm.put("model", umaChemicalFiberStatementDetailsDTOS.get(i).getEditionFee()+ "");
+            lm.put("editionFee", umaChemicalFiberStatementDetailsDTOS.get(i).getModel());
+            lm.put("prodName", umaChemicalFiberStatementDetailsDTOS.get(i).getProdName());
             lm.put("totalBag", umaChemicalFiberStatementDetailsDTOS.get(i).getTotalBag() + "");
             lm.put("netWeight", umaChemicalFiberStatementDetailsDTOS.get(i).getNetWeight() + "");
             lm.put("sellingPrice", umaChemicalFiberStatementDetailsDTOS.get(i).getSellingPrice() + "");
@@ -305,6 +311,7 @@ public class UmaChemicalFiberStatementServiceImpl implements UmaChemicalFiberSta
         map.put("contacts", umaChemicalFiberStatement.getContacts());
         map.put("customerName", umaChemicalFiberStatement.getCustomerName());
         map.put("contactPhone", umaChemicalFiberStatement.getContactPhone());
+        map.put("fax", umaChemicalFiberStatement.getFax());
         map.put("accountCode", umaChemicalFiberStatement.getAccountCode());
         map.put("cycle", starDateStr + "--" + endDateStr);
         map.put("capitTotal", NumberToCN.number2CNMontrayUnit(umaChemicalFiberStatement.getReceivable()));

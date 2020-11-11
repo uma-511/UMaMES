@@ -119,6 +119,7 @@ public class ChemicalFiberDeliveryDetailServiceImpl implements ChemicalFiberDeli
 
         BigDecimal tempTotalCost = new BigDecimal(0.0);
         BigDecimal tempTotalPrice = new BigDecimal(0.0);
+        BigDecimal tempTotalPriceShuiDian = new BigDecimal(0.0);
         ChemicalFiberDeliveryDetailQueryCriteria criteria = new ChemicalFiberDeliveryDetailQueryCriteria();
         criteria.setScanNumber(chemicalFiberDeliveryDetail.getScanNumber());
         List<ChemicalFiberDeliveryDetailDTO> chemicalFiberDeliveryDetailDTOS = chemicalFiberDeliveryDetailMapper.toDto(chemicalFiberDeliveryDetailRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root,criteria,criteriaBuilder)));

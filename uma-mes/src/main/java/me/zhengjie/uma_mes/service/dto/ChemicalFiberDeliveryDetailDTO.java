@@ -52,6 +52,9 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     // 总金额
     private BigDecimal totalPrice;
 
+    // 总金额
+    private BigDecimal totalPriceShuiDian;
+
     // 总件数
     private Integer totalBag;
 
@@ -69,4 +72,8 @@ public class ChemicalFiberDeliveryDetailDTO implements Serializable {
     private String customerName;
 
     private BigDecimal grossWeight;
+
+    private BigDecimal editionFee;
+
+    private BigDecimal shuiDian;
 }

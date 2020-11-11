@@ -70,6 +70,10 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
     @Column(name = "total_price")
     private BigDecimal totalPrice;
 
+    // 总金额
+    @Column(name = "total_price_shui_dian")
+    private BigDecimal totalPriceShuiDian;
+
     // 总件数
     @Column(name = "total_bag")
     private Integer totalBag;
@@ -97,6 +101,14 @@ public class ChemicalFiberDeliveryDetail implements Serializable {
     // 毛重
     @Column(name = "gross_weight")
     private BigDecimal grossWeight;
+
+    // 毛重
+    @Column(name = "edition_fee")
+    private BigDecimal editionFee;
+
+    // 毛重
+    @Column(name = "shui_dian")
+    private BigDecimal shuiDian;
 
     public void copy(ChemicalFiberDeliveryDetail source){
         BeanUtil.copyProperties(source,this, CopyOptions.create().setIgnoreNullValue(true));

@@ -66,7 +66,7 @@ public class UmaChemicalFiberStatement implements Serializable {
     @Column(name = "total_arrears")
     private BigDecimal totalArrears;
 
-    // 总欠金额
+    // 传真
     @Column(name = "fax")
     private String fax;
 

@@ -104,6 +104,13 @@ public class ChemicalFiberDeliveryNoteController {
     public void downloadDeliveryNote(HttpServletResponse response, @PathVariable Integer id) {
         chemicalFiberDeliveryNoteService.downloadDeliveryNote(id, response);
     }
+    @Log("导出出库单")
+    @ApiOperation("导出出库单")
+    @GetMapping(value = "/downloadDeliveryNote1/{id}")
+    @AnonymousAccess()
+    public void downloadDeliveryNote1(HttpServletResponse response, @PathVariable Integer id) {
+        chemicalFiberDeliveryNoteService.downloadDeliveryNote1(id, response);
+    }
 
     @Log("导出磅码单")
     @ApiOperation("导出磅码单")
