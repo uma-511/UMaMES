@@ -78,4 +78,6 @@ public class ChemicalFiberLabelDTO implements Serializable {
     private Timestamp outOfWarehouseTime;
 
     private Integer flowingWater;
+
+    private String prodctionNumber;
 }

@@ -201,6 +201,7 @@ public class ControlService {
         label.setPacker(userInfo.getUserName());
         label.setPrintTime(new Timestamp(System.currentTimeMillis()));
         label.setProductionId(controlPanelInfo.getProductionId());
+        label.setProdctionNumber(controlPanelInfo.getProductionNumber());
         label.setProductId(controlPanelInfo.getProductId());
         label.setShifts(userInfo.getBanci());
         label.setStatus(status);
@@ -211,7 +212,8 @@ public class ControlService {
         label.setFineness(controlPanelInfo.getFineness());
         label.setColor(controlPanelInfo.getColor());
         label.setCoreWeight(new BigDecimal(controlPanelInfo.getCoreWeight()));
-        label.setFlowingWater(Integer.valueOf(controlPanelInfo.getFlowingWater()) );
+        Integer flow = Integer.valueOf(controlPanelInfo.getFlowingWater());
+        label.setFlowingWater(++flow);
 
         ChemicalFiberLabelDTO labelDto = labelService.create(label);
 

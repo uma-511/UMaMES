@@ -174,9 +174,9 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
         chemicalFiberProductQueryCriteria.setModelAccurate(resources.getModel());
         chemicalFiberProductQueryCriteria.setDelFlag(0);
         List<ChemicalFiberProductDTO> chemicalFiberProductDTOS = chemicalFiberProductMapper.toDto(chemicalFiberProductRepository.findAll((root, criteriaQuery, criteriaBuilder) -> QueryHelp.getPredicate(root, chemicalFiberProductQueryCriteria, criteriaBuilder)));
-        if (chemicalFiberProductDTOS.size() > 0 && chemicalFiberProductDTOS.get(0).getModel().equals(resources.getModel()) && resources.getId() != chemicalFiberProductDTOS.get(0).getId()) {
+        /*if (chemicalFiberProductDTOS.size() > 0 && chemicalFiberProductDTOS.get(0).getModel().equals(resources.getModel()) && resources.getId() != chemicalFiberProductDTOS.get(0).getId()) {
             throw new BadRequestException("请确保产品型号唯一");
-        } else {
+        } else {*/
             ChemicalFiberProduct chemicalFiberProduct = chemicalFiberProductRepository.findById(resources.getId()).orElseGet(ChemicalFiberProduct::new);
             ValidationUtil.isNull( chemicalFiberProduct.getId(),"ChemicalFiberProduct","id",resources.getId());
             chemicalFiberProduct.copy(resources);
@@ -198,7 +198,7 @@ public class ChemicalFiberProductServiceImpl implements ChemicalFiberProductServ
                 ObjectTransfer.transValue(chemicalFiberStockDTO, chemicalFiberStock);
                 chemicalFiberStockService.update(chemicalFiberStock);
             }
-        }
+       /* }*/
     }
 
     @Override

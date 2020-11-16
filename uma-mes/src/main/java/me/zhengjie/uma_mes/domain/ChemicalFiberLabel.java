@@ -106,6 +106,10 @@ public class ChemicalFiberLabel implements Serializable {
     @Column(name = "flowing_water")
     private Integer flowingWater;
 
+    // 出库时间
+    @Column(name = "prodction_number")
+    private String prodctionNumber;
+
     public void copy(ChemicalFiberLabel source) {
         BeanUtil.copyProperties(source, this, CopyOptions.create().setIgnoreNullValue(true));
     }
